@@ -112,12 +112,9 @@ class _PodcastUploadScreenState extends State<PodcastUploadScreen> {
         didShowFilePicker = true;
       });
 
-      FilePickerResult? pickerResult =
-          await FilePicker.platform.pickFiles(type: FileType.audio);
+      FilePickerResult? pickerResult = await FilePicker.platform.pickFiles(type: Platform.isIOS ? FileType.any : FileType.audio);
       final XFile? file;
-      file = pickerResult != null
-          ? XFile(pickerResult.files.single.path ?? "")
-          : null;
+      file = pickerResult != null ? XFile(pickerResult.files.single.path ?? "") : null;
       if (file != null) {
         setState(() {
           didPickFile = true;
@@ -127,14 +124,17 @@ class _PodcastUploadScreenState extends State<PodcastUploadScreen> {
         setState(() {
           fileName = originalFileName;
         });
-        var fileToSave = File(file.path);
         log(originalFileName);
         log("path - ${file.path}");
         var alreadyUploaded = list.items.contains((e) {
           return e.fileName == originalFileName || e.filePath == file!.path;
         });
+        var extension = file.path.split(".").last;
+        if (extension != "mp3") {
+          throw 'Podcast should be in mp3 format.';
+        }
         if (alreadyUploaded) {
-          throw 'This video is already uploaded by you';
+          throw 'This podcast is already uploaded by you';
         }
         var size = await file.length();
         var dateEndGettingVideo = DateTime.now();
@@ -156,11 +156,9 @@ class _PodcastUploadScreenState extends State<PodcastUploadScreen> {
           throw 'Podcast Episode is too big to be uploaded from mobile (exceeding 500 mb)';
         }
         var path = file.path;
-        MediaInformationSession session =
-            await FFprobeKit.getMediaInformation(path);
+        MediaInformationSession session = await FFprobeKit.getMediaInformation(path);
         var info = session.getMediaInformation();
-        var duration =
-            (double.tryParse(info?.getDuration() ?? "0.0") ?? 0.0).toInt();
+        var duration = (double.tryParse(info?.getDuration() ?? "0.0") ?? 0.0).toInt();
         log('Podcast Episode duration is $duration');
         setState(() {
           this.duration = duration;
@@ -176,8 +174,7 @@ class _PodcastUploadScreenState extends State<PodcastUploadScreen> {
           tusFileName = name;
         });
         _addItem(originalFileName, file.path);
-        showMessage(
-            'Podcast Episode Audio is uploaded. Hit Next to finish next action items to publish podcast episode.');
+        showMessage('Podcast Episode Audio is uploaded. Hit Next to finish next action items to publish podcast episode.');
         showMyDialog();
         // Step 6. Move Video to Queue
       } else {
@@ -213,8 +210,7 @@ class _PodcastUploadScreenState extends State<PodcastUploadScreen> {
         nowButton,
       ],
     );
-    showDialog(
-        context: context, builder: (c) => alert, barrierDismissible: false);
+    showDialog(context: context, builder: (c) => alert, barrierDismissible: false);
   }
 
   void showMessage(String string) {
@@ -294,8 +290,7 @@ class _PodcastUploadScreenState extends State<PodcastUploadScreen> {
       body: ListView(
         children: [
           ListTile(
-            title: Text(
-                'Uploading Audio (${didUpload ? 100.0 : (progress * 100).toStringAsFixed(2)}%)'),
+            title: Text('Uploading Audio (${didUpload ? 100.0 : (progress * 100).toStringAsFixed(2)}%)'),
             trailing: !didStartUpload
                 ? const Icon(Icons.pending)
                 : !didUpload
