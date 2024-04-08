@@ -231,20 +231,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _logout() {
-    var data = context.read<HiveUserData>();
-    return Visibility(
-      visible: data.username != null,
-      child: ListTile(
-        leading: const Icon(Icons.logout),
-        title: const Text('Log Out'),
-        onTap: () {
-          logout(data);
-        },
-      ),
-    );
-  }
-
   Future<void> logout(HiveUserData data) async {
     // Create storage
     const storage = FlutterSecureStorage();
@@ -677,8 +663,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _ipfsNode(),
         _divider(),
         _appVersion(context),
-        _divider(),
-        _logout(),
         _divider(),
         _deleteAccount(),
         _divider()

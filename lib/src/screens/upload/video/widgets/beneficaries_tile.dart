@@ -1,7 +1,9 @@
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/models/my_account/video_ops.dart';
 import 'package:acela/src/screens/my_account/update_video/add_bene_sheet.dart';
+import 'package:acela/src/utils/constants.dart';
 import 'package:acela/src/widgets/custom_circle_avatar.dart';
+import 'package:acela/src/widgets/user_profile_image.dart';
 import 'package:flutter/material.dart';
 
 class BeneficiariesTile extends StatefulWidget {
@@ -31,15 +33,62 @@ class _BeneficiariesTileState extends State<BeneficiariesTile> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: () {
         beneficiariesBottomSheet(context);
       },
+      child: Padding(
+        padding: const EdgeInsets.all(kScreenHorizontalPaddingDigit),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Text('Video Participants:'),
+                Spacer(),
+                Icon(Icons.arrow_drop_down),
+              ],
+            ),
+            Visibility(
+              visible: beneficiaries.isNotEmpty,
+              child: Padding(
+                  padding: const EdgeInsets.only(top: 12.0),
+                  child: Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: List.generate(
+                      beneficiaries.length,
+                      (index) => _beneficarieNameTile(theme, index, context),
+                    ),
+                  )),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Container _beneficarieNameTile(
+      ThemeData theme, int index, BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(top: 2, bottom: 2, right: 8, left: 3),
+      decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.all(Radius.circular(20))),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Video Participants:'),
-          Spacer(),
-          Icon(Icons.arrow_drop_down),
+          UserProfileImage(radius: 20, userName: beneficiaries[index].account),
+          const SizedBox(
+            width: 5,
+          ),
+          Text(
+            beneficiaries[index].account,
+            style: TextStyle(
+              color: Theme.of(context).primaryColorLight.withOpacity(0.7),
+            ),
+          ),
         ],
       ),
     );
@@ -124,6 +173,8 @@ class _BeneficiariesTileState extends State<BeneficiariesTile> {
   void showAlertForAddBene(List<BeneficiariesJson> benes) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
       builder: (context) {
         return AddBeneSheet(
           benes: benes,

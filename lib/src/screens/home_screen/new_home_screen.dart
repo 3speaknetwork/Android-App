@@ -4,9 +4,7 @@ import 'package:acela/src/screens/communities_screen/communities_screen.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/bottom_nav_bar.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/tab_title_toast.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_list.dart';
-import 'package:acela/src/screens/podcast/view/podcast_trending.dart';
-import 'package:acela/src/screens/search/search_screen.dart';
-import 'package:acela/src/screens/stories/new_tab_based_stories.dart';
+import 'package:acela/src/screens/login/ha_login_screen.dart';
 import 'package:acela/src/screens/trending_tags/trending_tags.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -59,20 +57,30 @@ class _GQLFeedScreenState extends State<GQLFeedScreen>
     super.initState();
     _tabController =
         TabController(vsync: this, length: widget.username != null ? 6 : 5);
+    _tabController.addListener(tabBarListener);
   }
 
   @override
   void didUpdateWidget(covariant GQLFeedScreen oldWidget) {
     if (widget.username != oldWidget.username) {
+      _tabController.removeListener(tabBarListener);
       _tabController.dispose();
       _tabController =
           TabController(vsync: this, length: widget.username != null ? 6 : 5);
+      _tabController.addListener(tabBarListener);
     }
     super.didUpdateWidget(oldWidget);
   }
 
+  void tabBarListener() {
+    setState(() {
+      currentIndex = _tabController.index;
+    });
+  }
+
   @override
   void dispose() {
+    _tabController.removeListener(tabBarListener);
     _tabController.dispose();
     super.dispose();
   }
@@ -127,63 +135,6 @@ class _GQLFeedScreenState extends State<GQLFeedScreen>
         },
       ),
       title: Text('3Speak.tv'),
-      // subtitle: Text(
-      //   getSubtitle(),
-      //   maxLines: 1,
-      //   overflow: TextOverflow.ellipsis,
-      //   style: TextStyle(fontSize: 13),
-      // ),
-    );
-  }
-
-  SizedBox threeShortsActionButton() {
-    return SizedBox(
-      width: 35,
-      child: IconButton(
-        onPressed: () {
-          var screen = GQLStoriesScreen(appData: widget.appData);
-          var route = MaterialPageRoute(builder: (c) => screen);
-          Navigator.of(context).push(route);
-        },
-        icon: Image.asset(
-          'assets/branding/three_shorts_icon.png',
-          height: 25,
-          width: 25,
-        ),
-      ),
-    );
-  }
-
-  SizedBox podcastsActionButton() {
-    return SizedBox(
-      width: 35,
-      child: IconButton(
-        onPressed: () {
-          var screen = PodCastTrendingScreen(appData: widget.appData);
-          var route = MaterialPageRoute(builder: (c) => screen);
-          Navigator.of(context).push(route);
-        },
-        icon: Image.asset(
-          'assets/pod-cast-logo-round.png',
-          height: 25,
-          width: 25,
-        ),
-      ),
-    );
-  }
-
-  SizedBox searchIconButton() {
-    return SizedBox(
-      width: 40,
-      child: IconButton(
-        onPressed: () {
-          var route = MaterialPageRoute(
-            builder: (context) => const SearchScreen(),
-          );
-          Navigator.of(context).push(route);
-        },
-        icon: Icon(Icons.search),
-      ),
     );
   }
 
@@ -212,6 +163,28 @@ class _GQLFeedScreenState extends State<GQLFeedScreen>
             },
             tabs: myTabs(),
           ),
+          actions: [
+            if (widget.username == null)
+              Padding(
+                padding: const EdgeInsets.only(right: 15.0),
+                child: SizedBox(
+                  height: 25,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(4))),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 2, vertical: 0)),
+                    onPressed: () {
+                      var screen = HiveAuthLoginScreen(appData: widget.appData);
+                      var route = MaterialPageRoute(builder: (c) => screen);
+                      Navigator.of(context).push(route);
+                    },
+                    child: Text('Log In'),
+                  ),
+                ),
+              ),
+          ],
         ),
         body: SafeArea(
           child: Stack(
@@ -222,10 +195,14 @@ class _GQLFeedScreenState extends State<GQLFeedScreen>
                   children: widget.username != null
                       ? [
                           HomeScreenFeedList(
-                              key: ValueKey("${widget.username} 0"),
-                              showVideo: currentIndex == 0,
-                              feedType: HomeScreenFeedType.userFeed,
-                              appData: appData),
+                            key: ValueKey("${widget.username} 0"),
+                            showVideo: currentIndex == 0,
+                            feedType: HomeScreenFeedType.userFeed,
+                            appData: appData,
+                            onEmptyDataCallback: () {
+                              _tabController.animateTo(1);
+                            },
+                          ),
                           HomeScreenFeedList(
                               key: ValueKey("${widget.username} 1"),
                               showVideo: currentIndex == 1,
@@ -296,5 +273,4 @@ class _GQLFeedScreenState extends State<GQLFeedScreen>
     var snackBar = SnackBar(content: Text('Error: $string'));
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
-
 }

@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:developer';
+
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
+import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/new_feed_list_item.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
 import 'package:acela/src/utils/graphql/models/trending_feed_response.dart';
-import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/new_feed_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -50,7 +51,7 @@ class _SearchScreenState extends State<SearchScreen> {
       title: TextField(
         controller: _controller,
         onChanged: (value) {
-          var timer = Timer(const Duration(seconds: 2), () {
+          var timer = Timer(const Duration(seconds: 1), () {
             log('Text changed to $value');
             if (value.trim().length > 3) {
               search(value.trim(), appData);
@@ -93,12 +94,20 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _searchResultListView(HiveUserData appData) {
     if (results.isEmpty && !loading) {
-      return const Center(
+      return Center(
         child: Text('No search result found'),
       );
     } else if (loading) {
-      return const Center(
-        child: Text('Loading search results....'),
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(child: CircularProgressIndicator()),
+          const SizedBox(
+            height: 10,
+          ),
+          Center(child: Text('Loading search results....')),
+        ],
       );
     }
     return _searchResults(appData);

@@ -22,20 +22,11 @@ class _GQLStoriesScreenState extends State<GQLStoriesScreen>
   List<Tab> myTabs() {
     return widget.appData.username != null
         ? <Tab>[
-            Tab(
-              icon: Image.asset(
-                'assets/ctt-logo.png',
-                width: 30,
-                height: 30,
-              ),
-            ),
-            Tab(icon: Icon(Icons.person)),
             // Tab(icon: Icon(Icons.home)),
             Tab(icon: Icon(Icons.local_fire_department)),
             Tab(icon: Icon(Icons.play_arrow)),
             Tab(icon: Icon(Icons.looks_one)),
-          ]
-        : <Tab>[
+            Tab(icon: Icon(Icons.person)),
             Tab(
               icon: Image.asset(
                 'assets/ctt-logo.png',
@@ -43,9 +34,18 @@ class _GQLStoriesScreenState extends State<GQLStoriesScreen>
                 height: 30,
               ),
             ),
+          ]
+        : <Tab>[
             Tab(icon: Icon(Icons.local_fire_department)),
             Tab(icon: Icon(Icons.play_arrow)),
             Tab(icon: Icon(Icons.looks_one)),
+            Tab(
+              icon: Image.asset(
+                'assets/ctt-logo.png',
+                width: 30,
+                height: 30,
+              ),
+            ),
           ];
   }
 
@@ -74,28 +74,28 @@ class _GQLStoriesScreenState extends State<GQLStoriesScreen>
     if (widget.appData.username != null) {
       switch (currentIndex) {
         case 0:
-          return 'CTT Chat';
-        case 1:
-          return '@${widget.appData.username ?? 'User'}\'s feed';
-        case 2:
           return 'Trending feed';
-        case 3:
+        case 1:
           return 'New feed';
-        case 4:
+        case 2:
           return 'First uploads';
+        case 3:
+          return '@${widget.appData.username ?? 'User'}\'s feed';
+        case 4:
+          return 'CTT Chat';
         default:
           return 'User\'s feed';
       }
     } else {
       switch (currentIndex) {
         case 0:
-          return 'CTT Chat';
-        case 1:
           return 'Trending feed';
-        case 2:
+        case 1:
           return 'New feed';
-        case 3:
+        case 2:
           return 'First uploads';
+        case 3:
+          return 'CTT Chat';
         default:
           return 'User\'s feed';
       }
@@ -145,24 +145,22 @@ class _GQLStoriesScreenState extends State<GQLStoriesScreen>
           children: widget.appData.username != null
               ? [
                   StoryFeedList(
-                      appData: widget.appData, feedType: StoryFeedType.cttFeed),
+                      appData: widget.appData,
+                      feedType: StoryFeedType.trendingFeed),
+                  StoryFeedList(
+                      appData: widget.appData,
+                      feedType: StoryFeedType.newUploads),
+                  StoryFeedList(
+                      appData: widget.appData,
+                      feedType: StoryFeedType.firstUploads),
                   StoryFeedList(
                       appData: widget.appData,
                       feedType: StoryFeedType.userFeed),
                   StoryFeedList(
-                      appData: widget.appData,
-                      feedType: StoryFeedType.trendingFeed),
-                  StoryFeedList(
-                      appData: widget.appData,
-                      feedType: StoryFeedType.newUploads),
-                  StoryFeedList(
-                      appData: widget.appData,
-                      feedType: StoryFeedType.firstUploads),
+                      appData: widget.appData, feedType: StoryFeedType.cttFeed),
                 ]
               : [
                   StoryFeedList(
-                      appData: widget.appData, feedType: StoryFeedType.cttFeed),
-                  StoryFeedList(
                       appData: widget.appData,
                       feedType: StoryFeedType.trendingFeed),
                   StoryFeedList(
@@ -171,6 +169,8 @@ class _GQLStoriesScreenState extends State<GQLStoriesScreen>
                   StoryFeedList(
                       appData: widget.appData,
                       feedType: StoryFeedType.firstUploads),
+                  StoryFeedList(
+                      appData: widget.appData, feedType: StoryFeedType.cttFeed),
                 ],
         ),
       ),

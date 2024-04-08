@@ -32,7 +32,7 @@ class FavouriteTagsBody extends StatelessWidget {
             },
           )
         : const Center(
-            child: Text("No favourite tags found"),
+            child: Text("No Bookmarked tags found"),
           );
   }
 }

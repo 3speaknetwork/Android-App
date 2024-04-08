@@ -32,7 +32,7 @@ class _FavouriteShortsBodyState extends State<FavouriteShortsBody> {
             appData: widget.appData,
             controller: controller)
         : Center(
-            child: Text("No favourite shorts found"),
+            child: Text("No Bookmarked shorts found"),
           );
   }
 }

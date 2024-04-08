@@ -1,10 +1,12 @@
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_list.dart';
+import 'package:acela/src/screens/podcast/widgets/favourite.dart';
 import 'package:acela/src/screens/stories/story_feed_list.dart';
 import 'package:acela/src/screens/user_channel_screen/user_channel_following.dart';
 import 'package:acela/src/screens/user_channel_screen/user_channel_profile.dart';
 import 'package:acela/src/screens/user_channel_screen/user_channel_videos.dart';
+import 'package:acela/src/screens/user_channel_screen/user_favourite_provider.dart';
 import 'package:acela/src/widgets/custom_circle_avatar.dart';
 import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +28,7 @@ class _UserChannelScreenState extends State<UserChannelScreen>
   late TabController _tabController;
   var currentIndex = 0;
   var videoKey = GlobalKey<UserChannelVideosState>();
+  var userFavouriteProvider = UserFavoriteProvider();
 
   static List<Tab> tabs = [
     Tab(
@@ -123,6 +126,15 @@ class _UserChannelScreenState extends State<UserChannelScreen>
           ],
         ),
         actions: [
+           FavouriteWidget(
+            toastType: "User",
+              isLiked: userFavouriteProvider.isUserPresentLocally(widget.owner),
+              onAdd: () {
+                userFavouriteProvider.storeLikedUserLocally(widget.owner);
+              },
+              onRemove: () {
+                userFavouriteProvider.storeLikedUserLocally(widget.owner);
+              }),
           IconButton(
             onPressed: () async {
               Share.share("https://3speak.tv/rss/${widget.owner}.xml");

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:acela/src/utils/safe_convert.dart';
+import 'package:equatable/equatable.dart';
 
 class HivePostInfo {
   final String jsonrpc;
@@ -49,6 +50,18 @@ class HivePostInfoPostResultBody {
     required this.permlink,
   });
 
+  HivePostInfoPostResultBody copyWith({
+    double? payout,
+    List<ActiveVotesItem>? activeVotes,
+    String? permlink,
+  }) {
+    return HivePostInfoPostResultBody(
+      payout: payout ?? this.payout,
+      activeVotes: activeVotes ?? this.activeVotes,
+      permlink: permlink ?? this.permlink,
+    );
+  }
+
   factory HivePostInfoPostResultBody.fromJson(Map<String, dynamic>? json) =>
       HivePostInfoPostResultBody(
         payout: asDouble(json, 'payout'),
@@ -65,11 +78,11 @@ class HivePostInfoPostResultBody {
       };
 }
 
-class ActiveVotesItem {
+class ActiveVotesItem extends Equatable {
   final int rshares;
   final String voter;
 
-  ActiveVotesItem({
+  const ActiveVotesItem({
     this.rshares = 0,
     this.voter = "",
   });
@@ -79,9 +92,12 @@ class ActiveVotesItem {
         rshares: asInt(json, 'rshares'),
         voter: asString(json, 'voter'),
       );
-
+      
   Map<String, dynamic> toJson() => {
         'rshares': rshares,
         'voter': voter,
       };
+
+  @override
+  List<Object?> get props => [voter];
 }

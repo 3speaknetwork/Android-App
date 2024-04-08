@@ -20,7 +20,6 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
 
   VideoUploadController() {
     setCommunity();
-    setTags();
     setLanguage();
   }
 

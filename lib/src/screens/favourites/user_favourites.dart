@@ -1,6 +1,7 @@
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/favourites/favourite_shorts_body.dart';
 import 'package:acela/src/screens/favourites/favourite_tags_body.dart';
+import 'package:acela/src/screens/favourites/favourite_users_body.dart';
 import 'package:acela/src/screens/favourites/favourite_video_body.dart';
 import 'package:acela/src/screens/podcast/view/liked_podcasts.dart';
 import 'package:acela/src/screens/podcast/view/local_podcast_episode.dart';
@@ -24,7 +25,7 @@ class _UserFavouritesState extends State<UserFavourites>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 7, vsync: this);
     _tabController.addListener(() {
       setState(() {
         currentIndex = _tabController.index;
@@ -53,6 +54,7 @@ class _UserFavouritesState extends State<UserFavourites>
             Tab(icon: const Icon(Icons.play_arrow)),
             Tab(icon: const Icon(Icons.video_library_rounded)),
             Tab(icon: const Icon(Icons.tag)),
+            Tab(icon: const Icon(Icons.person)),
             Tab(icon: const Icon(Icons.podcasts)),
             Tab(icon: const Icon(Icons.queue_music_rounded)),
             Tab(icon: const Icon(FontAwesomeIcons.download)),
@@ -65,6 +67,7 @@ class _UserFavouritesState extends State<UserFavourites>
           appData: appData,
         ),
         FavouriteTagsBody(),
+        FavouriteUsersBody(),
         LikedPodcasts(
           appData: appData,
           showAppBar: false,
@@ -84,10 +87,12 @@ class _UserFavouritesState extends State<UserFavourites>
       case 2:
         return "Tags";
       case 3:
-        return "Podcasts";
+        return "Users";
       case 4:
-        return "Podcast Episode";
+        return "Podcasts";
       case 5:
+        return "Podcast Episode";
+      case 6:
         return "Offline Podcast Episode";
       default:
         return "";

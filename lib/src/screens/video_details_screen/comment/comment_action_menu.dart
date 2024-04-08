@@ -1,3 +1,4 @@
+import 'package:acela/src/models/hive_comments/new_hive_comment/newest_comment_model.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/login/ha_login_screen.dart';
 import 'package:acela/src/screens/video_details_screen/comment/hive_comment_dialog.dart';
@@ -14,14 +15,16 @@ class CommentActionMenu extends StatelessWidget {
       required this.author,
       required this.permlink,
       required this.onUpVote,
+      required this.depth,
       required this.onSubCommentAdded})
       : super(key: key);
 
   final HiveUserData appData;
   final String author;
   final String permlink;
+  final int depth;
   final VoidCallback onUpVote;
-  final VoidCallback onSubCommentAdded;
+  final Function(CommentItemModel) onSubCommentAdded;
 
   @override
   Widget build(BuildContext context) {
@@ -95,12 +98,15 @@ class CommentActionMenu extends StatelessWidget {
     var screen = HiveCommentDialog(
       author: author,
       permlink: permlink,
+      depth:depth ,
       username: appData.username ?? "",
       hasKey: appData.keychainData?.hasId ?? "",
       hasAuthKey: appData.keychainData?.hasAuthKey ?? "",
       onClose: () {},
       onDone: (newComment) async {
-        onSubCommentAdded();
+        if(newComment!=null){
+          onSubCommentAdded(newComment);
+        }
       },
     );
     Navigator.of(context).push(MaterialPageRoute(builder: (c) => screen));

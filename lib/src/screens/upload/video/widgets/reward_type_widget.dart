@@ -1,3 +1,4 @@
+import 'package:acela/src/utils/constants.dart';
 import 'package:flutter/material.dart';
 
 class RewardTypeWidget extends StatefulWidget {
@@ -23,20 +24,23 @@ class _RewardTypeWidgetState extends State<RewardTypeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(isPower100 ? '100% power' : '50% power'),
-        Switch(
-          value: isPower100,
-          onChanged: (newValue) {
-            setState(() {
-              isPower100 = newValue;
-            });
-            widget.onChanged(newValue);
-          },
-        )
-      ],
+    return Padding(
+      padding: kScreenHorizontalPadding,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(isPower100 ? '100% power' : '50% power'),
+          Switch(
+            value: isPower100,
+            onChanged: (newValue) {
+              setState(() {
+                isPower100 = newValue;
+              });
+              widget.onChanged(newValue);
+            },
+          )
+        ],
+      ),
     );
   }
 }

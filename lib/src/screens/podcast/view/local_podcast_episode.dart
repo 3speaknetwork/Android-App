@@ -89,56 +89,78 @@ class LocalEpisodeListView extends StatelessWidget {
       item.enclosureUrl = '$url';
     }
     return ListTile(
-      onTap: () {
-        GetAudioPlayer audioPlayer = GetAudioPlayer();
-        audioPlayer.audioHandler.updateQueue([]);
-        audioPlayer.audioHandler.addQueueItem(
-          MediaItem(
-            id: url,
-            title: item.title ?? "",
-            artUri: Uri.parse(item.image ?? ""),
-            duration: Duration(seconds: item.duration ?? 0),
-          ),
-        );
-        var screen = Scaffold(
-          appBar: AppBar(
-            title: ListTile(
-              leading: CachedImage(
-                imageUrl: item.image ?? '',
-                imageHeight: 40,
-                imageWidth: 40,
+        onTap: () {
+          GetAudioPlayer audioPlayer = GetAudioPlayer();
+          audioPlayer.audioHandler.updateQueue([]);
+          audioPlayer.audioHandler.addQueueItem(
+            MediaItem(
+              id: url,
+              title: item.title ?? "",
+              artUri: Uri.parse(item.image ?? ""),
+              duration: Duration(seconds: item.duration ?? 0),
+            ),
+          );
+          var screen = Scaffold(
+            appBar: AppBar(
+              title: ListTile(
+                leading: CachedImage(
+                  imageUrl: item.image ?? '',
+                  imageHeight: 40,
+                  imageWidth: 40,
+                ),
+                title: Text(item.title ?? 'No Title'),
               ),
-              title: Text(item.title ?? 'No Title'),
             ),
-          ),
-          body: SafeArea(
-            child: NewPodcastEpidosePlayer(
-              podcastEpisodes: [item],
+            body: SafeArea(
+              child: NewPodcastEpidosePlayer(
+                podcastEpisodes: [item],
+              ),
             ),
-          ),
-        );
-        var route = MaterialPageRoute(builder: (c) => screen);
-        Navigator.of(context).push(route);
-      },
-      leading: Container(
-        height: 30,
-        width: 30,
-        decoration: BoxDecoration(
-            color: Colors.grey,
-            image: (isOffline && !item.image!.startsWith('http'))
-                ? DecorationImage(
-                    image: FileImage(File(item.image!)), fit: BoxFit.cover)
-                : DecorationImage(
-                    image: NetworkImage(
-                      item.image ?? "",
-                    ),
-                  )),
-      ),
-      title: Text(
-        item.title ?? '',
-        maxLines: 2,
-        style: Theme.of(context).textTheme.titleSmall,
-      ),
-    );
+          );
+          var route = MaterialPageRoute(builder: (c) => screen);
+          Navigator.of(context).push(route);
+        },
+        leading: Container(
+          height: 30,
+          width: 30,
+          decoration: BoxDecoration(
+              color: Colors.grey,
+              image: (isOffline && !item.image!.startsWith('http'))
+                  ? DecorationImage(
+                      image: FileImage(File(item.image!)), fit: BoxFit.cover)
+                  : DecorationImage(
+                      image: NetworkImage(
+                        item.image ?? "",
+                      ),
+                    )),
+        ),
+        title: Text(
+          item.title ?? '',
+          maxLines: 2,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        trailing: fileSizeWidget(item.enclosureUrl));
+  }
+
+  Widget? fileSizeWidget(String? enclosureUrl) {
+    if (enclosureUrl == null) return null;
+    try {
+      return isOffline
+          ? Text(formatBytes(File(enclosureUrl).lengthSync()))
+          : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String formatBytes(int bytes) {
+    const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    int i = 0;
+    double size = bytes.toDouble();
+    while (size > 1024 && i < suffixes.length - 1) {
+      size /= 1024;
+      i++;
+    }
+    return "${size.toStringAsFixed(2)} ${suffixes[i]}";
   }
 }

@@ -1,3 +1,4 @@
+import 'package:acela/src/utils/constants.dart';
 import 'package:flutter/material.dart';
 
 class UploadTextField extends StatelessWidget {
@@ -23,21 +24,24 @@ class UploadTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return TextField(
-      controller: textEditingController,
-      decoration: InputDecoration(
-        border: border(),
-        filled: true,
-        isDense: true,
-        fillColor: theme.cardColor,
-        hintText: hintText,
-        labelText: labelText,
-        suffixIcon: _clearButton(),
+    return Padding(
+      padding: kScreenHorizontalPadding,
+      child: TextField(
+        controller: textEditingController,
+        decoration: InputDecoration(
+          border: border(),
+          filled: true,
+          isDense: true,
+          fillColor: theme.cardColor,
+          hintText: hintText,
+          labelText: labelText,
+          suffixIcon: _clearButton(),
+        ),
+        onChanged: onChanged,
+        maxLines: maxLines,
+        minLines: minLines,
+        maxLength: maxLength,
       ),
-      onChanged: onChanged,
-      maxLines: maxLines,
-      minLines: minLines,
-      maxLength: maxLength,
     );
   }
 

@@ -1,5 +1,5 @@
+import 'package:acela/src/utils/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class WorkTypeWidget extends StatefulWidget {
   const WorkTypeWidget(
@@ -24,25 +24,28 @@ class _WorkTypeWidgetState extends State<WorkTypeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Checkbox(
-          visualDensity: VisualDensity.compact,
-          value: isNsfwContent, onChanged: (newValue) {
-            setState(() {
-              isNsfwContent = newValue!;
-            });
-            widget.onChanged(newValue!);
-          },),
-        Expanded(
-          child: Text(
-            "You should check this option if your content is NSFW",
-            style: TextStyle(color: Colors.red),
-              ),
-        ),
-
-      ],
+    return Padding(
+      padding: EdgeInsets.all(kScreenHorizontalPaddingDigit),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Checkbox(
+            visualDensity: VisualDensity.compact,
+            value: isNsfwContent, onChanged: (newValue) {
+              setState(() {
+                isNsfwContent = newValue!;
+              });
+              widget.onChanged(newValue!);
+            },),
+          Expanded(
+            child: Text(
+              "You should check this option if your content is NSFW",
+              style: TextStyle(color: Colors.red),
+                ),
+          ),
+      
+        ],
+      ),
     );
   }
 }

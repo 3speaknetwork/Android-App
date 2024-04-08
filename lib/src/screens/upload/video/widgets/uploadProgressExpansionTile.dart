@@ -1,3 +1,4 @@
+import 'package:acela/src/utils/constants.dart';
 import 'package:acela/src/utils/enum.dart';
 import 'package:flutter/material.dart';
 
@@ -40,61 +41,64 @@ class _UploadProgressExpandableTileState
 
   @override
   Widget build(BuildContext context) {
-    return ExpansionPanelList(
-      expandedHeaderPadding: const EdgeInsets.only(top: 0),
-      elevation: 0,
-      expansionCallback: (int index, bool isExpanded) {
-        setState(
-          () {
-            this.isExpanded = isExpanded;
-          },
-        );
-      },
-      children: [
-        ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return SizedBox(
-              height: 55,
-              child: Stack(
-                children: [
-                  PageView(
-                    physics: const NeverScrollableScrollPhysics(),
-                    onPageChanged: (value) {
-                      setState(
-                        () {
-                          _pageIndex = value;
-                        },
-                      );
-                    },
-                    controller: widget.pageController,
-                    scrollDirection: Axis.vertical,
-                    children: _uploadWidgets(
-                        showStartEndWidgets: true, showWidgets: !isExpanded),
-                  ),
-                  Visibility(
-                    visible: isExpanded,
-                    child: ValueListenableBuilder<UploadStatus>(
-                      valueListenable: widget.uploadStatus,
-                      builder: (context, uploadStatus, child) {
-                        return ListTile(
-                          title: Text(
-                            uploadStatusString(uploadStatus),
-                          ),
+    return Padding(
+      padding: kScreenHorizontalPadding,
+      child: ExpansionPanelList(
+        expandedHeaderPadding: const EdgeInsets.only(top: 0),
+        elevation: 0,
+        expansionCallback: (int index, bool isExpanded) {
+          setState(
+            () {
+              this.isExpanded = isExpanded;
+            },
+          );
+        },
+        children: [
+          ExpansionPanel(
+            headerBuilder: (BuildContext context, bool isExpanded) {
+              return SizedBox(
+                height: 55,
+                child: Stack(
+                  children: [
+                    PageView(
+                      physics: const NeverScrollableScrollPhysics(),
+                      onPageChanged: (value) {
+                        setState(
+                          () {
+                            _pageIndex = value;
+                          },
                         );
                       },
+                      controller: widget.pageController,
+                      scrollDirection: Axis.vertical,
+                      children: _uploadWidgets(
+                          showStartEndWidgets: true, showWidgets: !isExpanded),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
-          body: Column(
-            children:
-                _uploadWidgets(showStartEndWidgets: false, showWidgets: true),
+                    Visibility(
+                      visible: isExpanded,
+                      child: ValueListenableBuilder<UploadStatus>(
+                        valueListenable: widget.uploadStatus,
+                        builder: (context, uploadStatus, child) {
+                          return ListTile(
+                            title: Text(
+                              uploadStatusString(uploadStatus),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+            body: Column(
+              children:
+                  _uploadWidgets(showStartEndWidgets: false, showWidgets: true),
+            ),
+            isExpanded: isExpanded,
           ),
-          isExpanded: isExpanded,
-        ),
-      ],
+        ],
+      ),
     );
   }
 

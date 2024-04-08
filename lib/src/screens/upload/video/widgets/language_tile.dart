@@ -1,4 +1,5 @@
 import 'package:acela/src/screens/settings/settings_screen.dart';
+import 'package:acela/src/utils/constants.dart';
 import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
 import 'package:flutter/material.dart';
 
@@ -44,7 +45,7 @@ class _LanguageTileState extends State<LanguageTile> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: EdgeInsets.zero,
+      contentPadding: kScreenHorizontalPadding,
       leading: const Icon(Icons.language),
       title: const Text("Set Language Filter"),
       trailing: Text(selectedLanguage.name),

@@ -1,6 +1,10 @@
+import 'dart:developer';
+
 import 'package:acela/src/models/my_account/video_ops.dart';
-import 'package:flutter/material.dart';
+import 'package:acela/src/widgets/user_profile_image.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class AddBeneSheet extends StatefulWidget {
   const AddBeneSheet({
@@ -20,23 +24,43 @@ class _AddBeneSheetState extends State<AddBeneSheet> {
   var name = '';
   var _controller = TextEditingController();
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   Widget _beneNameField() {
     return Container(
       margin: const EdgeInsets.only(left: 10, right: 10),
-      child: TextField(
-        controller: _controller,
-        decoration: const InputDecoration(
-          hintText: 'Video Participant Hive Account Name',
-          labelText: 'Account Name',
-        ),
-        onChanged: (text) {
-          setState(() {
-            name = text;
-          });
-        },
-        maxLines: 1,
-        minLines: 1,
-        maxLength: 150,
+      child: Row(
+        children: [
+          ValueListenableBuilder(
+              valueListenable: _controller,
+              builder: (context, value, child) {
+                return UserProfileImage(userName: _controller.text);
+              }),
+          const SizedBox(
+            width: 10,
+          ),
+          Expanded(
+            child: TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                hintText: 'Video Participant Hive Account Name',
+                labelText: 'Account Name',
+              ),
+              onChanged: (text) {
+                setState(() {
+                  name = text;
+                });
+              },
+              maxLines: 1,
+              minLines: 1,
+              maxLength: 150,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -53,55 +77,64 @@ class _AddBeneSheetState extends State<AddBeneSheet> {
 
   @override
   Widget build(BuildContext context) {
+    log(MediaQuery.of(context).viewInsets.bottom.toString());
     var author =
         widget.benes.where((element) => element.src == 'author').firstOrNull;
     var max = ((author?.weight ?? 99) - 1) * 100;
     return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Add Participant'),
-          actions: [
-            IconButton(
-              onPressed: () {
-                if (author == null) return;
-                if (name.isEmpty) return;
-                var names =
-                    widget.benes.map((e) => e.account.toLowerCase()).toList();
-                var participant = name.toLowerCase().trim();
-                if (names.contains(participant)) {
-                  showError('Video Participant already added');
-                } else {
-                  var percentValue = newBeneValue ~/ 100;
-                  var newList = widget.benes;
-                  newList.add(
-                    BeneficiariesJson(
-                      account: participant,
-                      weight: percentValue,
-                      src: 'participant',
-                    ),
-                  );
-                  newList = newList.where((e) => e.src != 'author').toList();
-                  var sum = newList.map((e) => e.weight).toList().sum;
-                  var newWeight = 100 - sum;
-                  newList.add(
-                    BeneficiariesJson(
-                        account: author.account, weight: newWeight, src: 'author'),
-                  );
-                  widget.onSave(newList);
-                  Navigator.of(context).pop();
-                }
-              },
-              icon: Icon(Icons.add),
-            )
-          ],
-        ),
-        body: SafeArea(
-          child: (author == null)
+        child: Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      height: 400,
+      margin: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Column(
+        children: [
+          AppBar(
+            title: Text('Add Participant'),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  if (author == null) return;
+                  if (name.isEmpty) return;
+                  var names =
+                      widget.benes.map((e) => e.account.toLowerCase()).toList();
+                  var participant = name.toLowerCase().trim();
+                  if (names.contains(participant)) {
+                    showError('Video Participant already added');
+                  } else {
+                    var percentValue = newBeneValue ~/ 100;
+                    var newList = widget.benes;
+                    newList.add(
+                      BeneficiariesJson(
+                        account: participant,
+                        weight: percentValue,
+                        src: 'participant',
+                      ),
+                    );
+                    newList = newList.where((e) => e.src != 'author').toList();
+                    var sum = newList.map((e) => e.weight).toList().sum;
+                    var newWeight = 100 - sum;
+                    newList.add(
+                      BeneficiariesJson(
+                          account: author.account,
+                          weight: newWeight,
+                          src: 'author'),
+                    );
+                    widget.onSave(newList);
+                    Navigator.of(context).pop();
+                  }
+                },
+                icon: Icon(Icons.add),
+              )
+            ],
+          ),
+          (author == null)
               ? Container()
-              : SingleChildScrollView(
-                  child: Column(
+              : Expanded(
+                  child: ListView(
+                    // mainAxisSize: MainAxisSize.min,
                     children: [
                       _beneNameField(),
+                      const SizedBox(height: 15,),
                       Slider(
                         value: newBeneValue.toDouble(),
                         min: 100.0,
@@ -121,8 +154,8 @@ class _AddBeneSheetState extends State<AddBeneSheet> {
                     ],
                   ),
                 ),
-        ),
+        ],
       ),
-    );
+    ));
   }
 }

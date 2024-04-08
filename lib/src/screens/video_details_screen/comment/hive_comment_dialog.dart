@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-
-import 'package:acela/src/models/hive_comments/new_hive_comment/new_hive_comment.dart';
+import 'package:acela/src/models/hive_comments/new_hive_comment/newest_comment_model.dart';
 import 'package:acela/src/models/login/login_bridge_response.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/utils/communicator.dart';
@@ -15,22 +14,24 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class HiveCommentDialog extends StatefulWidget {
-  const HiveCommentDialog({
-    Key? key,
-    required this.username,
-    required this.author,
-    required this.permlink,
-    required this.hasKey,
-    required this.hasAuthKey,
-    required this.onClose,
-    required this.onDone,
-  }) : super(key: key);
+  const HiveCommentDialog(
+      {Key? key,
+      required this.username,
+      required this.author,
+      required this.permlink,
+      required this.hasKey,
+      required this.hasAuthKey,
+      required this.onClose,
+      required this.onDone,
+      this.depth})
+      : super(key: key);
   final String username;
   final String author;
   final String permlink;
   final String hasKey;
   final String hasAuthKey;
-  final Function(VideoCommentModel? comment) onDone;
+  final int? depth;
+  final Function(CommentItemModel? comment) onDone;
   final Function onClose;
 
   @override
@@ -127,15 +128,19 @@ class _HiveCommentDialogState extends State<HiveCommentDialog> {
             Future.delayed(const Duration(seconds: 6), () {
               if (mounted) {
                 setState(() {
-                  VideoCommentModel addedComment = VideoCommentModel(
-                      createdAt: DateTime.now(),
-                      author: VideoCommentAuthorModel(username: widget.author),
-                      permlink: widget.permlink,
-                      body: textController.text,
-                      stats: VideoCommentStatsModel(
-                        numVotes: 0,
-                      ),
-                      children: []);
+                  String currentUserName = widget.username;
+                  CommentItemModel addedComment = CommentItemModel(
+                    created: DateTime.now(),
+                    author: currentUserName,
+                    isLocallyAdded: true,
+                    permlink:
+                        "re-$currentUserName-${DateTime.now().toIso8601String()}",
+                     parentAuthor: widget.author,
+                    parentPermlink: widget.permlink,
+                    body: textController.text,
+                    depth: widget.depth == null ? 1 : widget.depth! + 1,
+                    children: 0,
+                  );
                   isCommenting = false;
                   widget.onDone(addedComment);
                   Navigator.of(context).pop();
@@ -236,15 +241,19 @@ class _HiveCommentDialogState extends State<HiveCommentDialog> {
             if (mounted) {
               setState(() {
                 isCommenting = false;
-                VideoCommentModel addedComment = VideoCommentModel(
-                    createdAt: DateTime.now(),
-                    author: VideoCommentAuthorModel(username: widget.author),
-                    permlink: widget.permlink,
-                    body: textController.text,
-                    stats: VideoCommentStatsModel(
-                      numVotes: 0,
-                    ),
-                    children: []);
+                String currentUserName = widget.username;
+                CommentItemModel addedComment = CommentItemModel(
+                  created: DateTime.now(),
+                  isLocallyAdded: true,
+                  author: currentUserName,
+                  permlink:
+                      "re-$currentUserName-${DateTime.now().toIso8601String()}",
+                  parentAuthor: widget.author,
+                  parentPermlink: widget.permlink,
+                  body: textController.text,
+                  depth: widget.depth == null ? 1 : widget.depth! + 1,
+                  children: 0,
+                );
                 widget.onDone(addedComment);
                 showMessage('Comment published successfully');
                 Navigator.of(context).pop();

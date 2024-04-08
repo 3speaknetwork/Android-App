@@ -71,8 +71,8 @@ class _FavouriteWidgetState extends State<FavouriteWidget> {
 
   void showSnackBar(bool isAdding) {
     final String message = isAdding
-        ? "is added to your favourites"
-        : "is removed from your favourites";
+        ? "is added to your bookmarks"
+        : "is removed from your bookmarks";
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       backgroundColor: Colors.black,

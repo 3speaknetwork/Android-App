@@ -1,5 +1,7 @@
 import 'dart:io';
+
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
+import 'package:acela/src/screens/my_account/my_account_screen.dart';
 import 'package:acela/src/screens/upload/video/controller/video_upload_controller.dart';
 import 'package:acela/src/screens/upload/video/widgets/beneficaries_tile.dart';
 import 'package:acela/src/screens/upload/video/widgets/community_picker.dart';
@@ -8,6 +10,7 @@ import 'package:acela/src/screens/upload/video/widgets/reward_type_widget.dart';
 import 'package:acela/src/screens/upload/video/widgets/thumbnail_picker.dart';
 import 'package:acela/src/screens/upload/video/widgets/uploadProgressExpansionTile.dart';
 import 'package:acela/src/screens/upload/video/widgets/upload_textfield.dart';
+import 'package:acela/src/screens/upload/video/widgets/video_upload_divider.dart';
 import 'package:acela/src/screens/upload/video/widgets/work_type_widget.dart';
 import 'package:acela/src/utils/enum.dart';
 import 'package:acela/src/widgets/loading_screen.dart';
@@ -22,8 +25,8 @@ class VideoUploadScreen extends StatefulWidget {
       : super(key: key);
 
   final HiveUserData appData;
-  final bool isCamera;
 
+  final bool isCamera;
   @override
   State<VideoUploadScreen> createState() => _VideoUploadScreenState();
 }
@@ -60,7 +63,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
       floatingActionButton: saveButton(controller),
       body: SafeArea(
         child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 15),
+            padding: const EdgeInsets.symmetric(vertical: 15),
             child: ValueListenableBuilder<bool>(
               valueListenable: controller.isSaving,
               builder: (context, isPublishing, child) {
@@ -80,6 +83,8 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                 }
               },
               child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 child: Column(
                   children: [
                     UploadProgressExpandableTile(
@@ -108,7 +113,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                     ),
                     UploadTextField(
                         textEditingController: tagsController,
-                        hintText: 'Comma separated tags',
+                        hintText: 'threespeak,mobile',
                         labelText: 'Tags',
                         maxLines: 1,
                         minLines: 1,
@@ -128,19 +133,20 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                         onChanged: (value) {
                           controller.description = value;
                         }),
-                    const SizedBox(height: 15),
                     communityTile(controller),
-                    const SizedBox(height: 15),
+                    const VideoUploadDivider(),
                     _workType(controller),
-                    const SizedBox(height: 15),
+                    const VideoUploadDivider(),
                     _rewardType(controller),
-                    const SizedBox(height: 15),
+                    const VideoUploadDivider(),
                     _beneficiaryTile(controller),
-                    const SizedBox(height: 15),
+                    const VideoUploadDivider(),
                     _languageTile(controller),
-                    const SizedBox(height: 15),
+                    const VideoUploadDivider(),
                     _thumbnailPicker(controller),
-                    const SizedBox(height: 50),
+                    const SizedBox(
+                      height: 50,
+                    )
                   ],
                 ),
               ),
@@ -253,12 +259,21 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
       onPressed: () {
         Navigator.of(context).pop();
         Navigator.of(context).pop();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MyAccountScreen(
+              data: widget.appData,
+              initialTabIndex: 2,
+            ),
+          ),
+        );
       },
     );
     AlertDialog alert = AlertDialog(
       title: Text("🎉 Upload Complete 🎉"),
       content: Text(
-          "✅ Your Video is in-process\n\n✅ Video has be added to encoding queue\n\n👀 Check status from My Account\n\n📝 Let's edit video details now."),
+          "✅ Your Video is in-process\n\n✅ Video has be added to encoding queue\n\n👀 Check status from My Account."),
       actions: [
         okButton,
       ],

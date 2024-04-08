@@ -45,7 +45,7 @@ class _FavouriteVideoBodyState extends State<FavouriteVideoBody> {
             itemCount: items.length % 50 == 0 ? items.length + 1 : items.length,
           )
         : Center(
-            child: Text("No favourite vidoes found"),
+            child: Text("No Bookmarked vidoes found"),
           );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:acela/src/models/video_upload/upload_response.dart';
+import 'package:acela/src/utils/constants.dart';
 import 'package:acela/src/utils/enum.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -26,45 +27,82 @@ class _ThumbnailPickerState extends State<ThumbnailPicker> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SizedBox(
-        width: 320,
-        height: 160,
-        child: ValueListenableBuilder<UploadStatus>(
-          valueListenable: widget.thumbnailUploadStatus,
-          builder: (context, uploadStatus, child) {
-            return InkWell(
-              child: ValueListenableBuilder<double>(
-                valueListenable: widget.thumbnailUploadProgress,
-                builder: (context, progress, child) {
-                  return Center(
-                    child: uploadStatus == UploadStatus.started
-                        ? CircularProgressIndicator(
-                            value: progress,
-                            valueColor: AlwaysStoppedAnimation<Color?>(
-                                theme.primaryColorLight),
-                            backgroundColor: !isPickingImage
-                                ? theme.primaryColorLight.withOpacity(0.4)
-                                : null,
-                          )
-                        : ValueListenableBuilder<UploadResponse?>(
-                            valueListenable: widget.thumbnailUploadRespone,
-                            builder: (context, value, child) {
-                              return value != null
-                                  ? Image.network( value.url)
-                                  : const Text(
-                                      'Tap here to add thumbnail for your video\n\nThumbnail is MANDATORY to set.',
-                                      textAlign: TextAlign.center);
-                            },
-                          ),
-                  );
-                },
-              ),
-              onTap: () async {
-                await _onTap(uploadStatus);
-              },
-            );
+    return ValueListenableBuilder<UploadStatus>(
+      valueListenable: widget.thumbnailUploadStatus,
+      builder: (context, uploadStatus, child) {
+        return InkWell(
+          child: Padding(
+            padding: const EdgeInsets.all(kScreenHorizontalPaddingDigit),
+            child: Column(
+              children: [
+                Stack(
+                  children: [
+                    Positioned(
+                        top: 10,
+                        right: 10,
+                        child: Icon(
+                          Icons.emergency,
+                          size: 15,
+                          color: Colors.red,
+                        )),
+                    Container(
+                      color: theme.cardColor.withOpacity(0.5),
+                      width: 320,
+                      height: 160,
+                      child: ValueListenableBuilder<double>(
+                        valueListenable: widget.thumbnailUploadProgress,
+                        builder: (context, progress, child) {
+                          return Center(
+                            child: uploadStatus == UploadStatus.started
+                                ? CircularProgressIndicator(
+                                    value: progress,
+                                    valueColor: AlwaysStoppedAnimation<Color?>(
+                                        theme.primaryColorLight),
+                                    backgroundColor: !isPickingImage
+                                        ? theme.primaryColorLight
+                                            .withOpacity(0.4)
+                                        : null,
+                                  )
+                                : ValueListenableBuilder<UploadResponse?>(
+                                    valueListenable:
+                                        widget.thumbnailUploadRespone,
+                                    builder: (context, value, child) {
+                                      return value != null
+                                          ? Image.network(value.url)
+                                          : const SizedBox.shrink();
+                                    },
+                                  ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.upload),
+                      const SizedBox(
+                        width: 7,
+                      ),
+                      Text(
+                        "Tap here to set thumbnail",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          onTap: () async {
+            await _onTap(uploadStatus);
           },
-        ));
+        );
+      },
+    );
   }
 
   Future<void> _onTap(UploadStatus uploadStatus) async {
@@ -92,7 +130,7 @@ class _ThumbnailPickerState extends State<ThumbnailPicker> {
     }
   }
 
-   void showError(String string) {
+  void showError(String string) {
     var snackBar = SnackBar(content: Text('Error: $string'));
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }

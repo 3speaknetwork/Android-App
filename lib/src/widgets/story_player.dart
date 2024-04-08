@@ -23,6 +23,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
+import 'package:timeago/timeago.dart' as timeago;
 
 class StoryPlayer extends StatefulWidget {
   const StoryPlayer({
@@ -259,50 +260,17 @@ class _StoryPlayerState extends State<StoryPlayer> {
             activeVotes: postInfo!.activeVotes,
             onClose: () {},
             onDone: () {
-              loadHiveInfo();
+              setState(() {
+                postInfo = postInfo!.copyWith(activeVotes: [
+                ...postInfo!.activeVotes,
+                ActiveVotesItem(voter: widget.data.username!)
+              ]);
+              });
             },
           ),
         );
       },
     );
-  }
-
-  void commentPressed() {
-    if (postInfo == null) return;
-    if (widget.data.username == null) {
-      _betterPlayerController.pause();
-      showAdaptiveActionSheet(
-        context: context,
-        title: const Text('You are not logged in. Please log in to comment.'),
-        androidBorderRadius: 30,
-        actions: [
-          BottomSheetAction(
-              title: Text('Log in'),
-              leading: Icon(Icons.login),
-              onPressed: (c) {
-                Navigator.of(c).pop();
-                var screen = HiveAuthLoginScreen(appData: widget.data);
-                var route = MaterialPageRoute(builder: (c) => screen);
-                Navigator.of(c).push(route);
-              }),
-        ],
-        cancelAction: CancelAction(title: const Text('Cancel')),
-      );
-      return;
-    }
-    _betterPlayerController.pause();
-    var screen = HiveCommentDialog(
-      author: widget.item.author?.username ?? 'sagarkothari88',
-      permlink: widget.item.permlink ?? 'ctbtwcxbbd',
-      username: widget.data.username ?? "",
-      hasKey: widget.data.keychainData?.hasId ?? "",
-      hasAuthKey: widget.data.keychainData?.hasAuthKey ?? "",
-      onClose: () {},
-      onDone: (comment) {
-        loadHiveInfo();
-      },
-    );
-    Navigator.of(context).push(MaterialPageRoute(builder: (c) => screen));
   }
 
   List<Widget> _fabButtonsOnRight() {
@@ -342,17 +310,11 @@ class _StoryPlayerState extends State<StoryPlayer> {
           Navigator.of(context).push(route);
         },
       ),
-      IconButton(
-        icon: Icon(Icons.notes, color: Colors.blue),
-        onPressed: () {
-          seeCommentsPressed();
-        },
-      ),
       SizedBox(height: 10),
       IconButton(
         icon: Icon(Icons.comment, color: Colors.blue),
         onPressed: () {
-          commentPressed();
+          seeCommentsPressed();
         },
       ),
       SizedBox(height: 10),
@@ -362,7 +324,8 @@ class _StoryPlayerState extends State<StoryPlayer> {
             upvotePressed();
           }
         },
-        icon: Icon(Icons.thumb_up, color: Colors.blue),
+        icon: Icon(isVoted ? Icons.thumb_up : Icons.thumb_up_outlined,
+            color: Colors.blue),
       ),
       SizedBox(height: 10),
       IconButton(
@@ -383,6 +346,18 @@ class _StoryPlayerState extends State<StoryPlayer> {
       ),
       SizedBox(height: 10),
     ];
+  }
+
+  bool get isVoted {
+    if (widget.data.username == null) {
+      return false;
+    } else if (postInfo != null &&
+        postInfo!.activeVotes
+            .contains(ActiveVotesItem(voter: widget.data.username!))) {
+      return true;
+    }
+
+    return false;
   }
 
   @override
@@ -439,10 +414,22 @@ class _StoryPlayerState extends State<StoryPlayer> {
                             width: 15,
                           ),
                           Expanded(
-                            child: Text(
-                              widget.item.author!.username!,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.item.author!.username!,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  "${timeago.format(widget.item.createdAt!)}",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ],
                             ),
                           )
                         ],

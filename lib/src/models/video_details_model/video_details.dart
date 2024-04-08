@@ -25,7 +25,7 @@ class VideoDetails {
   final String status;
   final String playUrl;
   final String language;
-
+  final int? encodingProgress;
   final String thumbnail;
 
   final String video_v2;
@@ -41,8 +41,7 @@ class VideoDetails {
   final String visible_status;
 
   String getThumbnail() {
-    return thumbnail.replaceAll(
-        'ipfs://', IpfsNodeProvider().nodeUrl);
+    return thumbnail.replaceAll('ipfs://', IpfsNodeProvider().nodeUrl);
   }
 
   String getVideoUrl(HiveUserData data) {
@@ -65,8 +64,7 @@ class VideoDetails {
       // https://ipfs-3speak.b-cdn.net/ipfs/QmTRDJcgtt66pxs3ZnQCdRw57b69NS2TQvF4yHwaux5grT/manifest.m3u8
       // https://ipfs-3speak.b-cdn.net/ipfs/QmTRDJcgtt66pxs3ZnQCdRw57b69NS2TQvF4yHwaux5grT/480p/index.m3u8
       // https://ipfs-3speak.b-cdn.net/ipfs/QmWADpD1PWPnmYVkSZvgokU5vcN2qZqvsHCA985GZ5Jf4r/manifest.m3u8
-      var url =
-          video_v2.replaceAll('ipfs://', IpfsNodeProvider().nodeUrl);
+      var url = video_v2.replaceAll('ipfs://', IpfsNodeProvider().nodeUrl);
       log('Root Play url is - $url');
       return url;
     }
@@ -120,6 +118,7 @@ class VideoDetails {
     this.playUrl = "",
     this.steemPosted = false,
     this.status = "",
+    required this.encodingProgress,
     required this.video_v2,
     required this.tags,
     required this.originalFilename,
@@ -179,8 +178,7 @@ class VideoDetails {
         if (sum < 100) {
           var remaining = 100 - sum;
           beneficiariesToSet.add(
-            BeneficiariesJson(
-                account: owner, src: 'author', weight: remaining),
+            BeneficiariesJson(account: owner, src: 'author', weight: remaining),
           );
         }
         return beneficiariesToSet;
@@ -204,6 +202,7 @@ class VideoDetails {
         views: asInt(json, 'views'),
         tagsV2: asList(json, 'tags_v2').map((e) => e.toString()).toList(),
         id: asString(json, '_id'),
+        encodingProgress: json!=null ? asInt(json, 'encodingProgress') : null,
         community: asString(json, 'community'),
         permlink: asString(json, 'permlink'),
         duration: asDouble(json, 'duration'),

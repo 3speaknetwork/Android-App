@@ -34,54 +34,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         selectedFontSize: 11,
         unselectedFontSize: 11,
         type: BottomNavigationBarType.fixed,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: SizedBox(height: 25, child: Icon(Icons.search)),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: SizedBox(
-              height: 25,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 0.0),
-                child: Image.asset(
-                  'assets/branding/three_shorts_icon.png',
-                  height: 23,
-                  width: 23,
-                ),
-              ),
-            ),
-            label: '3Shorts',
-          ),
-          BottomNavigationBarItem(
-            icon: SizedBox(height: 25, child: Icon(Icons.add)),
-            label: 'Upload',
-          ),
-          BottomNavigationBarItem(
-            icon: SizedBox(
-              height: 25,
-              child: Image.asset(
-                'assets/pod-cast-logo-round.png',
-                height: 23,
-                width: 23,
-              ),
-            ),
-            label: 'Podcast',
-          ),
-          BottomNavigationBarItem(
-            icon: SizedBox(
-                height: 25,
-                child: widget.username == null
-                    ? Icon(Icons.person)
-                    : CustomCircleAvatar(
-                        height: 23,
-                        width: 23,
-                        url:
-                            'https://images.hive.blog/u/${widget.username ?? ''}/avatar',
-                      )),
-            label: 'You',
-          ),
-        ],
+        items: navItems,
         onTap: (index) => navigate(index, context),
         selectedItemColor: theme.primaryColorLight,
         unselectedItemColor: theme.primaryColorLight,
@@ -90,23 +43,108 @@ class _BottomNavBarState extends State<BottomNavBar> {
     );
   }
 
+  List<BottomNavigationBarItem> get navItems {
+    List<BottomNavigationBarItem> items = [];
+    items.add(
+      BottomNavigationBarItem(
+        icon: SizedBox(height: 25, child: Icon(Icons.search)),
+        label: 'Search',
+      ),
+    );
+
+    items.add(
+      BottomNavigationBarItem(
+        icon: SizedBox(
+          height: 25,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 0.0),
+            child: Image.asset(
+              'assets/branding/three_shorts_icon.png',
+              height: 23,
+              width: 23,
+            ),
+          ),
+        ),
+        label: '3Shorts',
+      ),
+    );
+
+    if (widget.username != null) {
+      items.add(
+        BottomNavigationBarItem(
+          icon: SizedBox(height: 25, child: Icon(Icons.add)),
+          label: 'Upload',
+        ),
+      );
+    }
+
+    items.add(
+      BottomNavigationBarItem(
+        icon: SizedBox(
+          height: 25,
+          child: Image.asset(
+            'assets/pod-cast-logo-round.png',
+            height: 23,
+            width: 23,
+          ),
+        ),
+        label: 'Podcast',
+      ),
+    );
+    if (widget.username != null) {
+      items.add(
+        BottomNavigationBarItem(
+          icon: SizedBox(
+              height: 25,
+              child: widget.username == null
+                  ? Icon(Icons.person)
+                  : CustomCircleAvatar(
+                      height: 23,
+                      width: 23,
+                      color: Theme.of(context).primaryColorLight == Colors.black
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade900,
+                      url:
+                          'https://images.hive.blog/u/${widget.username ?? ''}/avatar',
+                    )),
+          label: 'You',
+        ),
+      );
+    }
+    return items;
+  }
+
   void navigate(int index, BuildContext context) {
-    switch (index) {
-      case 0:
-        _onTapSearch();
-        break;
-      case 1:
-        _onTapThreeShorts();
-        break;
-      case 2:
-        _uploadBottomSheet();
-        break;
-      case 3:
-        _onTapPodcast();
-        break;
-      case 4:
-        _onAccountTap();
-        break;
+    if (widget.username != null) {
+      switch (index) {
+        case 0:
+          _onTapSearch();
+          break;
+        case 1:
+          _onTapThreeShorts();
+          break;
+        case 2:
+          _uploadBottomSheet();
+          break;
+        case 3:
+          _onTapPodcast();
+          break;
+        case 4:
+          _onAccountTap();
+          break;
+      }
+    } else {
+      switch (index) {
+        case 0:
+          _onTapSearch();
+          break;
+        case 1:
+          _onTapThreeShorts();
+          break;
+        case 2:
+          _onTapPodcast();
+          break;
+      }
     }
   }
 

@@ -25,20 +25,21 @@ enum HomeScreenFeedType {
 }
 
 class HomeScreenFeedList extends StatefulWidget {
-  const HomeScreenFeedList({
-    Key? key,
-    required this.appData,
-    required this.feedType,
-    this.owner,
-    this.community,
-    this.showVideo = true,
-  });
+  const HomeScreenFeedList(
+      {Key? key,
+      required this.appData,
+      required this.feedType,
+      this.owner,
+      this.community,
+      this.showVideo = true,
+      this.onEmptyDataCallback});
 
   final HiveUserData appData;
   final HomeScreenFeedType feedType;
   final String? owner;
   final String? community;
   final bool showVideo;
+  final VoidCallback? onEmptyDataCallback;
 
   @override
   State<HomeScreenFeedList> createState() => _HomeScreenFeedListState();
@@ -161,6 +162,9 @@ class _HomeScreenFeedListState extends State<HomeScreenFeedList>
           isPageEnded = true;
         }
         items = newItems;
+        if (items.isEmpty && widget.onEmptyDataCallback != null) {
+          widget.onEmptyDataCallback!();
+        }
         isLoading = false;
         firstPageLoaded = true;
       });
@@ -209,8 +213,16 @@ class _HomeScreenFeedListState extends State<HomeScreenFeedList>
           child: Column(
             children: [
               Spacer(),
-              Text(
-                  'We did not find anything to show.\nTap on Reload button to try again.'),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Text(
+                  widget.feedType == HomeScreenFeedType.userFeed
+                      ? 'Please follow more people to see videos they publish.'
+                      : 'We did not find anything to show.\nTap on Reload button to try again.',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 5,),
               ElevatedButton(
                 onPressed: () {
                   loadFeed(true);

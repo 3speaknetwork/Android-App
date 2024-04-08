@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:acela/src/models/hive_comments/new_hive_comment/new_hive_comment.dart';
+import 'package:acela/src/models/hive_comments/new_hive_comment/newest_comment_model.dart';
 import 'package:acela/src/models/trending_tags/trending_tags_response.dart';
 import 'package:acela/src/utils/graphql/models/trending_feed_response.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -24,7 +25,6 @@ class GQLCommunicator {
       'content-type': 'application/json',
     };
     var request = http.Request('POST', Uri.parse(gqlServer));
-    log('Query is - $query');
     request.body = json
         .encode({"query": query, "operationName": operation, "extensions": {}});
     request.headers.addAll(headers);
@@ -221,7 +221,7 @@ class GQLCommunicator {
     }
   }
 
-  Future<GQLFeedItem> getVideoDetails(String author,String permlink) async {
+  Future<GQLFeedItem> getVideoDetails(String author, String permlink) async {
     var headers = {
       'Connection': 'keep-alive',
       'content-type': 'application/json',
@@ -246,6 +246,33 @@ class GQLCommunicator {
     } else {
       print(response.reasonPhrase);
       throw response.reasonPhrase ?? 'Error occurred';
+    }
+  }
+
+  Future<List<CommentItemModel>> getComments(
+      String author, String permlink) async {
+    try {
+      var headers = {'content-type': 'application/json'};
+      var request = http.Request('POST', Uri.parse('https://api.hive.blog/'));
+      request.body = json.encode({
+        "id": 9,
+        "jsonrpc": "2.0",
+        "method": "bridge.get_discussion",
+        "params": {"author": author, "permlink": permlink}
+      });
+      request.headers.addAll(headers);
+
+      http.StreamedResponse response = await request.send();
+
+      if (response.statusCode == 200) {
+        CommentResponseModel commentResponse = CommentResponseModel.fromRawJson(
+            await response.stream.bytesToString());
+        return commentResponse.comments;
+      } else {
+        throw (response.reasonPhrase.toString());
+      }
+    } catch (e) {
+      throw (e.toString());
     }
   }
 }
