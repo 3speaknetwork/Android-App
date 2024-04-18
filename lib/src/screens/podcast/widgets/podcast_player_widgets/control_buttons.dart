@@ -1,10 +1,12 @@
 import 'package:acela/src/models/podcast/podcast_episodes.dart';
 import 'package:acela/src/screens/podcast/controller/podcast_chapters_controller.dart';
+import 'package:acela/src/screens/podcast/controller/podcast_controller.dart';
 import 'package:acela/src/screens/podcast/widgets/audio_player/action_tools.dart';
 import 'package:acela/src/screens/podcast/widgets/audio_player/audio_player_core_controls.dart';
 import 'package:acela/src/screens/podcast/widgets/podcast_player_widgets/podcast_player_intercation_icon_button.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ControlButtons extends StatelessWidget {
   final AudioPlayerHandler audioHandler;
@@ -99,6 +101,7 @@ class ControlButtons extends StatelessWidget {
                 ),
               );
             } else {
+                _continueFromDuration(context);
               return GestureDetector(
                 onTap: () {
                   isPaused = !isPaused;
@@ -153,6 +156,19 @@ class ControlButtons extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _continueFromDuration(BuildContext context) {
+    final podcastController = context.read<PodcastController>();
+    if (podcastController.isDurationContinuing) {
+      int? skipToDuration = podcastController.readSavedDurationOfEpisode(
+          podcastEpisode.id!, podcastEpisode.enclosureUrl!);
+      podcastController.isDurationContinuing = true;
+      if (skipToDuration != null) {
+        audioHandler.seek(Duration(seconds: skipToDuration));
+      }
+      podcastController.isDurationContinuing = false;
+    }
   }
 
   void _goForwardTenSeconds(PositionData positionData) {

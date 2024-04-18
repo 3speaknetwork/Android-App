@@ -58,6 +58,8 @@ abstract class AudioPlayerHandler implements AudioHandler {
     String url,
   );
 
+  Future<int> currentPosition();
+
   void disposeVideoController();
 
   bool isVideo = false;
@@ -337,6 +339,19 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   @override
   Future<void> pause() =>
       shouldPlayVideo() ? videoPlayerController!.pause() : _player.pause();
+
+  Future<int> currentPosition() async {
+    int duration = 0;
+    if (shouldPlayVideo()) {
+      var videoPosition = await videoPlayerController?.position;
+      if (videoPosition != null) {
+        duration = videoPosition.inSeconds;
+      }
+    } else {
+      duration = _player.position.inSeconds;
+    }
+    return duration;
+  }
 
   @override
   Future<void> seek(Duration position) => shouldPlayVideo()

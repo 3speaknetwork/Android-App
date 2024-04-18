@@ -46,14 +46,32 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
   void setBeneficiares({String? userName, bool resetBeneficiares = false}) {
     this.userName = userName ?? this.userName;
     if (beneficaries.isEmpty || resetBeneficiares) {
-      beneficaries = [
-        BeneficiariesJson(account: 'sagarkothari88', src: 'mobile', weight: 1),
-        BeneficiariesJson(
-            account: 'spk.beneficiary', src: 'threespeak', weight: 9),
-        BeneficiariesJson(
-            account: 'threespeakleader', src: 'threespeak', weight: 1),
+      if (this.userName != 'sagarkothari88') {
+        beneficaries.add(
+          BeneficiariesJson(
+              account: 'sagarkothari88',
+              src: 'mobile',
+              weight: 1,
+              isDefault: true),
+        );
+      }
+      if (this.userName != 'spk.beneficiary') {
+        beneficaries.add(BeneficiariesJson(
+            account: 'spk.beneficiary',
+            src: 'threespeak',
+            weight: 9,
+            isDefault: true));
+      }
+      if (this.userName != 'threespeakleader') {
+        beneficaries.add(BeneficiariesJson(
+            account: 'threespeakleader',
+            src: 'threespeak',
+            weight: 1,
+            isDefault: true));
+      }
+      beneficaries.add(
         BeneficiariesJson(account: this.userName, src: 'author', weight: 89),
-      ];
+      );
     }
   }
 
