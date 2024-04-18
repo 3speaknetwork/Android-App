@@ -130,8 +130,8 @@ class _PodcastUploadScreenState extends State<PodcastUploadScreen> {
           return e.fileName == originalFileName || e.filePath == file!.path;
         });
         var extension = file.path.split(".").last;
-        if (extension != "mp3") {
-          throw 'Podcast should be in mp3 format.';
+        if (!(extension == "mp3" || extension == "m4a")) {
+          throw 'Podcast should be in mp3/m4a format.';
         }
         if (alreadyUploaded) {
           throw 'This podcast is already uploaded by you';
