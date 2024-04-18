@@ -55,8 +55,8 @@ class _BeneficiariesTileState extends State<BeneficiariesTile> {
               child: Padding(
                   padding: const EdgeInsets.only(top: 12.0),
                   child: Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
+                    spacing: 0,
+                    runSpacing: 0,
                     children: List.generate(
                       beneficiaries.length,
                       (index) => _beneficarieNameTile(theme, index, context),
@@ -69,27 +69,32 @@ class _BeneficiariesTileState extends State<BeneficiariesTile> {
     );
   }
 
-  Container _beneficarieNameTile(
+  Visibility _beneficarieNameTile(
       ThemeData theme, int index, BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(top: 2, bottom: 2, right: 8, left: 3),
-      decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.all(Radius.circular(20))),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          UserProfileImage(radius: 20, userName: beneficiaries[index].account),
-          const SizedBox(
-            width: 5,
-          ),
-          Text(
-            beneficiaries[index].account,
-            style: TextStyle(
-              color: Theme.of(context).primaryColorLight.withOpacity(0.7),
+    return Visibility(
+      visible: !beneficiaries[index].isDefault,
+      child: Container(
+        margin: EdgeInsets.only(right: 6, bottom: 8),
+        padding: EdgeInsets.only(top: 2, bottom: 2, right: 8, left: 3),
+        decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.all(Radius.circular(20))),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            UserProfileImage(
+                radius: 20, userName: beneficiaries[index].account),
+            const SizedBox(
+              width: 5,
             ),
-          ),
-        ],
+            Text(
+              beneficiaries[index].account,
+              style: TextStyle(
+                color: Theme.of(context).primaryColorLight.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -9,9 +9,11 @@ import 'package:path_provider/path_provider.dart';
 
 class PodcastController extends ChangeNotifier {
   final box = GetStorage();
+  final durationStorage = GetStorage('duration_storage');
   final String _likedPodcastEpisodeLocalKey = 'liked_podcast_episode';
   final String _likedPodcastLocalKey = 'liked_podcast';
   final String _offlinePodcastLocalKey = 'offline_podcast';
+  bool isDurationContinuing = true;
   var externalDir;
 
   PodcastController() {
@@ -89,7 +91,9 @@ class PodcastController extends ChangeNotifier {
         if (!filterOnlyRssPodcasts) {
           items.add(PodCastFeedItem.fromJson(item));
         } else if (item['rssUrl'] != null) {
-          items.add(PodCastFeedItem.fromJson(item));
+          items.add(PodCastFeedItem.fromJson(
+            item,
+          ));
         }
       }
       return items;
@@ -165,8 +169,8 @@ class PodcastController extends ChangeNotifier {
     log('saving');
     PodcastEpisode localEpisode = episode;
     try {
-      localEpisode =
-          episode.copyWith(image: await _saveImage(episode.image!, episode.id!));
+      localEpisode = episode.copyWith(
+          image: await _saveImage(episode.image!, episode.id!));
     } catch (e) {}
     final String key = _offlinePodcastLocalKey;
     if (box.read(key) != null) {
@@ -233,5 +237,13 @@ class PodcastController extends ChangeNotifier {
         print('File removed successfully: $filePath');
       }
     } catch (e) {}
+  }
+
+  int? readSavedDurationOfEpisode(String id, String url) {
+    return durationStorage.read('${id}_$url');
+  }
+
+  writeDurationOfEpisode(String id, String url, int value) {
+    durationStorage.write('${id}_$url', value);
   }
 }

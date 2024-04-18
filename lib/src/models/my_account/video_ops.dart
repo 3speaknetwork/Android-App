@@ -35,11 +35,13 @@ class BeneficiariesJson {
   final String account;
   int weight;
   final String src;
+  final bool isDefault;
 
   BeneficiariesJson({
     required this.account,
     required this.weight,
     required this.src,
+    this.isDefault = false
   });
 
   factory BeneficiariesJson.fromJson(Map<String, dynamic>? json) =>
@@ -51,9 +53,7 @@ class BeneficiariesJson {
 
   static List<BeneficiariesJson> fromJsonString(String jsonString) {
     var list = json.decode(jsonString) as List;
-    var listNew = list
-        .map((e) => BeneficiariesJson.fromJson(e))
-        .toList();
+    var listNew = list.map((e) => BeneficiariesJson.fromJson(e)).toList();
     return listNew;
   }
 
@@ -68,5 +68,4 @@ class BeneficiariesJson {
       'src': src,
     };
   }
-
 }

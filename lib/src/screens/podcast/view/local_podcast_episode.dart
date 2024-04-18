@@ -7,6 +7,7 @@ import 'package:acela/src/screens/podcast/controller/podcast_controller.dart';
 import 'package:acela/src/screens/podcast/widgets/audio_player/new_pod_cast_epidose_player.dart';
 import 'package:acela/src/screens/podcast/widgets/audio_player/audio_player_core_controls.dart';
 import 'package:acela/src/widgets/cached_image.dart';
+import 'package:acela/src/widgets/confirmation_dialog.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -64,6 +65,24 @@ class LocalEpisodeListView extends StatelessWidget {
           return Dismissible(
               key: Key(item.id.toString()),
               background: Center(child: Text("Delete")),
+              confirmDismiss: (direction) async {
+                if (isOffline) {
+                  bool delete = false;
+                  await showDialog(
+                    context: context,
+                    builder: (context) => ConfirmationDialog(
+                        title: "Delete",
+                        content:
+                            "Are you sure you want to delete this episode ",
+                        onConfirm: () {
+                          delete = true;
+                        }),
+                  ).whenComplete(() => null);
+                  return Future.value(delete);
+                } else {
+                  return Future.value(true);
+                }
+              },
               onDismissed: (direction) {
                 if (isOffline) {
                   controller.deleteOfflinePodcastEpisode(item);

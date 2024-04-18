@@ -13,7 +13,7 @@ class AddBeneSheet extends StatefulWidget {
     required this.onSave,
   }) : super(key: key);
   final List<BeneficiariesJson> benes;
-  final Function onSave;
+  final Function(List<BeneficiariesJson> newBenes) onSave;
 
   @override
   State<AddBeneSheet> createState() => _AddBeneSheetState();
