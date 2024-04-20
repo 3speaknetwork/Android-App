@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:developer';
+
 import 'package:acela/src/models/podcast/podcast_episode_chapters.dart';
 import 'package:acela/src/models/podcast/podcast_episodes.dart';
 import 'package:acela/src/screens/podcast/controller/podcast_chapters_controller.dart';
 import 'package:acela/src/screens/podcast/controller/podcast_controller.dart';
+import 'package:acela/src/screens/podcast/widgets/audio_player/action_tools.dart';
+import 'package:acela/src/screens/podcast/widgets/audio_player/audio_player_core_controls.dart';
 import 'package:acela/src/screens/podcast/widgets/favourite.dart';
 import 'package:acela/src/screens/podcast/widgets/podcast_info_description.dart';
 import 'package:acela/src/screens/podcast/widgets/podcast_player_widgets/control_buttons.dart';
 import 'package:acela/src/screens/podcast/widgets/podcast_player_widgets/download_podcast_button.dart';
 import 'package:acela/src/screens/podcast/widgets/podcast_player_widgets/podcast_player_slider.dart';
-import 'package:acela/src/screens/podcast/widgets/audio_player/action_tools.dart';
-import 'package:acela/src/screens/podcast/widgets/audio_player/audio_player_core_controls.dart';
 import 'package:acela/src/widgets/cached_image.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +42,7 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
   List<PodcastEpisodeChapter>? chapters;
   late String originalTitle;
   late String? originalImage;
+  late Timer timer;
 
   Stream<Duration> get _bufferedPositionStream => _audioHandler.playbackState
       .map((state) => state.bufferedPosition)
@@ -64,6 +66,10 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
     log(currentPodcastEpisode.enclosureUrl!);
     _setUpVideo();
     podcastController = context.read<PodcastController>();
+    timer = Timer.periodic(Duration(seconds: 1), (t) {
+      writeCurrentDurationLocal();
+    });
+    podcastController.isDurationContinuing = true;
     originalImage = currentPodcastEpisode.image;
     originalTitle = currentPodcastEpisode.title!;
     // TO-DO: Ram to handle chapters for offline player
@@ -88,13 +94,28 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
     }
   }
 
+  void writeCurrentDurationLocal() async {
+    int seconds = await _audioHandler.currentPosition();
+    if (seconds > 0) {
+      context.read<PodcastController>().writeDurationOfEpisode(
+          currentPodcastEpisode.id!,
+          currentPodcastEpisode.enclosureUrl!,
+          seconds);
+    }
+  }
+
   void _onEpisodeChange(data) {
     QueueState queueState = data as QueueState;
     if (currentPodcastIndex != queueState.queueIndex) {
       setState(() {
         currentPodcastIndex = queueState.queueIndex ?? 0;
         currentPodcastEpisode = widget.podcastEpisodes[currentPodcastIndex];
+        podcastController.isDurationContinuing = true;
         _setUpVideo();
+        timer.cancel();
+        timer = Timer.periodic(Duration(seconds: 1), (t) {
+          writeCurrentDurationLocal();
+        });
         // if (currentPodcastEpisode.enclosureUrl != null && currentPodcastEpisode.enclosureUrl!.startsWith("http")) {
         chapterController = PodcastChapterController(
             chapterUrl: currentPodcastEpisode.chaptersUrl,
@@ -110,6 +131,7 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
   @override
   void dispose() {
     queueSubscription.cancel();
+    timer.cancel();
     super.dispose();
   }
 
@@ -186,6 +208,7 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
                   ),
                   userToolbar(),
                   PodcastPlayerSlider(
+                      episode: currentPodcastEpisode,
                       chapterController: chapterController,
                       audioPlayerHandler: _audioHandler,
                       positionDataStream: _positionDataStream,
