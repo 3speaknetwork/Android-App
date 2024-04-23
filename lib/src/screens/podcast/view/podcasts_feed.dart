@@ -30,6 +30,11 @@ class _PodcastFeedScreenState extends State<PodcastFeedScreen> {
   @override
   void initState() {
     super.initState();
+    if (!GetAudioPlayer().audioHandler.isInitiated) {
+      GetAudioPlayer().audioHandler.isInitiated = true;
+      GetAudioPlayer().audioHandler.play();
+    }
+
     future = loadPodCastEpisode();
   }
 

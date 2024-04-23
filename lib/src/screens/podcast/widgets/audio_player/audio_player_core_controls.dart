@@ -64,6 +64,8 @@ abstract class AudioPlayerHandler implements AudioHandler {
 
   bool isVideo = false;
 
+   bool isInitiated = false;
+
   bool shouldPlayVideo();
 }
 
@@ -87,6 +89,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
   final BehaviorSubject<double> speed = BehaviorSubject.seeded(1.0);
   final _mediaItemExpando = Expando<MediaItem>();
   bool isVideo = false;
+  bool isInitiated = false;
 
   VideoPlayerController? videoPlayerController;
   ValueNotifier<double?> aspectRatioNotifier = ValueNotifier(null);
@@ -239,7 +242,7 @@ class AudioPlayerHandlerImpl extends BaseAudioHandler
         .pipe(queue);
     // Load the playlist.
     _playlist.addAll(queue.value.map(_itemToSource).toList());
-    await _player.setAudioSource(_playlist);
+    await _player.setAudioSource(_playlist, preload: false);
   }
 
   AudioSource _itemToSource(MediaItem mediaItem) {
