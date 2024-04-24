@@ -109,7 +109,9 @@ class _MyAppState extends State<MyApp> {
           lazy: false,
           create: (context) => PodcastController(),
         ),
-        ChangeNotifierProvider(create: (context) => VideoSettingProvider()),
+        ChangeNotifierProvider(
+          lazy: false,
+          create: (context) => VideoSettingProvider()),
         ChangeNotifierProvider(
           lazy: false,
           create: (context) => SettingsProvider(),
