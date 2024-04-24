@@ -46,6 +46,7 @@ class _StoryPlayerState extends State<StoryPlayer> {
   late BetterPlayerController _betterPlayerController;
   HivePostInfoPostResultBody? postInfo;
   bool controlsVisible = false;
+  late final VideoSettingProvider videoSettingProvider;
 
   var aspectRatio = 0.0; // 0.5625
   double? height;
@@ -62,6 +63,7 @@ class _StoryPlayerState extends State<StoryPlayer> {
 
   @override
   void initState() {
+    videoSettingProvider = context.read<VideoSettingProvider>();
     super.initState();
     updateRatio();
     loadHiveInfo();
@@ -148,7 +150,6 @@ class _StoryPlayerState extends State<StoryPlayer> {
       _betterPlayerController = BetterPlayerController(config);
       _betterPlayerController.setupDataSource(dataSource);
     });
-    final videoSettingProvider = context.read<VideoSettingProvider>();
     if (videoSettingProvider.isMuted) {
       _betterPlayerController.setVolume(0.0);
     }
@@ -158,7 +159,6 @@ class _StoryPlayerState extends State<StoryPlayer> {
   }
 
   void _videoPlayerListener() {
-    final videoSettingProvider = context.read<VideoSettingProvider>();
     if (_betterPlayerController.videoPlayerController != null &&
         _betterPlayerController.videoPlayerController!.value.initialized) {
       if (_betterPlayerController.videoPlayerController!.value.volume == 0.0 &&
