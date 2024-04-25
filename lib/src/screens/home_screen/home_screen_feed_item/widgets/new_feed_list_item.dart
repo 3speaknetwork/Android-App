@@ -458,7 +458,7 @@ class _NewFeedListItemState extends State<NewFeedListItem>
     return Positioned(
       bottom: 10,
       right: 10,
-      child: HomeFeedVideoTimer(totalDuration: widget.duration!),
+      child: HomeFeedVideoTimer(totalDuration: widget.duration ?? 0),
     );
   }
 

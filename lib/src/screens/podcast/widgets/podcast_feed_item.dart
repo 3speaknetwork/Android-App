@@ -1,7 +1,7 @@
 import 'package:acela/src/models/podcast/trending_podcast_response.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/podcast/controller/podcast_controller.dart';
-import 'package:acela/src/screens/podcast/view/podcasts_feed.dart';
+import 'package:acela/src/screens/podcast/view/podcast_episodes/podcast_episodes_view.dart';
 import 'package:acela/src/screens/podcast/widgets/favourite.dart';
 import 'package:acela/src/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +43,7 @@ class _PodcastFeedItemWidgetState extends State<PodcastFeedItemWidget> {
       trailing: Visibility(
         visible: widget.showLikeButton,
         child: FavouriteWidget(
-          toastType: "Podcast",
+            toastType: "Podcast",
             isLiked:
                 podcastController.isLikedPodcastPresentLocally(widget.item),
             onAdd: () {
@@ -54,8 +54,9 @@ class _PodcastFeedItemWidgetState extends State<PodcastFeedItemWidget> {
             }),
       ),
       onTap: () {
-        var screen =
-            PodcastFeedScreen(appData: widget.appData, item: widget.item);
+        // var screen =
+        //     PodcastFeedScreen(appData: widget.appData, item: widget.item);
+        var screen = PodcastEpisodesView(feedItem: widget.item);
         var route = MaterialPageRoute(builder: (c) => screen);
         Navigator.of(context).push(route);
       },

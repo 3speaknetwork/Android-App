@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:ui';
 
 import 'package:acela/src/models/podcast/podcast_episode_chapters.dart';
 import 'package:acela/src/models/podcast/podcast_episodes.dart';
@@ -12,19 +13,26 @@ import 'package:acela/src/screens/podcast/widgets/podcast_info_description.dart'
 import 'package:acela/src/screens/podcast/widgets/podcast_player_widgets/control_buttons.dart';
 import 'package:acela/src/screens/podcast/widgets/podcast_player_widgets/download_podcast_button.dart';
 import 'package:acela/src/screens/podcast/widgets/podcast_player_widgets/podcast_player_slider.dart';
+import 'package:acela/src/utils/seconds_to_duration.dart';
 import 'package:acela/src/widgets/cached_image.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+import 'package:marquee/marquee.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
 class NewPodcastEpidosePlayer extends StatefulWidget {
-  const NewPodcastEpidosePlayer({Key? key, required this.podcastEpisodes})
+  const NewPodcastEpidosePlayer(
+      {Key? key,
+      required this.podcastEpisodes,
+      required this.currentPodcastIndex})
       : super(key: key);
 
   final List<PodcastEpisode> podcastEpisodes;
+  final int currentPodcastIndex;
 
   @override
   State<NewPodcastEpidosePlayer> createState() =>
@@ -62,6 +70,7 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
   @override
   void initState() {
     super.initState();
+    currentPodcastIndex = widget.currentPodcastIndex;
     currentPodcastEpisode = widget.podcastEpisodes[currentPodcastIndex];
     log(currentPodcastEpisode.enclosureUrl!);
     _setUpVideo();
@@ -137,101 +146,169 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final theme = Theme.of(context);
     return ChangeNotifierProvider.value(
       value: chapterController,
       child: Scaffold(
         body: SafeArea(
-          child: StreamBuilder<MediaItem?>(
-            stream: _audioHandler.mediaItem,
-            builder: (context, snapshot) {
-              final mediaItem = snapshot.data;
-              if (mediaItem == null) return const SizedBox();
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _audioHandler.shouldPlayVideo()
-                      ? SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.45,
-                          child: Center(
-                              child: ValueListenableBuilder<double?>(
-                            valueListenable: _audioHandler.aspectRatioNotifier,
-                            builder: (context, aspectRatio, child) {
-                              return AspectRatio(
-                                  aspectRatio: aspectRatio ?? 1.5,
-                                  child: child);
-                            },
-                            child: VideoPlayer(
-                                _audioHandler.videoPlayerController!),
-                          )),
-                        )
-                      : Container(
-                          constraints: BoxConstraints(
-                              maxHeight:
-                                  MediaQuery.of(context).size.height * 0.45),
-                          child: Selector<PodcastChapterController, String?>(
-                            selector: (_, myType) => myType.image,
-                            builder: (context, chapterImage, child) {
-                              return CachedImage(
-                                imageUrl: chapterImage ?? originalImage,
-                                imageHeight:
-                                    MediaQuery.of(context).size.height * 0.45,
-                              );
-                            },
-                          )),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 15.0, horizontal: 10),
-                    child: Column(
-                      children: [
-                        Selector<PodcastChapterController, String?>(
-                          selector: (_, myType) => myType.title,
-                          builder: (context, chapterTitle, child) {
-                            return Text(
-                              chapterTitle ?? originalTitle,
-                              textAlign: TextAlign.center,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.titleLarge,
-                            );
-                          },
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          currentPodcastEpisode.datePublishedPretty.toString(),
-                          style: TextStyle(fontSize: 12),
-                        ),
-                      ],
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (originalImage != null && originalImage!.isNotEmpty)
+                CachedImage(
+                  imageUrl: originalImage,
+                ),
+              if (originalImage != null && originalImage!.isNotEmpty)
+                Positioned.fill(
+                  child: ClipRRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                      child: const SizedBox.shrink(),
                     ),
                   ),
-                  userToolbar(),
-                  PodcastPlayerSlider(
-                      episode: currentPodcastEpisode,
-                      chapterController: chapterController,
-                      audioPlayerHandler: _audioHandler,
-                      positionDataStream: _positionDataStream,
-                      currentPodcastEpisodeDuration:
-                          currentPodcastEpisode.duration),
-                  ControlButtons(
-                    _audioHandler,
-                    chapterController: chapterController,
-                    podcastEpisode: currentPodcastEpisode,
-                    showSkipPreviousButtom: widget.podcastEpisodes.length > 1,
-                    positionStream: _positionDataStream.asBroadcastStream(),
-                  ),
-                ],
-              );
-            },
+                ),
+              Positioned.fill(
+                  child: Container(
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [
+                  theme.primaryColorDark,
+                  theme.primaryColorDark.withOpacity(0.3)
+                ])),
+              )),
+              StreamBuilder<MediaItem?>(
+                stream: _audioHandler.mediaItem,
+                builder: (context, snapshot) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Spacer(),
+                      _audioHandler.shouldPlayVideo()
+                          ? SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.45,
+                              child: Center(
+                                  child: ValueListenableBuilder<double?>(
+                                valueListenable:
+                                    _audioHandler.aspectRatioNotifier,
+                                builder: (context, aspectRatio, child) {
+                                  return AspectRatio(
+                                      aspectRatio: aspectRatio ?? 1.5,
+                                      child: child);
+                                },
+                                child: VideoPlayer(
+                                    _audioHandler.videoPlayerController!),
+                              )),
+                            )
+                          : Container(
+                              margin: EdgeInsets.symmetric(horizontal: 30),
+                              constraints: BoxConstraints(
+                                  maxHeight:
+                                      MediaQuery.of(context).size.height *
+                                          0.45),
+                              child:
+                                  Selector<PodcastChapterController, String?>(
+                                selector: (_, myType) => myType.image,
+                                builder: (context, chapterImage, child) {
+                                  return CachedImage(
+                                    imageUrl: chapterImage ?? originalImage,
+                                    imageHeight:
+                                        MediaQuery.of(context).size.height *
+                                            0.45,
+                                  );
+                                },
+                              )),
+                      Spacer(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 15.0, horizontal: 10),
+                        child: Column(
+                          children: [
+                            _title(screenWidth),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              currentPodcastEpisode.datePublishedPretty
+                                  .toString(),
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                      userToolbar(theme),
+                      PodcastPlayerSlider(
+                          episode: currentPodcastEpisode,
+                          chapterController: chapterController,
+                          audioPlayerHandler: _audioHandler,
+                          positionDataStream: _positionDataStream,
+                          currentPodcastEpisodeDuration:
+                              currentPodcastEpisode.duration),
+                      Gap(10),
+                      ControlButtons(
+                        _audioHandler,
+                        chapterController: chapterController,
+                        podcastEpisode: currentPodcastEpisode,
+                        showSkipPreviousButtom:
+                            widget.podcastEpisodes.length > 1,
+                        positionStream: _positionDataStream.asBroadcastStream(),
+                      ),
+                      Spacer(),
+                    ],
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget userToolbar() {
-    Color iconColor = Colors.lightBlue;
+  Selector<PodcastChapterController, String?> _title(double screenWidth) {
+    return Selector<PodcastChapterController, String?>(
+      selector: (_, myType) => myType.title,
+      builder: (context, chapterTitle, child) {
+        return SizedBox(
+          width: screenWidth * 0.85,
+          height: 25,
+          child: Utilities.textLines(
+                      chapterTitle ?? originalTitle,
+                      TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                      screenWidth * 0.85,
+                      3) >
+                  1
+              ? Marquee(
+                  text: chapterTitle ?? originalTitle,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  scrollAxis: Axis.horizontal,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  blankSpace: 50,
+                  velocity: 40.0,
+                  pauseAfterRound: const Duration(milliseconds: 1000),
+                  showFadingOnlyWhenScrolling: true,
+                  fadingEdgeStartFraction: 0.1,
+                  fadingEdgeEndFraction: 0.1,
+                  startPadding: 0.0,
+                  accelerationDuration: const Duration(seconds: 2),
+                  accelerationCurve: Curves.linear,
+                  decelerationDuration: const Duration(milliseconds: 500),
+                  decelerationCurve: Curves.easeOut,
+                )
+              : Text(
+                  chapterTitle ?? originalTitle,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
+        );
+      },
+    );
+  }
+
+  Widget userToolbar(ThemeData theme) {
+    Color iconColor = theme.primaryColorLight;
     List<Widget> tools = [
       IconButton(
         constraints: const BoxConstraints(),
@@ -254,19 +331,20 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
         episode: currentPodcastEpisode,
       ),
       FavouriteWidget(
-          toastType: "Podcast Episode",
-          disablePadding: true,
-          iconColor: iconColor,
-          isLiked: podcastController
-              .isLikedPodcastEpisodePresentLocally(currentPodcastEpisode),
-          onAdd: () {
-            podcastController
-                .storeLikedPodcastEpisodeLocally(currentPodcastEpisode);
-          },
-          onRemove: () {
-            podcastController
-                .storeLikedPodcastEpisodeLocally(currentPodcastEpisode);
-          }),
+        toastType: "Podcast Episode",
+        disablePadding: true,
+        iconColor: iconColor,
+        isLiked: podcastController
+            .isLikedPodcastEpisodePresentLocally(currentPodcastEpisode),
+        onAdd: () {
+          podcastController
+              .storeLikedPodcastEpisodeLocally(currentPodcastEpisode);
+        },
+        onRemove: () {
+          podcastController
+              .storeLikedPodcastEpisodeLocally(currentPodcastEpisode);
+        },
+      ),
       IconButton(
         onPressed: () {
           _onTapPodcastHistory();

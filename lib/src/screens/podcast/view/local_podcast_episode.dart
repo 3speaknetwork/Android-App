@@ -119,22 +119,13 @@ class LocalEpisodeListView extends StatelessWidget {
               duration: Duration(seconds: item.duration ?? 0),
             ),
           );
-          var screen = Scaffold(
-            appBar: AppBar(
-              title: ListTile(
-                leading: CachedImage(
-                  imageUrl: item.image ?? '',
-                  imageHeight: 40,
-                  imageWidth: 40,
-                ),
-                title: Text(item.title ?? 'No Title'),
-              ),
-            ),
-            body: SafeArea(
-              child: NewPodcastEpidosePlayer(
-                podcastEpisodes: [item],
-              ),
-            ),
+          if (!GetAudioPlayer().audioHandler.isInitiated) {
+            GetAudioPlayer().audioHandler.isInitiated = true;
+          }
+          GetAudioPlayer().audioHandler.play();
+          var screen = NewPodcastEpidosePlayer(
+            currentPodcastIndex: 0,
+            podcastEpisodes: [item],
           );
           var route = MaterialPageRoute(builder: (c) => screen);
           Navigator.of(context).push(route);

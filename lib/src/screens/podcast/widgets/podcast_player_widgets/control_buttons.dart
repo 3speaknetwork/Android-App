@@ -26,8 +26,9 @@ class ControlButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     bool isPaused = false;
-    Color iconColor = Colors.white;
+    Color iconColor = theme.primaryColorLight;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -60,7 +61,7 @@ class ControlButtons extends StatelessWidget {
             final positionData = snapshot.data ??
                 PositionData(Duration.zero, Duration.zero, Duration.zero);
             return PodcastPlayerInteractionIconButton(
-                size: 30,
+                size: 35,
                 horizontalPadding: 20,
                 onPressed: () => goBackTenSeconds(positionData),
                 icon: Icons.replay_10,
@@ -77,41 +78,40 @@ class ControlButtons extends StatelessWidget {
               audioHandler.play();
             if (processingState == AudioProcessingState.loading ||
                 processingState == AudioProcessingState.buffering) {
-              return SizedBox(
-                width: 40.0,
-                height: 40.0,
-                child: const CircularProgressIndicator(
+              return CircleAvatar(
+                radius: 32,
+                backgroundColor: theme.primaryColorLight,
+                child: CircularProgressIndicator(
                   strokeWidth: 2.5,
+                  color: theme.primaryColorDark,
                 ),
               );
             } else if (playing != true) {
               return GestureDetector(
                 onTap: audioHandler.play,
-                child: SizedBox(
-                  height: 40,
-                  width: 40,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.play_arrow,
-                      size: 30,
-                      color: Colors.black,
-                    ),
+                child: CircleAvatar(
+                  radius: 32,
+                  backgroundColor: theme.primaryColorLight,
+                  child: Icon(
+                    Icons.play_arrow,
+                    size: 35,
+                    color: Colors.black,
                   ),
                 ),
               );
             } else {
-                _continueFromDuration(context);
+              _continueFromDuration(context);
               return GestureDetector(
                 onTap: () {
                   isPaused = !isPaused;
                   audioHandler.pause();
                 },
                 child: CircleAvatar(
-                  backgroundColor: Colors.white,
+                  radius: 32,
+                  backgroundColor: theme.primaryColorLight,
                   child: Icon(
                     Icons.pause,
-                    size: 30,
+                    size: 35,
                     color: Colors.black,
                   ),
                 ),
@@ -125,7 +125,7 @@ class ControlButtons extends StatelessWidget {
             final positionData = snapshot.data ??
                 PositionData(Duration.zero, Duration.zero, Duration.zero);
             return PodcastPlayerInteractionIconButton(
-                size: 30,
+                size: 35,
                 horizontalPadding: 20,
                 onPressed: () => _goForwardTenSeconds(positionData),
                 icon: Icons.forward_10,
