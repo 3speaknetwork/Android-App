@@ -80,7 +80,7 @@ class PodcastPlayerSlider extends StatelessWidget {
     );
   }
 
-  String formatDuration(int seconds) {
+  static String formatDuration(int seconds) {
     Duration duration = Duration(seconds: seconds);
 
     if (duration.inHours < 1) {

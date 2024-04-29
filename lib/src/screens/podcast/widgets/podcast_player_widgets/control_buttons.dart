@@ -16,13 +16,15 @@ class ControlButtons extends StatelessWidget {
       required this.showSkipPreviousButtom,
       required this.podcastEpisode,
       required this.positionStream,
-      required this.chapterController})
+      required this.chapterController,
+      this.smallSize = false})
       : super(key: key);
 
   final bool showSkipPreviousButtom;
   final PodcastEpisode podcastEpisode;
   final Stream<PositionData> positionStream;
   final PodcastChapterController chapterController;
+  final bool smallSize;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,8 @@ class ControlButtons extends StatelessWidget {
     bool isPaused = false;
     Color iconColor = theme.primaryColorLight;
     return Row(
+      mainAxisAlignment:
+          smallSize ? MainAxisAlignment.center : MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Visibility(
@@ -55,19 +59,20 @@ class ControlButtons extends StatelessWidget {
             },
           ),
         ),
-        StreamBuilder<PositionData>(
-          stream: positionStream,
-          builder: (context, snapshot) {
-            final positionData = snapshot.data ??
-                PositionData(Duration.zero, Duration.zero, Duration.zero);
-            return PodcastPlayerInteractionIconButton(
-                size: 35,
-                horizontalPadding: 20,
-                onPressed: () => goBackTenSeconds(positionData),
-                icon: Icons.replay_10,
-                color: iconColor);
-          },
-        ),
+        if (!smallSize)
+          StreamBuilder<PositionData>(
+            stream: positionStream,
+            builder: (context, snapshot) {
+              final positionData = snapshot.data ??
+                  PositionData(Duration.zero, Duration.zero, Duration.zero);
+              return PodcastPlayerInteractionIconButton(
+                  size: 35,
+                  horizontalPadding: 20,
+                  onPressed: () => goBackTenSeconds(positionData),
+                  icon: Icons.replay_10,
+                  color: iconColor);
+            },
+          ),
         StreamBuilder<PlaybackState>(
           stream: audioHandler.playbackState,
           builder: (context, snapshot) {
@@ -78,26 +83,43 @@ class ControlButtons extends StatelessWidget {
               audioHandler.play();
             if (processingState == AudioProcessingState.loading ||
                 processingState == AudioProcessingState.buffering) {
-              return CircleAvatar(
-                radius: 32,
-                backgroundColor: theme.primaryColorLight,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: theme.primaryColorDark,
-                ),
-              );
+              return smallSize
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: SizedBox(
+                        height: 15,
+                        width: 15,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1,
+                          color: theme.primaryColorLight,
+                        ),
+                      ),
+                    )
+                  : CircleAvatar(
+                      radius: smallSize ? 20 : 32,
+                      backgroundColor: theme.primaryColorLight,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: theme.primaryColorDark,
+                      ),
+                    );
             } else if (playing != true) {
               return GestureDetector(
                 onTap: audioHandler.play,
-                child: CircleAvatar(
-                  radius: 32,
-                  backgroundColor: theme.primaryColorLight,
-                  child: Icon(
-                    Icons.play_arrow,
-                    size: 35,
-                    color: Colors.black,
-                  ),
-                ),
+                child: smallSize
+                    ? Icon(
+                        Icons.play_arrow,
+                        size: 20,
+                      )
+                    : CircleAvatar(
+                        radius: 32,
+                        backgroundColor: theme.primaryColorLight,
+                        child: Icon(
+                          Icons.play_arrow,
+                          size: 35,
+                          color: Colors.black,
+                        ),
+                      ),
               );
             } else {
               _continueFromDuration(context);
@@ -106,32 +128,38 @@ class ControlButtons extends StatelessWidget {
                   isPaused = !isPaused;
                   audioHandler.pause();
                 },
-                child: CircleAvatar(
-                  radius: 32,
-                  backgroundColor: theme.primaryColorLight,
-                  child: Icon(
-                    Icons.pause,
-                    size: 35,
-                    color: Colors.black,
-                  ),
-                ),
+                child: smallSize
+                    ? Icon(
+                        Icons.pause,
+                        size: 20,
+                      )
+                    : CircleAvatar(
+                        radius: 32,
+                        backgroundColor: theme.primaryColorLight,
+                        child: Icon(
+                          Icons.pause,
+                          size: 35,
+                          color: theme.primaryColorDark,
+                        ),
+                      ),
               );
             }
           },
         ),
-        StreamBuilder<PositionData>(
-          stream: positionStream,
-          builder: (context, snapshot) {
-            final positionData = snapshot.data ??
-                PositionData(Duration.zero, Duration.zero, Duration.zero);
-            return PodcastPlayerInteractionIconButton(
-                size: 35,
-                horizontalPadding: 20,
-                onPressed: () => _goForwardTenSeconds(positionData),
-                icon: Icons.forward_10,
-                color: iconColor);
-          },
-        ),
+        if (!smallSize)
+          StreamBuilder<PositionData>(
+            stream: positionStream,
+            builder: (context, snapshot) {
+              final positionData = snapshot.data ??
+                  PositionData(Duration.zero, Duration.zero, Duration.zero);
+              return PodcastPlayerInteractionIconButton(
+                  size: 35,
+                  horizontalPadding: 20,
+                  onPressed: () => _goForwardTenSeconds(positionData),
+                  icon: Icons.forward_10,
+                  color: iconColor);
+            },
+          ),
         Visibility(
           visible: showSkipPreviousButtom,
           child: StreamBuilder<QueueState>(

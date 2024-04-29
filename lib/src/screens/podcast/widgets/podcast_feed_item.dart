@@ -12,12 +12,14 @@ class PodcastFeedItemWidget extends StatefulWidget {
       {Key? key,
       required this.item,
       required this.appData,
-      this.showLikeButton = true})
+      this.showLikeButton = true,
+      this.playOnMiniPlayer = true})
       : super(key: key);
 
   final PodCastFeedItem item;
   final HiveUserData appData;
   final bool showLikeButton;
+  final bool playOnMiniPlayer;
 
   @override
   State<PodcastFeedItemWidget> createState() => _PodcastFeedItemWidgetState();
@@ -54,9 +56,10 @@ class _PodcastFeedItemWidgetState extends State<PodcastFeedItemWidget> {
             }),
       ),
       onTap: () {
-        // var screen =
-        //     PodcastFeedScreen(appData: widget.appData, item: widget.item);
-        var screen = PodcastEpisodesView(feedItem: widget.item);
+        var screen = PodcastEpisodesView(
+          feedItem: widget.item,
+          playOnMiniPlayer: widget.playOnMiniPlayer,
+        );
         var route = MaterialPageRoute(builder: (c) => screen);
         Navigator.of(context).push(route);
       },

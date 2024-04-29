@@ -99,6 +99,7 @@ dependencies:
   gap: ^3.0.1
   marquee: ^2.2.3
   flutter_spinkit: ^5.2.1
+  miniplayer: ^1.0.1
 
 dev_dependencies:
   flutter_test:

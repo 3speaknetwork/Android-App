@@ -192,6 +192,14 @@ class PodcastController extends ChangeNotifier {
       List json = box.read(key);
       List<PodcastEpisode> items =
           json.map((e) => PodcastEpisode.fromJson(e)).toList();
+      if (isOffline) {
+        items = items.map((e) {
+          String url = e.enclosureUrl ?? "";
+          url = Uri.parse(getOfflineUrl(e.enclosureUrl ?? "", e.id!)).path;
+          e.enclosureUrl = '$url';
+          return e;
+        }).toList();
+      }
       return items;
     } else {
       return [];
