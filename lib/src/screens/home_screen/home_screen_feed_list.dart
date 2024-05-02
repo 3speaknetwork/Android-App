@@ -149,44 +149,51 @@ class _HomeScreenFeedListState extends State<HomeScreenFeedList>
   }
 
   void loadFeed(bool reset) async {
-    log('loading');
-    if (isLoading) return;
-    if (!firstPageLoaded) {
-      setState(() {
-        isLoading = true;
-        firstPageLoaded = false;
-      });
-      var newItems = await loadWith(true);
-      setState(() {
-        if (newItems.length < pageLimit - 1) {
-          isPageEnded = true;
-        }
-        items = newItems;
-        if (items.isEmpty && widget.onEmptyDataCallback != null) {
-          widget.onEmptyDataCallback!();
-        }
-        isLoading = false;
-        firstPageLoaded = true;
-      });
-    } else {
-      setState(() {
-        isLoading = true;
-        if (reset) {
+    try {
+      log('loading');
+      if (isLoading) return;
+      if (!firstPageLoaded) {
+        setState(() {
+          isLoading = true;
           firstPageLoaded = false;
-          isPageEnded = false;
-        }
-      });
-      var newItems = await loadWith(reset);
+        });
+        var newItems = await loadWith(true);
+        setState(() {
+          if (newItems.length < pageLimit - 1) {
+            isPageEnded = true;
+          }
+          items = newItems;
+          if (items.isEmpty && widget.onEmptyDataCallback != null) {
+            widget.onEmptyDataCallback!();
+          }
+          isLoading = false;
+          firstPageLoaded = true;
+        });
+      } else {
+        setState(() {
+          isLoading = true;
+          if (reset) {
+            firstPageLoaded = false;
+            isPageEnded = false;
+          }
+        });
+        var newItems = await loadWith(reset);
+        setState(() {
+          if (newItems.length < pageLimit - 1) {
+            isPageEnded = true;
+          }
+          if (newItems.isNotEmpty) {
+            newItems.removeAt(0);
+          }
+          items = items + newItems;
+          isLoading = false;
+          firstPageLoaded = true;
+        });
+      }
+    } catch (e) {
       setState(() {
-        if (newItems.length < pageLimit - 1) {
-          isPageEnded = true;
-        }
-        if (newItems.isNotEmpty) {
-          newItems.removeAt(0);
-        }
-        items = items + newItems;
         isLoading = false;
-        firstPageLoaded = true;
+        hasFailed = true;
       });
     }
   }
@@ -222,7 +229,9 @@ class _HomeScreenFeedListState extends State<HomeScreenFeedList>
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(height: 5,),
+              const SizedBox(
+                height: 5,
+              ),
               ElevatedButton(
                 onPressed: () {
                   loadFeed(true);

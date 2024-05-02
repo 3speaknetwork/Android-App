@@ -904,6 +904,17 @@
         });
       }
 
+      async function getAccountInfo(accountName) {
+      const response = await dhiveClient.database.call("get_accounts", [[accountName]]);
+      replyToNative({
+        id: 'identifier',
+        type: "getAccountInfo",
+        data: response[0],
+        valid: true,
+        error: "",
+      });
+    }
+
       function replyToNative(result) {
         // window.webkit.messageHandlers.acela.postMessage(result);
         Android.postMessage(JSON.stringify(result));

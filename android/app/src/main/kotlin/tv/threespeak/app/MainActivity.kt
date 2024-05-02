@@ -146,7 +146,12 @@ class MainActivity : AudioServiceActivity() {
                 && hasAuthkey != null
             ) {
                 webView?.evaluateJavascript("commentOnContent('$user', '$author', '$permlink', '$comment', '$postingKey', '$hasKey', '$hasAuthkey');", null)
-            }
+            } else if (call.method == "getAccountInfo" && username != null ) {
+                    webView?.evaluateJavascript(
+                        "getAccountInfo('$username');",
+                        null
+                    )
+                }
         }
     }
 
@@ -232,6 +237,9 @@ class WebAppInterface(private val mContext: Context) {
             JSBridgeAction.DO_WE_HAVE_POSTING_AUTH.value -> {
                 main.result?.success(message)
             }
+            JSBridgeAction.GET_ACCOUNT_INFO.value -> {
+                main.result?.success(message)
+            }
         }
     }
 }
@@ -254,4 +262,5 @@ enum class JSBridgeAction(val value: String) {
     GET_ENCRYPTED_CHALLENGE("getEncryptedChallenge"),
     GET_DECRYPTED_CHALLENGE("getDecryptedChallenge"),
     DO_WE_HAVE_POSTING_AUTH("doWeHavePostingAuth"),
+    GET_ACCOUNT_INFO("getAccountInfo"),
 }

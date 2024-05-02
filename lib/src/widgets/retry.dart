@@ -14,6 +14,8 @@ class RetryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
           Text(error)
