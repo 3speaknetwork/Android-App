@@ -4,8 +4,9 @@ import 'dart:developer';
 
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/models/login/login_bridge_response.dart';
+import 'package:acela/src/models/user_account/action_response.dart';
+import 'package:acela/src/models/user_account/user_model.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
-import 'package:acela/src/screens/home_screen/new_home_screen.dart';
 import 'package:acela/src/screens/login/sign_up_screen.dart';
 import 'package:acela/src/utils/communicator.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
@@ -341,39 +342,56 @@ class _HiveAuthLoginScreenState extends State<HiveAuthLoginScreen>
       var bridgeResponse = LoginBridgeResponse.fromJsonString(response);
       if (bridgeResponse.valid) {
         debugPrint("Successful login");
-        String resolution = await storage.read(key: 'resolution') ?? '480p';
-        String rpc = await storage.read(key: 'rpc') ?? 'api.hive.blog';
-        String union = await storage.read(key: 'union') ??
-            GQLCommunicator.defaultGQLServer;
-        String? lang = await storage.read(key: 'lang');
-        await storage.write(key: 'username', value: usernameController.text);
-        await storage.write(key: 'postingKey', value: postingKey);
-        await storage.delete(key: 'hasId');
-        await storage.delete(key: 'hasExpiry');
-        await storage.delete(key: 'hasAuthKey');
-        await storage.delete(key: 'cookie');
-        var data = HiveUserData(
-          accessToken: null,
-          postingAuthority: null,
-          username: usernameController.text,
-          postingKey: postingKey,
-          keychainData: null,
-          cookie: null,
-          resolution: resolution,
-          rpc: rpc,
-          union: union,
-          loaded: true,
-          language: lang,
-        );
-        server.updateHiveUserData(data);
-        var cookie = await Communicator().getValidCookie(data);
-        log(cookie);
-        Navigator.of(context).pop();
-        showMessage(
-            'You have successfully logged in as - ${usernameController.text}');
-        setState(() {
-          isLoading = false;
-        });
+        ActionSingleDataResponse<UserModel> response =
+            await Communicator().getAccountInfo(usernameController.text);
+        if (response.isSuccess) {
+          if (response.data!.hasThreeSpeakPostingAuthority()) {
+            String resolution = await storage.read(key: 'resolution') ?? '480p';
+            String rpc = await storage.read(key: 'rpc') ?? 'api.hive.blog';
+            String union = await storage.read(key: 'union') ??
+                GQLCommunicator.defaultGQLServer;
+            String? lang = await storage.read(key: 'lang');
+            await storage.write(
+                key: 'username', value: usernameController.text);
+            await storage.write(key: 'postingKey', value: postingKey);
+            await storage.delete(key: 'hasId');
+            await storage.delete(key: 'hasExpiry');
+            await storage.delete(key: 'hasAuthKey');
+            await storage.delete(key: 'cookie');
+            var data = HiveUserData(
+              accessToken: null,
+              postingAuthority: null,
+              username: usernameController.text,
+              postingKey: postingKey,
+              keychainData: null,
+              cookie: null,
+              resolution: resolution,
+              rpc: rpc,
+              union: union,
+              loaded: true,
+              language: lang,
+            );
+            server.updateHiveUserData(data);
+            var cookie = await Communicator().getValidCookie(data);
+            log(cookie);
+            Navigator.of(context).pop();
+            showMessage(
+                'You have successfully logged in as - ${usernameController.text}');
+            setState(() {
+              isLoading = false;
+            });
+          } else {
+            showMessage("Three speak posting authority is required to log in");
+            setState(() {
+              isLoading = false;
+            });
+          }
+        } else {
+          showMessage("Server error");
+          setState(() {
+            isLoading = false;
+          });
+        }
       } else {
         // it is NO valid key
         showError('Not valid key.');
@@ -386,7 +404,8 @@ class _HiveAuthLoginScreenState extends State<HiveAuthLoginScreen>
         isLoading = false;
       });
       log(e.toString());
-      if(e == 'No 3Speak Account found with name - ${usernameController.text}'){
+      if (e ==
+          'No 3Speak Account found with name - ${usernameController.text}') {
         await storage.delete(key: 'username');
         await storage.delete(key: 'postingKey');
         await storage.delete(key: 'hasId');
@@ -397,7 +416,7 @@ class _HiveAuthLoginScreenState extends State<HiveAuthLoginScreen>
           username: null,
           postingKey: null,
           keychainData: null,
-          cookie: null,     
+          cookie: null,
           accessToken: null,
           postingAuthority: null,
           resolution: '480p',
@@ -434,34 +453,51 @@ class _HiveAuthLoginScreenState extends State<HiveAuthLoginScreen>
         showMessage(
             'Did not find token & expiry details from HiveAuth. Please go back & try again.');
       } else {
-        const storage = FlutterSecureStorage();
-        await storage.write(key: 'username', value: usernameController.text);
-        await storage.delete(key: 'postingKey');
-        await storage.delete(key: 'cookie');
-        await storage.write(key: 'hasId', value: tokenData[0]);
-        await storage.write(key: 'hasExpiry', value: tokenData[1]);
-        await storage.write(key: 'hasAuthKey', value: authKey);
-        var newData = HiveUserData(
-          username: usernameController.text,
-          postingKey: null,
-          keychainData: HiveKeychainData(
-            hasAuthKey: authKey,
-            hasExpiry: tokenData[1],
-            hasId: tokenData[0],
-          ),
-          cookie: null,
-          accessToken: null,
-          postingAuthority: null,
-          resolution: data.resolution,
-          rpc: data.rpc,
-          union: data.union,
-          loaded: true,
-          language: data.language,
-        );
-        server.updateHiveUserData(newData);
-        showMessage(
-            'You have successfully logged in with Hive Auth with user - ${usernameController.text}');
-        Navigator.of(context).pop();
+        ActionSingleDataResponse<UserModel> response =
+            await Communicator().getAccountInfo(usernameController.text);
+        if (response.isSuccess) {
+          if (response.data!.hasThreeSpeakPostingAuthority()) {
+            const storage = FlutterSecureStorage();
+            await storage.write(
+                key: 'username', value: usernameController.text);
+            await storage.delete(key: 'postingKey');
+            await storage.delete(key: 'cookie');
+            await storage.write(key: 'hasId', value: tokenData[0]);
+            await storage.write(key: 'hasExpiry', value: tokenData[1]);
+            await storage.write(key: 'hasAuthKey', value: authKey);
+            var newData = HiveUserData(
+              username: usernameController.text,
+              postingKey: null,
+              keychainData: HiveKeychainData(
+                hasAuthKey: authKey,
+                hasExpiry: tokenData[1],
+                hasId: tokenData[0],
+              ),
+              cookie: null,
+              accessToken: null,
+              postingAuthority: null,
+              resolution: data.resolution,
+              rpc: data.rpc,
+              union: data.union,
+              loaded: true,
+              language: data.language,
+            );
+            server.updateHiveUserData(newData);
+            showMessage(
+                'You have successfully logged in with Hive Auth with user - ${usernameController.text}');
+            Navigator.of(context).pop();
+          } else {
+            setState(() {
+              isLoading = false;
+            });
+            showMessage("Three speak posting authority is required to log in");
+          }
+        } else {
+          setState(() {
+            isLoading = false;
+          });
+          showMessage("Server error");
+        }
       }
     } else {
       showMessage(

@@ -11,6 +11,8 @@ import 'package:acela/src/models/home_screen_feed_models/home_feed.dart';
 import 'package:acela/src/models/login/memo_response.dart';
 import 'package:acela/src/models/my_account/video_ops.dart';
 import 'package:acela/src/models/podcast/upload/podcast_episode_upload_response.dart';
+import 'package:acela/src/models/user_account/action_response.dart';
+import 'package:acela/src/models/user_account/user_model.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/models/video_details_model/video_details.dart';
 import 'package:acela/src/models/video_upload/does_post_exists.dart';
@@ -815,6 +817,24 @@ class Communicator {
       }
     } catch (e) {
       return ActionResponse(data: '', valid: false, error: e.toString());
+    }
+  }
+
+  Future<ActionSingleDataResponse<UserModel>> getAccountInfo(
+      String accountName) async {
+    try {
+      final String jsonString = await MethodChannel('com.example.acela/auth')
+          .invokeMethod('getAccountInfo', {
+        'username': accountName,
+      });
+
+      ActionSingleDataResponse<UserModel> response =
+          ActionSingleDataResponse.fromJsonString(
+              jsonString, UserModel.fromJson);
+      return response;
+    } catch (e) {
+      return ActionSingleDataResponse(
+          status: ResponseStatus.failed, errorMessage: e.toString());
     }
   }
 }
