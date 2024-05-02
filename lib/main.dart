@@ -4,6 +4,7 @@ import 'package:acela/src/global_provider/image_resolution_provider.dart';
 import 'package:acela/src/global_provider/video_setting_provider.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/podcast/controller/podcast_controller.dart';
+import 'package:acela/src/screens/podcast/controller/podcast_player_controller.dart';
 import 'package:acela/src/screens/upload/video/controller/video_upload_controller.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
 import 'package:acela/src/utils/routes/app_router.dart';
@@ -109,10 +110,15 @@ class _MyAppState extends State<MyApp> {
           lazy: false,
           create: (context) => PodcastController(),
         ),
-        ChangeNotifierProvider(create: (context) => VideoSettingProvider()),
+        ChangeNotifierProvider(
+          lazy: false,
+          create: (context) => VideoSettingProvider()),
         ChangeNotifierProvider(
           lazy: false,
           create: (context) => SettingsProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => PodcastPlayerController(),
         ),
         ChangeNotifierProvider(create: (context) => VideoUploadController())
       ],

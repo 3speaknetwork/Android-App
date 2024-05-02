@@ -69,11 +69,18 @@ class _UserFavouritesState extends State<UserFavourites>
         FavouriteTagsBody(),
         FavouriteUsersBody(),
         LikedPodcasts(
+          playOnMiniPlayer: false,
           appData: appData,
           showAppBar: false,
         ),
-        LocalEpisodeListView(isOffline: false),
-        LocalEpisodeListView(isOffline: true),
+        LocalEpisodeListView(
+          isOffline: false,
+          playOnMiniPlayer: false,
+        ),
+        LocalEpisodeListView(
+          isOffline: true,
+          playOnMiniPlayer: false,
+        ),
       ]),
     );
   }
