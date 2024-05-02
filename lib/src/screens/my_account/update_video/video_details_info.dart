@@ -112,6 +112,7 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
     beneficiaries = widget.item.benes;
     tagsController.text =
         widget.item.tags.isEmpty ? "threespeak,mobile" : widget.item.tags;
+    tags = widget.item.tags.isEmpty ? "threespeak,mobile" : widget.item.tags;
     socket = WebSocketChannel.connect(
       Uri.parse(Communicator.hiveAuthServer),
     );
