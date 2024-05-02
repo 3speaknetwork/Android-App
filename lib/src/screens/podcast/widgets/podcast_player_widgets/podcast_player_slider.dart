@@ -5,8 +5,8 @@ import 'package:acela/src/screens/podcast/controller/podcast_chapters_controller
 import 'package:acela/src/screens/podcast/controller/podcast_controller.dart';
 import 'package:acela/src/screens/podcast/widgets/audio_player/action_tools.dart';
 import 'package:acela/src/screens/podcast/widgets/audio_player/audio_player_core_controls.dart';
-import 'package:acela/src/utils/seconds_to_duration.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 class PodcastPlayerSlider extends StatelessWidget {
@@ -28,7 +28,7 @@ class PodcastPlayerSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 15, right: 15, bottom: 5),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: StreamBuilder<PositionData>(
         stream: positionDataStream,
         builder: (context, snapshot) {
@@ -37,30 +37,57 @@ class PodcastPlayerSlider extends StatelessWidget {
           // writeCurrentDurationLocal(context, positionData.position.inSeconds);
           var duration = currentPodcastEpisodeDuration?.toDouble() ?? 0.0;
           var pending = duration - positionData.position.inSeconds;
-          var pendingText = "${Utilities.formatTime(pending.toInt())}";
-          var leadingText =
-              "${Utilities.formatTime(positionData.position.inSeconds)}";
+          var pendingText = formatDuration(pending.toInt());
+          var leadingText = formatDuration(positionData.position.inSeconds);
           chapterController.setDurationData(positionData);
           chapterController.syncChapters();
-          return Row(
+          return Column(
             children: [
-              Text(leadingText),
-              Expanded(
-                child: SeekBar(
-                  duration: positionData.duration,
-                  position: positionData.position,
-                  onChanged: _onSlideChange,
-                  onChangeEnd: (newPosition) {
-                    audioPlayerHandler.seek(newPosition);
-                  },
-                ),
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  SeekBar(
+                    duration: positionData.duration,
+                    position: positionData.position,
+                    onChanged: _onSlideChange,
+                    onChangeEnd: (newPosition) {
+                      audioPlayerHandler.seek(newPosition);
+                    },
+                  ),
+                  Positioned(
+                      bottom: -8,
+                      left: 0,
+                      right: 0,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 22.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              leadingText,
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            Text(pendingText, style: TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                      ))
+                ],
               ),
-              Text(pendingText),
             ],
           );
         },
       ),
     );
+  }
+
+  static String formatDuration(int seconds) {
+    Duration duration = Duration(seconds: seconds);
+
+    if (duration.inHours < 1) {
+      return '${(duration.inMinutes % 60).toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
+    } else {
+      return '${duration.inHours}:${(duration.inMinutes % 60).toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
+    }
   }
 
   void writeCurrentDurationLocal(BuildContext context, int seconds) {

@@ -8,6 +8,7 @@ class CachedImage extends StatelessWidget {
       this.imageHeight,
       this.imageWidth,
       this.loadingIndicatorSize,
+      this.borderRadius,
       this.fit})
       : super(key: key);
 
@@ -16,13 +17,16 @@ class CachedImage extends StatelessWidget {
   final double? imageWidth;
   final double? loadingIndicatorSize;
   final BoxFit? fit;
+  final double? borderRadius;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Theme.of(context).primaryColorLight == Colors.black
-          ? Colors.grey.shade400
-          : Colors.grey.shade900,
+      decoration: BoxDecoration(
+          color: Theme.of(context).primaryColorLight == Colors.black
+              ? Colors.grey.shade400
+              : Colors.grey.shade900,
+          borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 0))),
       child: CachedNetworkImage(
         imageUrl: imageUrl ?? '',
         height: imageHeight,

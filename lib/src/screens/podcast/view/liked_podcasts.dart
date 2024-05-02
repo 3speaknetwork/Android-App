@@ -10,11 +10,13 @@ class LikedPodcasts extends StatefulWidget {
       {Key? key,
       required this.appData,
       this.showAppBar = true,
+      this.playOnMiniPlayer = true,
       this.filterOnlyRssPodcasts = false})
       : super(key: key);
 
   final HiveUserData appData;
   final bool showAppBar;
+  final bool playOnMiniPlayer;
   final bool filterOnlyRssPodcasts;
 
   @override
@@ -34,24 +36,28 @@ class _LikedPodcastsState extends State<LikedPodcasts> {
             )
           : null,
       body: items.isEmpty
-          ? Center(child: Text(widget.filterOnlyRssPodcasts ? "" : "Liked Podcasts is Empty"))
+          ? Center(
+              child: Text(widget.filterOnlyRssPodcasts
+                  ? ""
+                  : "Liked Podcasts is Empty"))
           : ListView.separated(
               itemBuilder: (c, i) {
                 return Dismissible(
-                        key: Key(items[i].id!),
-                        background: Center(child: Text("Delete")),
-                        onDismissed: (direction) {
-                          context
-                              .read<PodcastController>()
-                              .storeLikedPodcastLocally(items[i]);
-                          showSnackBar("Podcast ${items[i].title} is removed");
-                        },
-                        child: PodcastFeedItemWidget(
-                          showLikeButton: false,
-                          appData: widget.appData,
-                          item: items[i],
-                        ),
-                      );
+                  key: Key(items[i].id!),
+                  background: Center(child: Text("Delete")),
+                  onDismissed: (direction) {
+                    context
+                        .read<PodcastController>()
+                        .storeLikedPodcastLocally(items[i]);
+                    showSnackBar("Podcast ${items[i].title} is removed");
+                  },
+                  child: PodcastFeedItemWidget(
+                    playOnMiniPlayer: widget.playOnMiniPlayer,
+                    showLikeButton: false,
+                    appData: widget.appData,
+                    item: items[i],
+                  ),
+                );
               },
               separatorBuilder: (c, i) => const Divider(height: 0),
               itemCount: items.length,

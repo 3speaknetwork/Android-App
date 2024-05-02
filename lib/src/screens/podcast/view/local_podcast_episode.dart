@@ -4,18 +4,17 @@ import 'dart:io';
 import 'package:acela/src/models/podcast/podcast_episodes.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/podcast/controller/podcast_controller.dart';
-import 'package:acela/src/screens/podcast/widgets/audio_player/new_pod_cast_epidose_player.dart';
-import 'package:acela/src/screens/podcast/widgets/audio_player/audio_player_core_controls.dart';
-import 'package:acela/src/widgets/cached_image.dart';
+import 'package:acela/src/screens/podcast/controller/podcast_player_controller.dart';
 import 'package:acela/src/widgets/confirmation_dialog.dart';
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class LocalPodcastEpisode extends StatelessWidget {
-  const LocalPodcastEpisode({Key? key, required this.appData})
+  const LocalPodcastEpisode(
+      {Key? key, required this.appData, this.playOnMiniPlayer = true})
       : super(key: key);
   final HiveUserData appData;
+  final bool playOnMiniPlayer;
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +32,14 @@ class LocalPodcastEpisode extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            LocalEpisodeListView(isOffline: true),
-            LocalEpisodeListView(isOffline: false),
+            LocalEpisodeListView(
+              isOffline: true,
+              playOnMiniPlayer: playOnMiniPlayer,
+            ),
+            LocalEpisodeListView(
+              isOffline: false,
+              playOnMiniPlayer: playOnMiniPlayer,
+            ),
           ],
         ),
       ),
@@ -43,10 +48,12 @@ class LocalPodcastEpisode extends StatelessWidget {
 }
 
 class LocalEpisodeListView extends StatelessWidget {
-  const LocalEpisodeListView({Key? key, required this.isOffline})
+  const LocalEpisodeListView(
+      {Key? key, required this.isOffline, required this.playOnMiniPlayer})
       : super(key: key);
 
   final bool isOffline;
+  final bool playOnMiniPlayer;
 
   @override
   Widget build(BuildContext context) {
@@ -91,53 +98,21 @@ class LocalEpisodeListView extends StatelessWidget {
                       forceRemove: true);
                 }
               },
-              child: podcastEpisodeListItem(item, context, controller));
+              child: podcastEpisodeListItem(items, context, controller, index));
         },
         separatorBuilder: (c, i) => const Divider(height: 0),
         itemCount: items.length,
       );
   }
 
-  ListTile podcastEpisodeListItem(
-      PodcastEpisode item, BuildContext context, PodcastController controller) {
-    String url = item.enclosureUrl ?? "";
-    if (isOffline) {
-      url =
-          Uri.parse(controller.getOfflineUrl(item.enclosureUrl ?? "", item.id!))
-              .path;
-      item.enclosureUrl = '$url';
-    }
+  ListTile podcastEpisodeListItem(List<PodcastEpisode> items,
+      BuildContext context, PodcastController controller, int index) {
+    PodcastEpisode item = items[index];
     return ListTile(
         onTap: () {
-          GetAudioPlayer audioPlayer = GetAudioPlayer();
-          audioPlayer.audioHandler.updateQueue([]);
-          audioPlayer.audioHandler.addQueueItem(
-            MediaItem(
-              id: url,
-              title: item.title ?? "",
-              artUri: Uri.parse(item.image ?? ""),
-              duration: Duration(seconds: item.duration ?? 0),
-            ),
-          );
-          var screen = Scaffold(
-            appBar: AppBar(
-              title: ListTile(
-                leading: CachedImage(
-                  imageUrl: item.image ?? '',
-                  imageHeight: 40,
-                  imageWidth: 40,
-                ),
-                title: Text(item.title ?? 'No Title'),
-              ),
-            ),
-            body: SafeArea(
-              child: NewPodcastEpidosePlayer(
-                podcastEpisodes: [item],
-              ),
-            ),
-          );
-          var route = MaterialPageRoute(builder: (c) => screen);
-          Navigator.of(context).push(route);
+          final playerController = context.read<PodcastPlayerController>();
+          playerController.onTapEpisode(
+              index, context, items, playOnMiniPlayer);
         },
         leading: Container(
           height: 30,
