@@ -70,7 +70,9 @@
 
       async function validateHiveKey(accountName, postingKey) {
         try {
-          const accounts = await dhiveClient.database.getAccounts([accountName]);
+          const accounts = await dhiveClient.database.getAccounts([
+            accountName,
+          ]);
           const pubWif = accounts[0].posting.key_auths[0][0];
           console.log("PubWif: ", pubWif);
           const pKey = dhive.PrivateKey.fromString(postingKey)
@@ -717,6 +719,19 @@
             error: e.message,
           });
         }
+      }
+
+      async function getAccountInfo(accountName) {
+        const response = await dhiveClient.database.call("get_accounts", [
+          [accountName],
+        ]);
+        replyToNative({
+          id: "identifier",
+          type: "getAccountInfo",
+          data: response[0],
+          valid: true,
+          error: "",
+        });
       }
 
       function getEncryptedChallenge(username, authKey) {
