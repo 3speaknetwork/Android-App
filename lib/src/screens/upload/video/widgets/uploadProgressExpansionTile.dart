@@ -151,7 +151,7 @@ class _UploadProgressExpandableTileState
         visible: showWidgets,
         child: ListTile(
             leading: moveWidgetToEncodingQueueProgressWidget(!isExpanded),
-            title: const Text('Pinning to IPFS'),
+            title: const Text('Preparing for Encoding'),
             trailing: moveWidgetToEncodingQueueProgressWidget(isExpanded)),
       ),
       Visibility(
