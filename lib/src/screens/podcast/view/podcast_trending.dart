@@ -98,8 +98,13 @@ class _PodCastTrendingScreenState extends State<PodCastTrendingScreen>
       onWillPop: () async {
         final NavigatorState navigatorState =
             miniPlayerNavigatorkey.currentState!;
-        if (!navigatorState.canPop()) return true;
+    
+        if (!navigatorState.canPop()) {
+          Navigator.of(context).pop();
+          return true;
+        }
         navigatorState.pop();
+    
         return false;
       },
       child: Stack(
@@ -137,7 +142,8 @@ class _PodCastTrendingScreenState extends State<PodCastTrendingScreen>
                       IconButton(
                         onPressed: () {
                           var screen = PodCastSearch(appData: widget.appData);
-                          var route = MaterialPageRoute(builder: (c) => screen);
+                          var route =
+                              MaterialPageRoute(builder: (c) => screen);
                           Navigator.of(context).push(route);
                         },
                         icon: Icon(Icons.search),
@@ -152,7 +158,8 @@ class _PodCastTrendingScreenState extends State<PodCastTrendingScreen>
                           controller: _tabController,
                           children: [
                             PodcastFeedsBody(
-                                future: trendingFeeds, appData: widget.appData),
+                                future: trendingFeeds,
+                                appData: widget.appData),
                             _rssPodcastTab(context),
                             PodcastCategoriesBody(
                               appData: widget.appData,
@@ -180,25 +187,27 @@ class _PodCastTrendingScreenState extends State<PodCastTrendingScreen>
               ),
             ),
           ),
-          Consumer<PodcastPlayerController>(
-            builder: (context, value, child) {
-              return Miniplayer(
-                controller: value.miniplayerController,
-                minHeight: value.episodes.isEmpty ? 0 : 65,
-                maxHeight: MediaQuery.of(context).size.height,
-                builder: (height, percentage) {
-                  if (value.episodes.isEmpty) {
-                    return SizedBox.shrink();
-                  } else {
-                    return NewPodcastEpidosePlayer(
-                        key: ValueKey(value.episodes.first.id),
-                        dragValue: percentage,
-                        podcastEpisodes: value.episodes,
-                        currentPodcastIndex: value.index);
-                  }
-                },
-              );
-            },
+          SafeArea(
+            child: Consumer<PodcastPlayerController>(
+              builder: (context, value, child) {
+                return Miniplayer(
+                  controller: value.miniplayerController,
+                  minHeight: value.episodes.isEmpty ? 0 : 65,
+                  maxHeight: MediaQuery.of(context).size.height,
+                  builder: (height, percentage) {
+                    if (value.episodes.isEmpty) {
+                      return SizedBox.shrink();
+                    } else {
+                      return NewPodcastEpidosePlayer(
+                          key: ValueKey(value.episodes.first.id),
+                          dragValue: percentage,
+                          podcastEpisodes: value.episodes,
+                          currentPodcastIndex: value.index);
+                    }
+                  },
+                );
+              },
+            ),
           )
         ],
       ),
