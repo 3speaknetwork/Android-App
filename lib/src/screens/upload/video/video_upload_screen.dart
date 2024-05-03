@@ -1,9 +1,7 @@
 import 'dart:io';
-
 import 'package:acela/src/models/user_account/action_response.dart';
 import 'package:acela/src/models/user_account/user_model.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
-import 'package:acela/src/screens/my_account/my_account_screen.dart';
 import 'package:acela/src/screens/upload/video/controller/video_upload_controller.dart';
 import 'package:acela/src/screens/upload/video/widgets/beneficaries_tile.dart';
 import 'package:acela/src/screens/upload/video/widgets/community_picker.dart';
@@ -13,6 +11,7 @@ import 'package:acela/src/screens/upload/video/widgets/thumbnail_picker.dart';
 import 'package:acela/src/screens/upload/video/widgets/uploadProgressExpansionTile.dart';
 import 'package:acela/src/screens/upload/video/widgets/upload_textfield.dart';
 import 'package:acela/src/screens/upload/video/widgets/video_upload_divider.dart';
+import 'package:acela/src/screens/upload/video/widgets/video_upload_success_dialog.dart';
 import 'package:acela/src/screens/upload/video/widgets/work_type_widget.dart';
 import 'package:acela/src/utils/communicator.dart';
 import 'package:acela/src/utils/enum.dart';
@@ -271,32 +270,16 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
   }
 
   void showSuccessDialog({required VoidCallback resetControllerCallback}) {
-    Widget okButton = TextButton(
-      child: Text("Okay"),
-      onPressed: () {
-        Navigator.of(context).pop();
-        Navigator.of(context).pop();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MyAccountScreen(
-              data: widget.appData,
-              initialTabIndex: 2,
-            ),
-          ),
-        );
-      },
-    );
-    AlertDialog alert = AlertDialog(
-      title: Text("🎉 Upload Complete 🎉"),
-      content: Text(
-          "✅ Your Video is in-process\n\n✅ Video has be added to encoding queue\n\n👀 Check status from My Account."),
-      actions: [
-        okButton,
-      ],
-    );
-    showDialog(context: context, builder: (c) => alert)
-        .whenComplete(() => resetControllerCallback());
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (c) => VideoUploadSucessDialog(
+
+              
+            )).whenComplete(() {
+      resetControllerCallback();
+      Navigator.pop(context);
+    });
   }
 
   Widget saveButton(VideoUploadController controller) {
