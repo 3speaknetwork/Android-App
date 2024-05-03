@@ -30,6 +30,7 @@ class AcelaWebViewController: UIViewController {
 	var getEncryptedChallengeHandler: ((String) -> Void)? = nil
 	var getDecryptedChallengeHandler: ((String) -> Void)? = nil
 	var doWeHavePostingAuthHandler: ((String) -> Void)? = nil
+	var getAccountInfoHandler: ((String) -> Void)? = nil
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -165,6 +166,13 @@ class AcelaWebViewController: UIViewController {
 		doWeHavePostingAuthHandler = handler
 		OperationQueue.main.addOperation {
 			self.webView?.evaluateJavaScript("doWeHavePostingAuth('\(username)');")
+		}
+	}
+
+	func getAccountInfo(username: String, handler: @escaping (String) -> Void) {
+		getAccountInfoHandler = handler
+		OperationQueue.main.addOperation {
+			self.webView?.evaluateJavaScript("getAccountInfo('\(username)');")
 		}
 	}
 
@@ -319,6 +327,11 @@ extension AcelaWebViewController: WKScriptMessageHandler {
 					let response = ValidateHiveKeyResponse.jsonStringFrom(dict: dict)
 				else { return }
 				getDecryptedChallengeHandler?(response)
+			case "getAccountInfo":
+				guard
+					let response = ValidateHiveKeyResponse.jsonStringFrom(dict: dict)
+				else { return }
+				getAccountInfoHandler?(response)
 			case "doWeHavePostingAuth":
 				guard
 					let response = ValidateHiveKeyResponse.jsonStringFrom(dict: dict)

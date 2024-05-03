@@ -231,6 +231,18 @@ class AuthBridge {
 					acela.commentOnContent(user: user, author: author, permlink: permlink, comment: comment, postingKey: postingKey, hasKey: hasKey, hasAuthKey: hasAuthKey)  { response in
 						result(response)
 					}
+				case "getAccountInfo":
+					guard
+						let arguments = call.arguments as? NSDictionary,
+						let username = arguments["username"] as? String,
+						let acela = acela
+					else {
+						result(FlutterMethodNotImplemented)
+						return
+					}
+					acela.getAccountInfo(username: username)  { response in
+						result(response)
+					}
 				default: debugPrint("do nothing")
 			}
 		})
