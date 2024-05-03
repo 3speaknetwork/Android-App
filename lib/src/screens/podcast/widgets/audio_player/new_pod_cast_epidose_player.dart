@@ -82,7 +82,7 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
       writeCurrentDurationLocal();
     });
     podcastController.isDurationContinuing = true;
-    originalImage = currentPodcastEpisode.image;
+    originalImage = currentPodcastEpisode.networkImage;
     originalTitle = currentPodcastEpisode.title!;
     // TO-DO: Ram to handle chapters for offline player
     // if (currentPodcastEpisode.enclosureUrl != null && currentPodcastEpisode.enclosureUrl!.startsWith("http")) {
@@ -135,7 +135,7 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
             audioPlayerHandler: _audioHandler);
         // }
         originalTitle = currentPodcastEpisode.title!;
-        originalImage = currentPodcastEpisode.image;
+        originalImage = currentPodcastEpisode.networkImage;
       });
     }
   }
@@ -154,195 +154,197 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
     return ChangeNotifierProvider.value(
       value: chapterController,
       child: Scaffold(
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (originalImage != null && originalImage!.isNotEmpty)
-              CachedImage(
-                imageUrl: originalImage,
-              ),
-            if (originalImage != null && originalImage!.isNotEmpty)
+        body: SafeArea(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (originalImage != null && originalImage!.isNotEmpty)
+                CachedImage(
+                  imageUrl: originalImage,
+                ),
+              if (originalImage != null && originalImage!.isNotEmpty)
+                Positioned.fill(
+                  child: ClipRRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+                      child: const SizedBox.shrink(),
+                    ),
+                  ),
+                ),
               Positioned.fill(
-                child: ClipRRect(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-                    child: const SizedBox.shrink(),
-                  ),
-                ),
-              ),
-            Positioned.fill(
-                child: Container(
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [
-                theme.primaryColorDark,
-                theme.primaryColorDark.withOpacity(0.3)
-              ])),
-            )),
-            // if (widget.dragValue < 0.5)
-            Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Visibility(
-                  maintainAnimation: true,
-                  maintainSize: true,
-                  maintainState: true,
-                  visible: widget.dragValue < 0.5,
-                  child: PodcastProgressBar(
-                      duration: currentPodcastEpisode.duration,
-                      positionStream: _positionDataStream),
-                )),
-            StreamBuilder<MediaItem?>(
-              stream: _audioHandler.mediaItem,
-              builder: (context, snapshot) {
-                return SingleChildScrollView(
-                  physics: NeverScrollableScrollPhysics(),
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Spacer(),
-                        _audioHandler.shouldPlayVideo()
-                            ? SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.45,
-                                child: Center(
-                                    child: ValueListenableBuilder<double?>(
-                                  valueListenable:
-                                      _audioHandler.aspectRatioNotifier,
-                                  builder: (context, aspectRatio, child) {
-                                    return AspectRatio(
-                                        aspectRatio: aspectRatio ?? 1.5,
-                                        child: child);
-                                  },
-                                  child: VideoPlayer(
-                                      _audioHandler.videoPlayerController!),
-                                )),
-                              )
-                            : Transform.translate(
-                                offset: Offset(
-                                  lerpDouble(-150, 0, widget.dragValue) ?? 0,
-                                  lerpDouble(-152.5, 0, widget.dragValue) ?? 0,
-                                ),
-                                child: Container(
-                                    height: lerpDouble(
-                                            50,
-                                            MediaQuery.of(context).size.height *
+                  child: Container(
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [
+                  theme.primaryColorDark,
+                  theme.primaryColorDark.withOpacity(0.3)
+                ])),
+              )),
+              // if (widget.dragValue < 0.5)
+              Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Visibility(
+                    maintainAnimation: true,
+                    maintainSize: true,
+                    maintainState: true,
+                    visible: widget.dragValue < 0.5,
+                    child: PodcastProgressBar(
+                        duration: currentPodcastEpisode.duration,
+                        positionStream: _positionDataStream),
+                  )),
+              StreamBuilder<MediaItem?>(
+                stream: _audioHandler.mediaItem,
+                builder: (context, snapshot) {
+                  return SingleChildScrollView(
+                    physics: NeverScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Spacer(),
+                          _audioHandler.shouldPlayVideo()
+                              ? SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.45,
+                                  child: Center(
+                                      child: ValueListenableBuilder<double?>(
+                                    valueListenable:
+                                        _audioHandler.aspectRatioNotifier,
+                                    builder: (context, aspectRatio, child) {
+                                      return AspectRatio(
+                                          aspectRatio: aspectRatio ?? 1.5,
+                                          child: child);
+                                    },
+                                    child: VideoPlayer(
+                                        _audioHandler.videoPlayerController!),
+                                  )),
+                                )
+                              : Transform.translate(
+                                  offset: Offset(
+                                    lerpDouble(-150, 0, widget.dragValue) ?? 0,
+                                    lerpDouble(-152.5, 0, widget.dragValue) ?? 0,
+                                  ),
+                                  child: Container(
+                                      height: lerpDouble(
+                                              50,
+                                              MediaQuery.of(context).size.height *
+                                                  0.45,
+                                              widget.dragValue) ??
+                                          0,
+                                      width: lerpDouble(
+                                              50,
+                                              MediaQuery.of(context).size.width *
+                                                  0.85,
+                                              widget.dragValue) ??
+                                          0,
+                                      margin:
+                                          EdgeInsets.symmetric(horizontal: 30),
+                                      // constraints: BoxConstraints(
+                                      //     maxHeight: MediaQuery.of(context)
+                                      //             .size
+                                      //             .height *
+                                      //         0.45),
+                                      child: Selector<PodcastChapterController,
+                                          String?>(
+                                        selector: (_, myType) => myType.image,
+                                        builder: (context, chapterImage, child) {
+                                          return CachedImage(
+                                            imageUrl:
+                                                chapterImage ?? originalImage,
+                                            imageHeight: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
                                                 0.45,
-                                            widget.dragValue) ??
-                                        0,
-                                    width: lerpDouble(
-                                            50,
-                                            MediaQuery.of(context).size.width *
-                                                0.85,
-                                            widget.dragValue) ??
-                                        0,
-                                    margin:
-                                        EdgeInsets.symmetric(horizontal: 30),
-                                    // constraints: BoxConstraints(
-                                    //     maxHeight: MediaQuery.of(context)
-                                    //             .size
-                                    //             .height *
-                                    //         0.45),
-                                    child: Selector<PodcastChapterController,
-                                        String?>(
-                                      selector: (_, myType) => myType.image,
-                                      builder: (context, chapterImage, child) {
-                                        return CachedImage(
-                                          imageUrl:
-                                              chapterImage ?? originalImage,
-                                          imageHeight: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.45,
-                                        );
-                                      },
-                                    )),
-                              ),
-                        Spacer(),
-                        AnimatedOpacity(
-                          opacity: widget.dragValue == 1
-                              ? 1
-                              : widget.dragValue.clamp(0, 0.5),
-                          duration: Duration(milliseconds: 150),
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 15.0, horizontal: 10),
-                                child: Column(
-                                  children: [
-                                    _title(screenWidth * 0.85),
-                                    const SizedBox(
-                                      height: 5,
-                                    ),
-                                    Text(
-                                      currentPodcastEpisode.datePublishedPretty
-                                          .toString(),
-                                      style: TextStyle(fontSize: 12),
-                                    ),
-                                  ],
+                                          );
+                                        },
+                                      )),
                                 ),
-                              ),
-                              userToolbar(theme),
-                              _slider(),
-                              Gap(10),
-                              ControlButtons(
-                                _audioHandler,
-                                chapterController: chapterController,
-                                podcastEpisode: currentPodcastEpisode,
-                                showSkipPreviousButtom:
-                                    widget.podcastEpisodes.length > 1,
-                                positionStream:
-                                    _positionDataStream.asBroadcastStream(),
-                              ),
-                            ],
+                          Spacer(),
+                          AnimatedOpacity(
+                            opacity: widget.dragValue == 1
+                                ? 1
+                                : widget.dragValue.clamp(0, 0.5),
+                            duration: Duration(milliseconds: 150),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 15.0, horizontal: 10),
+                                  child: Column(
+                                    children: [
+                                      _title(screenWidth * 0.85),
+                                      const SizedBox(
+                                        height: 5,
+                                      ),
+                                      Text(
+                                        currentPodcastEpisode.datePublishedPretty
+                                            .toString(),
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                userToolbar(theme),
+                                _slider(),
+                                Gap(10),
+                                ControlButtons(
+                                  _audioHandler,
+                                  chapterController: chapterController,
+                                  podcastEpisode: currentPodcastEpisode,
+                                  showSkipPreviousButtom:
+                                      widget.podcastEpisodes.length > 1,
+                                  positionStream:
+                                      _positionDataStream.asBroadcastStream(),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Spacer(),
-                      ],
+                          Spacer(),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-            if (widget.dragValue < 0.5)
-              AnimatedPositioned(
-                top: lerpDouble(10, 0, widget.dragValue),
-                left: lerpDouble(80, 20, widget.dragValue),
-                right: 10,
-                duration: Duration(milliseconds: 100),
-                child: AnimatedOpacity(
-                  opacity: (lerpDouble(1, 6, widget.dragValue * (-0.5)) ?? 0)
-                      .clamp(0, 1),
+                  );
+                },
+              ),
+              if (widget.dragValue < 0.5)
+                AnimatedPositioned(
+                  top: lerpDouble(10, 0, widget.dragValue),
+                  left: lerpDouble(80, 20, widget.dragValue),
+                  right: 10,
                   duration: Duration(milliseconds: 100),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 0.0, right: 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Align(
-                            alignment: Alignment.centerLeft,
-                            child: _title(screenWidth * 0.75,
-                                height: 15, fontSize: 14)),
-                        ControlButtons(
-                          _audioHandler,
-                          smallSize: true,
-                          chapterController: chapterController,
-                          podcastEpisode: currentPodcastEpisode,
-                          showSkipPreviousButtom:
-                              widget.podcastEpisodes.length > 1,
-                          positionStream:
-                              _positionDataStream.asBroadcastStream(),
-                        ),
-                      ],
+                  child: AnimatedOpacity(
+                    opacity: (lerpDouble(1, 6, widget.dragValue * (-0.5)) ?? 0)
+                        .clamp(0, 1),
+                    duration: Duration(milliseconds: 100),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 0.0, right: 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Align(
+                              alignment: Alignment.centerLeft,
+                              child: _title(screenWidth * 0.75,
+                                  height: 15, fontSize: 14)),
+                          ControlButtons(
+                            _audioHandler,
+                            smallSize: true,
+                            chapterController: chapterController,
+                            podcastEpisode: currentPodcastEpisode,
+                            showSkipPreviousButtom:
+                                widget.podcastEpisodes.length > 1,
+                            positionStream:
+                                _positionDataStream.asBroadcastStream(),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

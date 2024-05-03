@@ -64,6 +64,7 @@ class PodcastEpisode {
   int? duration;
   int? episode;
   String? image;
+  String? feedImage;
   String? guid;
   String? chaptersUrl;
   bool isAudio;
@@ -79,6 +80,7 @@ class PodcastEpisode {
       this.duration,
       this.episode,
       this.image,
+      this.feedImage,
       this.guid,
       this.chaptersUrl,
       required this.isAudio});
@@ -87,6 +89,16 @@ class PodcastEpisode {
       PodcastEpisode.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
+
+  String? get networkImage {
+    if (image != null && image!.isNotEmpty) {
+      return image;
+    }
+    if (feedImage != null && feedImage!.isNotEmpty) {
+      return feedImage;
+    }
+    return null;
+  }
 
   factory PodcastEpisode.fromJson(Map<String, dynamic> json) => PodcastEpisode(
       id: json["id"].toString(),
@@ -101,6 +113,7 @@ class PodcastEpisode {
       duration: json["duration"],
       episode: json["episode"],
       image: json["image"],
+      feedImage : json["feedImage"],
       guid: json["guid"],
       chaptersUrl: json['chaptersUrl']);
 

@@ -27,18 +27,20 @@ class _BottomNavBarState extends State<BottomNavBar> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SizedBox(
-      height: 65,
-      child: BottomNavigationBar(
-        showUnselectedLabels: true,
-        selectedFontSize: 11,
-        unselectedFontSize: 11,
-        type: BottomNavigationBarType.fixed,
-        items: navItems,
-        onTap: (index) => navigate(index, context),
-        selectedItemColor: theme.primaryColorLight,
-        unselectedItemColor: theme.primaryColorLight,
-        backgroundColor: theme.primaryColorDark,
+    return SafeArea(
+      child: SizedBox(
+        height: 65,
+        child: BottomNavigationBar(
+          showUnselectedLabels: true,
+          selectedFontSize: 11,
+          unselectedFontSize: 11,
+          type: BottomNavigationBarType.fixed,
+          items: navItems,
+          onTap: (index) => navigate(index, context),
+          selectedItemColor: theme.primaryColorLight,
+          unselectedItemColor: theme.primaryColorLight,
+          backgroundColor: theme.primaryColorDark,
+        ),
       ),
     );
   }

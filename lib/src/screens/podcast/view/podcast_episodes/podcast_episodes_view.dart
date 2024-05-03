@@ -143,7 +143,7 @@ class _PodcastEpisodesViewState extends State<PodcastEpisodesView> {
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         child: FilledButton.icon(
                           onPressed: () => playerController.onDefaultPlay(
-                              context, widget.playOnMiniPlayer),
+                              context,episodes, widget.playOnMiniPlayer),
                           style: FilledButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                   borderRadius:
@@ -182,7 +182,7 @@ class _PodcastEpisodesViewState extends State<PodcastEpisodesView> {
                           : Icon(Icons.play_circle_outline_outlined);
                     }),
                 leading: CachedImage(
-                  imageUrl: item.image,
+                  imageUrl: item.networkImage,
                   imageHeight: 48,
                   imageWidth: 48,
                   loadingIndicatorSize: 25,

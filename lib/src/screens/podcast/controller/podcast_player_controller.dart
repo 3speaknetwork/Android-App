@@ -64,7 +64,7 @@ class PodcastPlayerController extends ChangeNotifier {
     _initiatePlay(context, episodes, index, playOnMiniPlayer);
   }
 
-  void onDefaultPlay(BuildContext context, bool playOnMiniPlayer) async {
+  void onDefaultPlay(BuildContext context,List<PodcastEpisode> episodes, bool playOnMiniPlayer) async {
     await _addEpisodesToQueue(episodes);
     _initiatePlay(context, episodes, 0, playOnMiniPlayer);
   }

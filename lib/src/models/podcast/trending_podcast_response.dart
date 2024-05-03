@@ -67,6 +67,9 @@ class PodCastFeedItem {
     if (feedImage != null && feedImage!.isNotEmpty) {
       return feedImage;
     }
+    if (artwork != null && artwork!.isNotEmpty) {
+      return artwork;
+    }
     return null;
   }
 
