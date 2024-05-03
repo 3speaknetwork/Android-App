@@ -174,7 +174,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   void _onTapPodcast() {
     var screen = PodCastTrendingScreen(appData: widget.appData);
     var route = MaterialPageRoute(builder: (c) => screen);
-    Navigator.of(context).push(route);
+    Navigator.of(context,rootNavigator: true).push(route);
   }
 
   void _onTapSearch() {
