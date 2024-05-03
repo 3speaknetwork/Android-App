@@ -329,9 +329,10 @@ extension AcelaWebViewController: WKScriptMessageHandler {
 				getDecryptedChallengeHandler?(response)
 			case "getAccountInfo":
 				guard
-					let response = ValidateHiveKeyResponse.jsonStringFrom(dict: dict)
+					let data = try? JSONSerialization.data(withJSONObject: dict),
+					let string = String(data: data, encoding: .utf8)
 				else { return }
-				getAccountInfoHandler?(response)
+				getAccountInfoHandler?(string)
 			case "doWeHavePostingAuth":
 				guard
 					let response = ValidateHiveKeyResponse.jsonStringFrom(dict: dict)
