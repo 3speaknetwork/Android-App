@@ -16,7 +16,9 @@ class VideoUploadSucessDialog extends StatefulWidget {
 class _VideoUploadSucessDialogState extends State<VideoUploadSucessDialog> {
   late Timer colorChangeTimer;
   late Timer enableButtonTimer;
+  late Timer valueTimer;
   int colorIndex = 0;
+  int timerCount = 5;
   Random random = Random();
   bool enableButton = false;
 
@@ -58,12 +60,23 @@ class _VideoUploadSucessDialogState extends State<VideoUploadSucessDialog> {
         });
       }
     });
+    valueTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          timerCount--;
+          if (timerCount == 0) {
+            valueTimer.cancel();
+          }
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     colorChangeTimer.cancel();
     enableButtonTimer.cancel();
+    valueTimer.cancel();
     super.dispose();
   }
 
@@ -99,7 +112,7 @@ class _VideoUploadSucessDialogState extends State<VideoUploadSucessDialog> {
               TextButton(
                 style: TextButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor),
-                child: Text("AutoPublish"),
+                child: Text("AutoPublish ${timerCount!=0 ? timerCount : ""}"),
                 onPressed: () {
                   Navigator.pop(context);
                 },
