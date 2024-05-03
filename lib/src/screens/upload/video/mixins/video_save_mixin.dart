@@ -30,7 +30,7 @@ class VideoSaveMixin {
           user: user,
           videoId: item.id,
           title: title,
-          description: "${description} <sub>Uploaded using 3Speak Mobile App</sub>",
+          description: "${description}\n\n<sub>Uploaded using 3Speak Mobile App</sub>",
           isNsfwContent: isNsfwContent,
           tags: tags,
           thumbnail: thumbIpfs.isEmpty ? null : thumbIpfs,
