@@ -11,7 +11,8 @@ class VideoSaveMixin {
 
   Future<void> saveVideo(
     HiveUserData user,
-    VideoUploadInfo item, {
+    VideoUploadInfo item, 
+    bool hasPostingAuthority,{
     required String title,
     required String description,
     required bool isNsfwContent,
@@ -25,12 +26,13 @@ class VideoSaveMixin {
     required Function(String) errorSnackbar,
   }) async {
     try {
+      String body = "${description}${hasPostingAuthority ? " <sub>Uploaded using 3Speak Mobile App</sub>" : ""}";
       isSaving.value = true;
       await Communicator().updateInfo(
           user: user,
           videoId: item.id,
           title: title,
-          description: "${description} <sub>Uploaded using 3Speak Mobile App</sub>",
+          description: body,
           isNsfwContent: isNsfwContent,
           tags: tags,
           thumbnail: thumbIpfs.isEmpty ? null : thumbIpfs,

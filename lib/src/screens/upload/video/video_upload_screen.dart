@@ -1,7 +1,6 @@
 import 'dart:io';
-import 'package:acela/src/models/user_account/action_response.dart';
-import 'package:acela/src/models/user_account/user_model.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
+import 'package:acela/src/screens/my_account/my_account_screen.dart';
 import 'package:acela/src/screens/upload/video/controller/video_upload_controller.dart';
 import 'package:acela/src/screens/upload/video/widgets/beneficaries_tile.dart';
 import 'package:acela/src/screens/upload/video/widgets/community_picker.dart';
@@ -13,7 +12,6 @@ import 'package:acela/src/screens/upload/video/widgets/upload_textfield.dart';
 import 'package:acela/src/screens/upload/video/widgets/video_upload_divider.dart';
 import 'package:acela/src/screens/upload/video/widgets/video_upload_success_dialog.dart';
 import 'package:acela/src/screens/upload/video/widgets/work_type_widget.dart';
-import 'package:acela/src/utils/communicator.dart';
 import 'package:acela/src/utils/enum.dart';
 import 'package:acela/src/widgets/loading_screen.dart';
 import 'package:flutter/material.dart';
@@ -216,38 +214,25 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
     controller.jumpToPage();
     if (controller.uploadStatus.value == UploadStatus.idle) {
       try {
-        ActionSingleDataResponse<UserModel> response =
-            await Communicator().getAccountInfo(widget.appData.username!);
-        if (response.isSuccess) {
-          if (response.data!.hasThreeSpeakPostingAuthority()) {
-            final XFile? file;
-            // file = null;
-            file = await ImagePicker().pickVideo(
-              source:
-                  widget.isCamera ? ImageSource.camera : ImageSource.gallery,
-              preferredCameraDevice: CameraDevice.front,
-            );
+        final XFile? file;
+        // file = null;
+        file = await ImagePicker().pickVideo(
+          source: widget.isCamera ? ImageSource.camera : ImageSource.gallery,
+          preferredCameraDevice: CameraDevice.front,
+        );
 
-            if (file != null) {
-              var fileToSave = File(file.path);
-              if (widget.isCamera) {
-                ImagesPicker.saveVideoToAlbum(fileToSave);
-              }
-              controller.onUpload(
-                hiveUserData: widget.appData,
-                pickedVideoFile: file,
-              );
-            } else {
-              showMessage('Video Picker Cancelled');
-              Navigator.pop(context);
-            }
-          } else {
-            Navigator.pop(context);
-            showMessage("Three speak posting authority is required to upload video");
+        if (file != null) {
+          var fileToSave = File(file.path);
+          if (widget.isCamera) {
+            ImagesPicker.saveVideoToAlbum(fileToSave);
           }
+          controller.onUpload(
+            hiveUserData: widget.appData,
+            pickedVideoFile: file,
+          );
         } else {
+          showMessage('Video Picker Cancelled');
           Navigator.pop(context);
-          showMessage("Server error,please try again");
         }
       } catch (e) {
         showMessage(e.toString());
@@ -269,16 +254,27 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  void showSuccessDialog({required VoidCallback resetControllerCallback}) {
+  void showSuccessDialog(bool hasPostingAuthority,
+      {required VoidCallback resetControllerCallback}) {
     showDialog(
         barrierDismissible: false,
         context: context,
         builder: (c) => VideoUploadSucessDialog(
-
-              
+              hasPostingAuthority: hasPostingAuthority,
             )).whenComplete(() {
       resetControllerCallback();
       Navigator.pop(context);
+      if (!hasPostingAuthority) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MyAccountScreen(
+              data: widget.appData,
+              initialTabIndex: 2,
+            ),
+          ),
+        );
+      }
     });
   }
 
@@ -291,7 +287,8 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
       child: FloatingActionButton.extended(
           onPressed: () {
             controller.validateAndSaveVideo(widget.appData,
-                successDialog: () => showSuccessDialog(
+                successDialog: (hasPostingAuthority) => showSuccessDialog(
+                    hasPostingAuthority,
                     resetControllerCallback: controller.resetController),
                 successSnackbar: (message) => showMessage(
                       message,
