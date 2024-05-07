@@ -103,7 +103,7 @@ class _VideoUploadSucessDialogState extends State<VideoUploadSucessDialog> {
             Text(
               widget.hasPostingAuthority
                   ? "🚨 Your Video will be automatically published 🚨"
-                  : "You'll have to publish this uploaded video from my account after video is processed",
+                  : "🚨 You'll have to publish this uploaded video from my account after video is processed. It will NOT be published automatically. 🚨 ",
               style: TextStyle(
                   color: colors[colorIndex],
                   fontSize: 15,
