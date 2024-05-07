@@ -1,8 +1,11 @@
 import 'package:acela/src/models/my_account/video_ops.dart';
+import 'package:acela/src/models/user_account/action_response.dart';
+import 'package:acela/src/models/user_account/user_model.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/settings/settings_screen.dart';
 import 'package:acela/src/screens/upload/video/mixins/video_save_mixin.dart';
 import 'package:acela/src/screens/upload/video/mixins/video_upload_mixin.dart';
+import 'package:acela/src/utils/communicator.dart';
 import 'package:acela/src/utils/enum.dart';
 import 'package:flutter/material.dart';
 
@@ -46,6 +49,9 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
   void setBeneficiares({String? userName, bool resetBeneficiares = false}) {
     this.userName = userName ?? this.userName;
     if (beneficaries.isEmpty || resetBeneficiares) {
+      if (resetBeneficiares) {
+        beneficaries.clear();
+      }
       if (this.userName != 'sagarkothari88') {
         beneficaries.add(
           BeneficiariesJson(
@@ -81,7 +87,7 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
 
   Future<void> validateAndSaveVideo(
     HiveUserData userData, {
-    required VoidCallback successDialog,
+    required Function(bool) successDialog,
     required Function(String) successSnackbar,
     required Function(String) errorSnackbar,
   }) async {
@@ -94,18 +100,33 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
     } else if (thumbnailUploadResponse.value == null) {
       errorSnackbar('Thumbnail is Required');
     } else {
-      await saveVideo(userData, uploadedVideoItem,
-          title: title,
-          description: description,
-          tags: tags,
-          beneficiaries: beneficaries,
-          communityId: communityId,
-          isNsfwContent: isNsfwContent,
-          language: language,
-          isPowerUp100: isPower100,
-          thumbIpfs: thumbnailUploadResponse.value!.name,
-          successDialog: successDialog,
-          errorSnackbar: errorSnackbar);
+      bool? hasPostingAuthoriy = await _hasPostingAuthority();
+      if (hasPostingAuthoriy == null) {
+        errorSnackbar("Something went wrong, try again");
+      } else {
+        await saveVideo(userData, uploadedVideoItem, hasPostingAuthoriy,
+            title: title,
+            description: description,
+            tags: tags,
+            beneficiaries: beneficaries,
+            communityId: communityId,
+            isNsfwContent: isNsfwContent,
+            language: language,
+            isPowerUp100: isPower100,
+            thumbIpfs: thumbnailUploadResponse.value!.name,
+            successDialog: () => successDialog(hasPostingAuthoriy),
+            errorSnackbar: errorSnackbar);
+      }
+    }
+  }
+
+  Future<bool?> _hasPostingAuthority() async {
+    ActionSingleDataResponse<UserModel> response =
+        await Communicator().getAccountInfo(this.userName);
+    if (response.isSuccess) {
+      return response.data!.hasThreeSpeakPostingAuthority();
+    } else {
+      return null;
     }
   }
 

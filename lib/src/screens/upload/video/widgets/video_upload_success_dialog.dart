@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 class VideoUploadSucessDialog extends StatefulWidget {
   const VideoUploadSucessDialog({
     Key? key,
+    required this.hasPostingAuthority,
   }) : super(key: key);
+
+  final bool hasPostingAuthority;
 
   @override
   State<VideoUploadSucessDialog> createState() =>
@@ -98,7 +101,9 @@ class _VideoUploadSucessDialogState extends State<VideoUploadSucessDialog> {
               height: 10,
             ),
             Text(
-              "🚨 Your Video will be automatically published 🚨",
+              widget.hasPostingAuthority
+                  ? "🚨 Your Video will be automatically published 🚨"
+                  : "You'll have to publish this uploaded video from my account after video is processed",
               style: TextStyle(
                   color: colors[colorIndex],
                   fontSize: 15,
@@ -112,7 +117,8 @@ class _VideoUploadSucessDialogState extends State<VideoUploadSucessDialog> {
               TextButton(
                 style: TextButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor),
-                child: Text("AutoPublish ${timerCount!=0 ? timerCount : ""}"),
+                child: Text(
+                    "${widget.hasPostingAuthority ? "AutoPublish" : "Okay. I will"} ${timerCount != 0 ? timerCount : ""}"),
                 onPressed: () {
                   Navigator.pop(context);
                 },
