@@ -372,20 +372,23 @@ class Communicator {
     }
   }
 
-  Future<VideoDetails> updateInfo({
-    required HiveUserData user,
-    required String videoId,
-    required String title,
-    required String description,
-    required bool isNsfwContent,
-    required String tags,
-    required String? thumbnail,
-    required String communityID,
-  }) async {
+  Future<VideoDetails> updateInfo(
+      {required HiveUserData user,
+      required String videoId,
+      required String title,
+      required String description,
+      required bool isNsfwContent,
+      required String tags,
+      required String? thumbnail,
+      required String communityID,
+      List<BeneficiariesJson>? beneficiaries}) async {
     var request = http.Request(
         'POST', Uri.parse('${Communicator.tsServer}/mobile/api/update_info'));
     var cookie = await getValidCookie(user);
     request.body = VideoUploadCompleteRequest(
+      beneficiaries: beneficiaries != null
+          ? json.encode(beneficiaries.map((e) => e.toJson()).toList())
+          : null,
       videoId: videoId,
       title: title,
       description: description,
