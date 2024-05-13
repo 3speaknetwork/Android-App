@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/global_provider/ipfs_node_provider.dart';
 import 'package:acela/src/models/login/login_bridge_response.dart';
