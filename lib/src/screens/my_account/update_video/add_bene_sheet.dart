@@ -134,7 +134,9 @@ class _AddBeneSheetState extends State<AddBeneSheet> {
                     // mainAxisSize: MainAxisSize.min,
                     children: [
                       _beneNameField(),
-                      const SizedBox(height: 15,),
+                      const SizedBox(
+                        height: 15,
+                      ),
                       Slider(
                         value: newBeneValue.toDouble(),
                         min: 100.0,

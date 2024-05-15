@@ -288,14 +288,16 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
         });
       } else {
         var v = await Communicator().updateInfo(
-            user: user,
-            videoId: widget.item.id,
-            title: widget.title,
-            description: widget.subtitle,
-            isNsfwContent: widget.isNsfwContent,
-            tags: tags,
-            thumbnail: thumbIpfs.isEmpty ? null : thumbIpfs,
-            communityID: widget.selectedCommunity);
+          user: user,
+          videoId: widget.item.id,
+          title: widget.title,
+          description: widget.subtitle,
+          isNsfwContent: widget.isNsfwContent,
+          tags: tags,
+          thumbnail: thumbIpfs.isEmpty ? null : thumbIpfs,
+          communityID: widget.selectedCommunity,
+          beneficiaries: beneficiaries,
+        );
         if (widget.justForEditing) {
           setState(() {
             showMessage('Video details are saved.');
