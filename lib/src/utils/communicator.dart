@@ -381,7 +381,7 @@ class Communicator {
       required String tags,
       required String? thumbnail,
       required String communityID,
-      List<BeneficiariesJson>? beneficiaries}) async {
+      required List<BeneficiariesJson>? beneficiaries}) async {
     var request = http.Request(
         'POST', Uri.parse('${Communicator.tsServer}/mobile/api/update_info'));
     var cookie = await getValidCookie(user);

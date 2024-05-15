@@ -36,7 +36,15 @@ class _BeneficiariesTileState extends State<BeneficiariesTile> {
     final theme = Theme.of(context);
     return InkWell(
       onTap: () {
-        beneficiariesBottomSheet(context);
+        if (beneficiaries
+                .where((element) => !element.isDefault)
+                .toList()
+                .length >
+            0) {
+          beneficiariesBottomSheet(context);
+        }else{
+          showAlertForAddBene(beneficiaries);
+        }
       },
       child: Padding(
         padding: const EdgeInsets.all(kScreenHorizontalPaddingDigit),
@@ -116,7 +124,7 @@ class _BeneficiariesTileState extends State<BeneficiariesTile> {
               appBar: AppBar(
                 title: Text('Video Participants'),
                 actions: [
-                  if (beneficiaries.length < 8)
+                  if (beneficiaries.length < 7)
                     IconButton(
                         onPressed: () {
                           Navigator.of(context).pop();
@@ -136,24 +144,12 @@ class _BeneficiariesTileState extends State<BeneficiariesTile> {
                     title: Text(filteredBenes[i].account),
                     subtitle: Text(
                         '${filteredBenes[i].src} ( ${filteredBenes[i].weight} % )'),
-                    trailing: (filteredBenes[i].src == 'participant')
-                        ? IconButton(
+                    trailing: IconButton(
                             onPressed: () {
-                              var currentBenes = beneficiaries;
-                              var author = currentBenes
-                                  .where((e) => e.account == widget.userName)
-                                  .firstOrNull;
-                              if (author == null) return;
-                              var otherBenes = currentBenes
-                                  .where((e) =>
-                                      e.src != 'author' &&
-                                      e.account != filteredBenes[i].account)
-                                  .toList();
-                              author.weight =
-                                  author.weight + filteredBenes[i].weight;
-                              otherBenes.add(author);
                               setState(() {
-                                beneficiaries = otherBenes;
+                                beneficiaries.removeWhere((element) =>
+                                    element.account ==
+                                    filteredBenes[i].account);
                               });
                               Navigator.of(context).pop();
                             },
@@ -162,7 +158,7 @@ class _BeneficiariesTileState extends State<BeneficiariesTile> {
                               color: Colors.red,
                             ),
                           )
-                        : null,
+                        
                   );
                 },
                 separatorBuilder: (c, i) => const Divider(),
@@ -176,21 +172,41 @@ class _BeneficiariesTileState extends State<BeneficiariesTile> {
   }
 
   void showAlertForAddBene(List<BeneficiariesJson> benes) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (context) {
-        return AddBeneSheet(
-          benes: benes,
-          onSave: (newBenes) {
-            setState(() {
-              beneficiaries = newBenes;
-            });
-            widget.onChanged(newBenes);
-          },
-        );
-      },
-    );
+    if (beneficiaries.length == 7 || maxLimitReached()) {
+      showError('Maximum limit reached');
+    } else {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        builder: (context) {
+          return AddBeneSheet(
+            benes: benes,
+            onSave: (newBenes) {
+              setState(() {
+                beneficiaries = newBenes;
+              });
+              widget.onChanged(newBenes);
+            },
+          );
+        },
+      );
+    }
+  }
+
+  bool maxLimitReached() {
+    int weight = 0;
+    beneficiaries.forEach((element) {
+      weight += element.weight;
+    });
+    if (weight >= 99) {
+      return true;
+    }
+    return false;
+  }
+
+  void showError(String string) {
+    var snackBar = SnackBar(content: Text('Error: $string'));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

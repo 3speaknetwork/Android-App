@@ -35,6 +35,7 @@ class VideoSaveMixin {
           description: body,
           isNsfwContent: isNsfwContent,
           tags: tags,
+          beneficiaries: beneficiaries,
           thumbnail: thumbIpfs.isEmpty ? null : thumbIpfs,
           communityID: communityId);
       isSaving.value = false;

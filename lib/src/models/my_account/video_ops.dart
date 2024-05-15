@@ -61,10 +61,24 @@ class BeneficiariesJson {
     return json.encode(data);
   }
 
+   BeneficiariesJson copyWith({
+    String? account,
+    int? weight,
+    String? src,
+    bool? isDefault,
+  }) {
+    return BeneficiariesJson(
+      account: account ?? this.account,
+      weight: weight ?? this.weight,
+      src: src ?? this.src,
+      isDefault: isDefault ?? this.isDefault,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'account': account,
-      'weight': weight,
+      'weight': weight * 100,
       'src': src,
     };
   }

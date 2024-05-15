@@ -75,9 +75,6 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
             weight: 1,
             isDefault: true));
       }
-      beneficaries.add(
-        BeneficiariesJson(account: this.userName, src: 'author', weight: 89),
-      );
     }
   }
 
