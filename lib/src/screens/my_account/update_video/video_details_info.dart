@@ -323,12 +323,11 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
               .replaceAll("ipfs://", "")
               .replaceAll("/manifest.m3u8", "");
         }
-        // List<BeneficiariesJson> newBene = beneficiaries
-        //     .map((e) => e.copyWith(
-        //         weight: e.weight * 100, account: e.account.toLowerCase()))
-        //     .toList()
-        //   ..sort((a, b) =>
-        //       a.account.toLowerCase().compareTo(b.account.toLowerCase()));
+        List<BeneficiariesJson> newBene = beneficiaries
+            .map((e) => e.copyWith(account: e.account.toLowerCase()))
+            .toList()
+          ..sort((a, b) =>
+              a.account.toLowerCase().compareTo(b.account.toLowerCase()));
         final String response = await platform.invokeMethod('newPostVideo', {
           'thumbnail': v.thumbnailValue,
           'video_v2': v.videoValue,
@@ -349,7 +348,7 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
           'hasKey': user.keychainData?.hasId ?? '',
           'hasAuthKey': user.keychainData?.hasAuthKey ?? '',
           'newBene': base64
-              .encode(utf8.encode(BeneficiariesJson.toJsonString(beneficiaries))),
+              .encode(utf8.encode(BeneficiariesJson.toJsonString(newBene))),
           'language': selectedLanguage.code,
           'powerUp': powerUp100,
         });
@@ -584,8 +583,43 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
       } else if (widget.appData.username! != 'threespeakleader' &&
           beneficiaries[i].account == 'threespeakleader') {
         beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
+      } else if (beneficiaries[i].src == 'ENCODER_PAY') {
+        beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
       }
     }
+    if (beneficiaries
+            .indexWhere((element) => element.account == 'sagarkothari88') ==
+        -1) {
+      beneficiaries.add(
+        BeneficiariesJson(
+            account: 'sagarkothari88',
+            src: 'MOBILE_APP_PAY',
+            weight: 1,
+            isDefault: true),
+      );
+    }
+    if (beneficiaries
+            .indexWhere((element) => element.account == 'spk.beneficiary') ==
+        -1) {
+      beneficiaries.add(BeneficiariesJson(
+          account: 'spk.beneficiary',
+          src: 'threespeak',
+          weight: 9,
+          isDefault: true));
+    }
+
+    if (beneficiaries
+            .indexWhere((element) => element.account == 'threespeakleader') ==
+        -1) {
+      beneficiaries.add(BeneficiariesJson(
+          account: 'threespeakleader',
+          src: 'threespeak',
+          weight: 1,
+          isDefault: true));
+    }
+
+    beneficiaries =
+        beneficiaries.where((element) => element.src != 'author').toList();
   }
 
   Widget _showQRCodeAndKeychainButton(String qr) {
@@ -748,7 +782,14 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
               label: Text(widget.justForEditing ? 'Save Details' : 'Publish'),
               onPressed: () {
                 if (user.username != null) {
-                  if (thumbIpfs.isNotEmpty ||
+                  int weight = 0;
+                  beneficiaries.forEach((element) {
+                    weight += element.weight;
+                  });
+                  if (beneficiaries.length > 8 || weight > 100) {
+                    showError(
+                        'Beneficiaries exceeds the limit, please lower down');
+                  } else if (thumbIpfs.isNotEmpty ||
                       widget.item.getThumbnail().isNotEmpty) {
                     completeVideo(user);
                   } else {

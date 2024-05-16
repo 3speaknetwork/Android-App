@@ -56,7 +56,7 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
         beneficaries.add(
           BeneficiariesJson(
               account: 'sagarkothari88',
-              src: 'mobile',
+              src: 'MOBILE_APP_PAY',
               weight: 1,
               isDefault: true),
         );
