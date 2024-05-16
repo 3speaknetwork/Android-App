@@ -323,6 +323,12 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
               .replaceAll("ipfs://", "")
               .replaceAll("/manifest.m3u8", "");
         }
+        // List<BeneficiariesJson> newBene = beneficiaries
+        //     .map((e) => e.copyWith(
+        //         weight: e.weight * 100, account: e.account.toLowerCase()))
+        //     .toList()
+        //   ..sort((a, b) =>
+        //       a.account.toLowerCase().compareTo(b.account.toLowerCase()));
         final String response = await platform.invokeMethod('newPostVideo', {
           'thumbnail': v.thumbnailValue,
           'video_v2': v.videoValue,
@@ -342,8 +348,8 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
           'ipfsHash': ipfsHash,
           'hasKey': user.keychainData?.hasId ?? '',
           'hasAuthKey': user.keychainData?.hasAuthKey ?? '',
-          'newBene': base64.encode(
-              utf8.encode(BeneficiariesJson.toJsonString(beneficiaries))),
+          'newBene': base64
+              .encode(utf8.encode(BeneficiariesJson.toJsonString(beneficiaries))),
           'language': selectedLanguage.code,
           'powerUp': powerUp100,
         });

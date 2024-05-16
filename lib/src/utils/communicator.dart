@@ -381,14 +381,17 @@ class Communicator {
       required String tags,
       required String? thumbnail,
       required String communityID,
-      required List<BeneficiariesJson>? beneficiaries}) async {
+      required List<BeneficiariesJson> beneficiaries}) async {
     var request = http.Request(
         'POST', Uri.parse('${Communicator.tsServer}/mobile/api/update_info'));
+    var bene = beneficiaries
+        .map((e) => e.copyWith(account: e.account.toLowerCase()))
+        .toList()
+      ..sort(
+          (a, b) => a.account.toLowerCase().compareTo(b.account.toLowerCase()));
     var cookie = await getValidCookie(user);
     request.body = VideoUploadCompleteRequest(
-      beneficiaries: beneficiaries != null
-          ? json.encode(beneficiaries.map((e) => e.toJson()).toList())
-          : null,
+      beneficiaries: json.encode(bene.map((e) => e.toJson()).toList()),
       videoId: videoId,
       title: title,
       description: description,
