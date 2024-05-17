@@ -11,8 +11,8 @@ class VideoSaveMixin {
 
   Future<void> saveVideo(
     HiveUserData user,
-    VideoUploadInfo item, 
-    bool hasPostingAuthority,{
+    VideoUploadInfo item,
+    bool hasPostingAuthority, {
     required String title,
     required String description,
     required bool isNsfwContent,
@@ -37,7 +37,8 @@ class VideoSaveMixin {
           tags: tags,
           beneficiaries: beneficiaries,
           thumbnail: thumbIpfs.isEmpty ? null : thumbIpfs,
-          communityID: communityId);
+          communityID: communityId,
+          beneficiaries: beneficiaries);
       isSaving.value = false;
       successDialog();
     } catch (e) {
