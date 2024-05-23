@@ -112,6 +112,7 @@ class _BeneficiariesTileState extends State<BeneficiariesTile> {
         .where((element) =>
             element.src != 'ENCODER_PAY' &&
             element.src != 'MOBILE_APP_PAY' &&
+            element.src != 'MOBILE_APP_PAY_AND_ENCODER_PAY' &&
             element.src != 'threespeak')
         .toList();
     showModalBottomSheet(

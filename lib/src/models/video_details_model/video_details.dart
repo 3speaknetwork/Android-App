@@ -135,9 +135,7 @@ class VideoDetails {
       return [
         BeneficiariesJson(account: 'sagarkothari88', src: 'mobile', weight: 1),
         BeneficiariesJson(
-            account: 'spk.beneficiary', src: 'threespeak', weight: 9),
-        BeneficiariesJson(
-            account: 'threespeakleader', src: 'threespeak', weight: 1),
+            account: 'spk.beneficiary', src: 'threespeak', weight: 10),
       ];
     } else {
       try {
@@ -162,9 +160,7 @@ class VideoDetails {
           BeneficiariesJson(
               account: 'sagarkothari88', src: 'mobile', weight: 1),
           BeneficiariesJson(
-              account: 'spk.beneficiary', src: 'threespeak', weight: 9),
-          BeneficiariesJson(
-              account: 'threespeakleader', src: 'threespeak', weight: 1),
+              account: 'spk.beneficiary', src: 'threespeak', weight: 10),
         ];
       }
     }

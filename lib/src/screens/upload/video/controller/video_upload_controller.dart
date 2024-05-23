@@ -65,14 +65,7 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
         beneficaries.add(BeneficiariesJson(
             account: 'spk.beneficiary',
             src: 'threespeak',
-            weight: 9,
-            isDefault: true));
-      }
-      if (this.userName != 'threespeakleader') {
-        beneficaries.add(BeneficiariesJson(
-            account: 'threespeakleader',
-            src: 'threespeak',
-            weight: 1,
+            weight: 10,
             isDefault: true));
       }
     }

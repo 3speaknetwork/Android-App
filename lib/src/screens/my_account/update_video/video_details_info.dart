@@ -580,10 +580,10 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
       } else if (widget.appData.username! != 'spk.beneficiary' &&
           beneficiaries[i].account == 'spk.beneficiary') {
         beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
-      } else if (widget.appData.username! != 'threespeakleader' &&
-          beneficiaries[i].account == 'threespeakleader') {
+      }
+      else if (beneficiaries[i].src == 'ENCODER_PAY') {
         beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
-      } else if (beneficiaries[i].src == 'ENCODER_PAY') {
+      } else if (beneficiaries[i].src == 'MOBILE_APP_PAY_AND_ENCODER_PAY') {
         beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
       }
     }
@@ -604,17 +604,7 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
       beneficiaries.add(BeneficiariesJson(
           account: 'spk.beneficiary',
           src: 'threespeak',
-          weight: 9,
-          isDefault: true));
-    }
-
-    if (beneficiaries
-            .indexWhere((element) => element.account == 'threespeakleader') ==
-        -1) {
-      beneficiaries.add(BeneficiariesJson(
-          account: 'threespeakleader',
-          src: 'threespeak',
-          weight: 1,
+          weight: 10,
           isDefault: true));
     }
 
