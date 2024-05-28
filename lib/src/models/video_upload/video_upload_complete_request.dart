@@ -10,16 +10,15 @@ class VideoUploadCompleteRequest {
   final String communityID;
   final String? beneficiaries;
 
-  VideoUploadCompleteRequest({
-    required this.videoId,
-    required this.title,
-    required this.description,
-    required this.isNsfwContent,
-    required this.tags,
-    required this.thumbnail,
-    required this.communityID,
-    required this.beneficiaries
-  });
+  VideoUploadCompleteRequest(
+      {required this.videoId,
+      required this.title,
+      required this.description,
+      required this.isNsfwContent,
+      required this.tags,
+      required this.thumbnail,
+      required this.communityID,
+      required this.beneficiaries});
 
   Map<String, dynamic> toJson() {
     var map = {
@@ -29,7 +28,7 @@ class VideoUploadCompleteRequest {
       'isNsfwContent': isNsfwContent,
       'tags': tags,
       'communityID': communityID,
-      'beneficiaries' : beneficiaries
+      'beneficiaries': beneficiaries
     };
     if (thumbnail != null && thumbnail!.isNotEmpty) {
       map['thumbnail'] = thumbnail!;

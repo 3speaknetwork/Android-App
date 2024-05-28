@@ -135,10 +135,7 @@ class VideoDetails {
       return [
         BeneficiariesJson(account: 'sagarkothari88', src: 'mobile', weight: 1),
         BeneficiariesJson(
-            account: 'spk.beneficiary', src: 'threespeak', weight: 9),
-        BeneficiariesJson(
-            account: 'threespeakleader', src: 'threespeak', weight: 1),
-        BeneficiariesJson(account: owner, src: 'author', weight: 89),
+            account: 'spk.beneficiary', src: 'threespeak', weight: 10),
       ];
     } else {
       try {
@@ -147,10 +144,7 @@ class VideoDetails {
         for (var item in array) {
           var name = item.account;
           var weight = item.weight;
-          if ((weight / 100) >= 1 &&
-              name.toLowerCase() != 'sagarkothari88' &&
-              name.toLowerCase() != 'spk.beneficiary' &&
-              name.toLowerCase() != 'threespeakleader') {
+          if ((weight / 100) >= 1 ) {
             beneficiariesToSet.add(
               BeneficiariesJson(
                 account: name,
@@ -160,37 +154,13 @@ class VideoDetails {
             );
           }
         }
-        if (owner != 'sagarkothari88') {
-          beneficiariesToSet.add(
-            BeneficiariesJson(
-                account: 'sagarkothari88', src: 'mobile', weight: 1),
-          );
-        }
-        beneficiariesToSet.add(
-          BeneficiariesJson(
-              account: 'spk.beneficiary', src: 'threespeak', weight: 9),
-        );
-        beneficiariesToSet.add(
-          BeneficiariesJson(
-              account: 'threespeakleader', src: 'threespeak', weight: 1),
-        );
-        var sum = beneficiariesToSet.map((e) => e.weight).toList().sum;
-        if (sum < 100) {
-          var remaining = 100 - sum;
-          beneficiariesToSet.add(
-            BeneficiariesJson(account: owner, src: 'author', weight: remaining),
-          );
-        }
         return beneficiariesToSet;
       } catch (e) {
         return [
           BeneficiariesJson(
               account: 'sagarkothari88', src: 'mobile', weight: 1),
           BeneficiariesJson(
-              account: 'spk.beneficiary', src: 'threespeak', weight: 9),
-          BeneficiariesJson(
-              account: 'threespeakleader', src: 'threespeak', weight: 1),
-          BeneficiariesJson(account: owner, src: 'author', weight: 89),
+              account: 'spk.beneficiary', src: 'threespeak', weight: 10),
         ];
       }
     }

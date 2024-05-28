@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'package:acela/src/bloc/server.dart';
+
 import 'package:acela/src/global_provider/ipfs_node_provider.dart';
 import 'package:acela/src/models/login/login_bridge_response.dart';
 import 'package:acela/src/models/my_account/video_ops.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/models/video_details_model/video_details.dart';
 import 'package:acela/src/screens/my_account/my_account_screen.dart';
-import 'package:acela/src/screens/my_account/update_video/add_bene_sheet.dart';
 import 'package:acela/src/screens/settings/settings_screen.dart';
+import 'package:acela/src/screens/upload/video/widgets/beneficaries_tile.dart';
 import 'package:acela/src/utils/communicator.dart';
 import 'package:acela/src/utils/safe_convert.dart';
 import 'package:acela/src/widgets/custom_circle_avatar.dart';
@@ -109,6 +109,7 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
   void initState() {
     super.initState();
     beneficiaries = widget.item.benes;
+    setBeneficiares();
     tagsController.text =
         widget.item.tags.isEmpty ? "threespeak,mobile" : widget.item.tags;
     tags = widget.item.tags.isEmpty ? "threespeak,mobile" : widget.item.tags;
@@ -288,16 +289,15 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
         });
       } else {
         var v = await Communicator().updateInfo(
-          user: user,
-          videoId: widget.item.id,
-          title: widget.title,
-          description: widget.subtitle,
-          isNsfwContent: widget.isNsfwContent,
-          tags: tags,
-          thumbnail: thumbIpfs.isEmpty ? null : thumbIpfs,
-          communityID: widget.selectedCommunity,
-          beneficiaries: beneficiaries,
-        );
+            user: user,
+            videoId: widget.item.id,
+            title: widget.title,
+            description: widget.subtitle,
+            isNsfwContent: widget.isNsfwContent,
+            tags: tags,
+            thumbnail: thumbIpfs.isEmpty ? null : thumbIpfs,
+            beneficiaries: beneficiaries,
+            communityID: widget.selectedCommunity);
         if (widget.justForEditing) {
           setState(() {
             showMessage('Video details are saved.');
@@ -323,6 +323,11 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
               .replaceAll("ipfs://", "")
               .replaceAll("/manifest.m3u8", "");
         }
+        List<BeneficiariesJson> newBene = beneficiaries
+            .map((e) => e.copyWith(account: e.account.toLowerCase()))
+            .toList()
+          ..sort((a, b) =>
+              a.account.toLowerCase().compareTo(b.account.toLowerCase()));
         final String response = await platform.invokeMethod('newPostVideo', {
           'thumbnail': v.thumbnailValue,
           'video_v2': v.videoValue,
@@ -342,8 +347,8 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
           'ipfsHash': ipfsHash,
           'hasKey': user.keychainData?.hasId ?? '',
           'hasAuthKey': user.keychainData?.hasAuthKey ?? '',
-          'newBene': base64.encode(
-              utf8.encode(BeneficiariesJson.toJsonString(beneficiaries))),
+          'newBene': base64
+              .encode(utf8.encode(BeneficiariesJson.toJsonString(newBene))),
           'language': selectedLanguage.code,
           'powerUp': powerUp100,
         });
@@ -559,114 +564,52 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
     );
   }
 
-  Widget _beneficiaries() {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      child: InkWell(
-        onTap: () {
-          beneficiariesBottomSheet();
-        },
-        child: Row(
-          children: [
-            Text('Video Participants:'),
-            Spacer(),
-            Icon(Icons.arrow_drop_down),
-          ],
-        ),
-      ),
+  Widget _beneficiaryTile() {
+    return BeneficiariesTile(
+      userName: context.read<HiveUserData>().username!,
+      beneficiaries: beneficiaries,
+      onChanged: (beneficaries) => this.beneficiaries = beneficaries,
     );
   }
 
-  void showAlertForAddBene(List<BeneficiariesJson> benes) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return AddBeneSheet(
-          benes: benes,
-          onSave: (newBenes) {
-            setState(() {
-              beneficiaries = newBenes;
-            });
-          },
-        );
-      },
-    );
-  }
+  void setBeneficiares({String? userName, bool resetBeneficiares = false}) {
+    for (int i = 0; i < beneficiaries.length; i++) {
+      if (widget.appData.username! != 'sagarkothari88' &&
+          beneficiaries[i].account == 'sagarkothari88') {
+        beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
+      } else if (widget.appData.username! != 'spk.beneficiary' &&
+          beneficiaries[i].account == 'spk.beneficiary') {
+        beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
+      }
+      else if (beneficiaries[i].src == 'ENCODER_PAY') {
+        beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
+      } else if (beneficiaries[i].src == 'MOBILE_APP_PAY_AND_ENCODER_PAY') {
+        beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
+      }
+    }
+    if (beneficiaries
+            .indexWhere((element) => element.account == 'sagarkothari88') ==
+        -1) {
+      beneficiaries.add(
+        BeneficiariesJson(
+            account: 'sagarkothari88',
+            src: 'MOBILE_APP_PAY',
+            weight: 1,
+            isDefault: true),
+      );
+    }
+    if (beneficiaries
+            .indexWhere((element) => element.account == 'spk.beneficiary') ==
+        -1) {
+      beneficiaries.add(BeneficiariesJson(
+          account: 'spk.beneficiary',
+          src: 'threespeak',
+          weight: 10,
+          isDefault: true));
+    }
 
-  void beneficiariesBottomSheet() {
-    var filteredBenes = beneficiaries
-        .where((element) =>
-            element.src != 'ENCODER_PAY' &&
-            element.src != 'mobile' &&
-            element.src != 'threespeak')
-        .toList();
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return SafeArea(
-          child: Container(
-            height: 400,
-            child: Scaffold(
-              appBar: AppBar(
-                title: Text('Video Participants'),
-                actions: [
-                  if (beneficiaries.length < 8)
-                    IconButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          showAlertForAddBene(beneficiaries);
-                        },
-                        icon: Icon(Icons.add))
-                ],
-              ),
-              body: ListView.separated(
-                itemBuilder: (c, i) {
-                  return ListTile(
-                    leading: CustomCircleAvatar(
-                      height: 40,
-                      width: 40,
-                      url: server.userOwnerThumb(filteredBenes[i].account),
-                    ),
-                    title: Text(filteredBenes[i].account),
-                    subtitle: Text(
-                        '${filteredBenes[i].src} ( ${filteredBenes[i].weight} % )'),
-                    trailing: (filteredBenes[i].src == 'participant')
-                        ? IconButton(
-                            onPressed: () {
-                              var currentBenes = beneficiaries;
-                              var author = currentBenes
-                                  .where((e) => e.account == widget.item.owner)
-                                  .firstOrNull;
-                              if (author == null) return;
-                              var otherBenes = currentBenes
-                                  .where((e) =>
-                                      e.src != 'author' &&
-                                      e.account != filteredBenes[i].account)
-                                  .toList();
-                              author.weight =
-                                  author.weight + filteredBenes[i].weight;
-                              otherBenes.add(author);
-                              setState(() {
-                                beneficiaries = otherBenes;
-                              });
-                              Navigator.of(context).pop();
-                            },
-                            icon: Icon(
-                              Icons.delete,
-                              color: Colors.red,
-                            ),
-                          )
-                        : null,
-                  );
-                },
-                separatorBuilder: (c, i) => const Divider(),
-                itemCount: filteredBenes.length,
-              ),
-            ),
-          ),
-        );
-      },
-    );
+    beneficiaries =
+        beneficiaries.where((element) => element.src != 'author').toList();
   }
 
   Widget _showQRCodeAndKeychainButton(String qr) {
@@ -819,7 +762,7 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
                 _thumbnailPicker(user),
                 const Text('Tap to change video thumbnail'),
                 if (!widget.justForEditing) _rewardType(),
-                if (!widget.justForEditing) _beneficiaries(),
+                if (!widget.justForEditing) _beneficiaryTile(),
                 if (!widget.justForEditing) _changeLanguage(),
               ],
             ),
@@ -829,7 +772,14 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
               label: Text(widget.justForEditing ? 'Save Details' : 'Publish'),
               onPressed: () {
                 if (user.username != null) {
-                  if (thumbIpfs.isNotEmpty ||
+                  int weight = 0;
+                  beneficiaries.forEach((element) {
+                    weight += element.weight;
+                  });
+                  if (beneficiaries.length > 8 || weight > 100) {
+                    showError(
+                        'Beneficiaries exceeds the limit, please lower down');
+                  } else if (thumbIpfs.isNotEmpty ||
                       widget.item.getThumbnail().isNotEmpty) {
                     completeVideo(user);
                   } else {

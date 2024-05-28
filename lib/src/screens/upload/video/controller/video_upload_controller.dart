@@ -56,7 +56,7 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
         beneficaries.add(
           BeneficiariesJson(
               account: 'sagarkothari88',
-              src: 'mobile',
+              src: 'MOBILE_APP_PAY',
               weight: 1,
               isDefault: true),
         );
@@ -65,19 +65,9 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
         beneficaries.add(BeneficiariesJson(
             account: 'spk.beneficiary',
             src: 'threespeak',
-            weight: 9,
+            weight: 10,
             isDefault: true));
       }
-      if (this.userName != 'threespeakleader') {
-        beneficaries.add(BeneficiariesJson(
-            account: 'threespeakleader',
-            src: 'threespeak',
-            weight: 1,
-            isDefault: true));
-      }
-      beneficaries.add(
-        BeneficiariesJson(account: this.userName, src: 'author', weight: 89),
-      );
     }
   }
 

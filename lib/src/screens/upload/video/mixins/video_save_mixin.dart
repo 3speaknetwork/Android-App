@@ -35,9 +35,9 @@ class VideoSaveMixin {
           description: body,
           isNsfwContent: isNsfwContent,
           tags: tags,
+          beneficiaries: beneficiaries,
           thumbnail: thumbIpfs.isEmpty ? null : thumbIpfs,
-          communityID: communityId,
-          beneficiaries: beneficiaries);
+          communityID: communityId,);
       isSaving.value = false;
       successDialog();
     } catch (e) {
