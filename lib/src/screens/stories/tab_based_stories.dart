@@ -31,7 +31,7 @@ class _TabBasedStoriesScreenState extends State<TabBasedStoriesScreen>
   late Future<List<VideoDetails>> loadNew;
   late Future<List<VideoDetails>> loadFirstUploads;
   Future<List<VideoDetails>>? loadMyFeedVideos;
-  CarouselController controller = CarouselController();
+  CarouselSliderController controller = CarouselSliderController();
 
   var isMenuOpen = false;
 
@@ -293,7 +293,7 @@ class _TabBasedStoriesScreenState extends State<TabBasedStoriesScreen>
   Widget carousel(List<VideoDetails> items) {
     return Container(
       child: CarouselSlider(
-        carouselController: controller,
+        CarouselSliderController: controller,
         options: CarouselOptions(
           height: MediaQuery.of(context).size.height,
           enableInfiniteScroll: true,

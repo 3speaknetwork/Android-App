@@ -15,7 +15,7 @@ class StoryFeedDataBody extends StatefulWidget {
 
   final List<GQLFeedItem> items;
   final HiveUserData appData;
-  final CarouselController controller;
+  final CarouselSliderController controller;
   final VoidCallback? onRemoveFavouriteCallback;
 
   @override
@@ -44,13 +44,13 @@ class _StoryFeedDataBodyState extends State<StoryFeedDataBody> {
   Widget carousel(List<GQLFeedItem> items, BuildContext context) {
     return Container(
       child: CarouselSlider(
-        carouselController: widget.controller,
         options: CarouselOptions(
           height: MediaQuery.of(context).size.height,
           enableInfiniteScroll: true,
           viewportFraction: 1,
           scrollDirection: Axis.vertical,
         ),
+        carouselController: widget.controller,
         items: items.map((item) {
           return Builder(
             builder: (BuildContext context) {

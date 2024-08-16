@@ -23,7 +23,7 @@ class NewStoriesFeedScreen extends StatefulWidget {
 }
 
 class _NewStoriesFeedScreenState extends State<NewStoriesFeedScreen> {
-  CarouselController controller = CarouselController();
+  CarouselSliderController controller = CarouselSliderController();
   Future<List<HomeFeedItem>>? _future;
 
   @override
@@ -92,7 +92,7 @@ class _NewStoriesFeedScreenState extends State<NewStoriesFeedScreen> {
   Widget carousel(HiveUserData data, List<HomeFeedItem> items) {
     return Container(
       child: CarouselSlider(
-        carouselController: controller,
+        CarouselSliderController: controller,
         options: CarouselOptions(
           height: MediaQuery.of(context).size.height,
           enableInfiniteScroll: true,

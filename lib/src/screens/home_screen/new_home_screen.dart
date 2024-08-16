@@ -135,6 +135,7 @@ class _GQLFeedScreenState extends State<GQLFeedScreen>
         },
       ),
       title: Text('3Speak.tv'),
+      subtitle: Text('Powered by Hive'),
     );
   }
 

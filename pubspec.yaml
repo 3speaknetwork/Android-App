@@ -15,10 +15,10 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 3.0.2+101
+version: 3.0.4+103
 
 environment:
-  sdk: ">=2.15.1 <3.0.0"
+  sdk: ^3.5.0
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -32,21 +32,19 @@ dependencies:
       url: https://github.com/florent37/Flutter-AssetsAudioPlayer.git
       ref: master
   adaptive_action_sheet: ^2.0.1
-  better_player:
-    git:
-      url: https://github.com/tintran-dev/betterplayer.git
+  better_player: ^0.0.84
   bs58: ^1.0.2
   bs58check: ^1.0.2
   chewie: ^1.3.0
   crypto: ^3.0.3
-  device_info_plus: ^8.2.2
+  device_info_plus: ^10.1.2
   elliptic: ^0.3.8
-  ffmpeg_kit_flutter: ^5.1.0
+  ffmpeg_kit_flutter: ^6.0.3
   file_picker: ^5.2.10
   flutter:
     sdk: flutter
   flutter_dotenv: ^5.0.2
-  flutter_markdown: ^0.6.9
+  flutter_markdown: ^0.7.3+1
   flutter_secure_storage: ^8.0.0
   font_awesome_flutter: ^10.1.0
   hex: ^0.2.0
@@ -55,7 +53,7 @@ dependencies:
   json_annotation: ^4.4.0
   overlay_support: ^2.0.1
   provider: ^6.0.2
-  share_plus: ^6.3.4
+  share_plus: ^10.0.2
   timeago: ^3.1.0
   tus_client: ^1.0.2
   url_launcher: ^6.0.20
@@ -63,43 +61,44 @@ dependencies:
   video_player_web_hls: ^1.0.0+3
   video_compress: ^3.1.0
   video_thumbnail: ^0.5.0
-  image_picker: ^0.8.5+3
-  localstorage: ^4.0.0+1
-  permission_handler: ^10.0.0
+  image_picker: ^1.1.2
+  localstorage: ^5.0.0
+  permission_handler: ^11.3.1
   path_provider: ^2.0.11
   images_picker: ^1.2.11
-  carousel_slider: ^4.1.1
-  uuid: ^3.0.7
-  web_socket_channel: ^2.3.0
+  carousel_slider: ^5.0.0
+  uuid: ^4.4.2
+  web_socket_channel: ^3.0.1
   encryptor: ^0.0.1
   qr_flutter: ^4.0.0
-  pretty_qr_code: ^2.0.2
+  pretty_qr_code: ^3.3.0
   webview_flutter: ^4.2.0
-  wakelock: ^0.6.2
   convert: ^3.1.1
-  chip_list: ^2.4.3+8
+  chip_list: ^3.1.0
   get_storage: ^2.1.1
   flutter_downloader: ^1.11.2
   cached_network_image: ^3.3.0
   audio_service: ^0.18.12
   just_audio: ^0.9.35
-  upgrader: ^6.5.0
+  upgrader: ^10.3.0
   dart_rss: ^3.0.1
   inview_notifier_list: ^3.0.0
-  sentry_flutter: ^7.13.2
+  sentry_flutter: ^8.7.0
   equatable: ^2.0.5
   croppy: ^1.1.4
   image: ^4.1.4
-  firebase_core: ^2.30.1
-  firebase_analytics: ^10.10.3
-  firebase_crashlytics: ^3.5.3
-  go_router: ^13.2.0
+  # firebase_core: ^3.3.0
+  # firebase_analytics: ^11.2.1
+  # firebase_crashlytics: ^4.0.4
+  go_router: ^14.2.3
   scrollable_positioned_list: ^0.3.8
   auto_size_text: ^3.0.0
   gap: ^3.0.1
   marquee: ^2.2.3
   flutter_spinkit: ^5.2.1
   miniplayer: ^1.0.1
+  win32: ^5.5.4
+  wakelock_plus: ^1.2.8
 
 dev_dependencies:
   flutter_test:
@@ -112,7 +111,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.1
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
