@@ -32,13 +32,12 @@ dependencies:
       url: https://github.com/florent37/Flutter-AssetsAudioPlayer.git
       ref: master
   adaptive_action_sheet: ^2.0.1
-  better_player: ^0.0.84
-  bs58: ^1.0.2
-  bs58check: ^1.0.2
-  chewie: ^1.3.0
+  better_player:
+    git:
+      url: https://github.com/RAMb002/betterplayer.git
+
   crypto: ^3.0.3
   device_info_plus: ^10.1.2
-  elliptic: ^0.3.8
   ffmpeg_kit_flutter: ^6.0.3
   file_picker: ^5.2.10
   flutter:
@@ -47,13 +46,12 @@ dependencies:
   flutter_markdown: ^0.7.3+1
   flutter_secure_storage: ^8.0.0
   font_awesome_flutter: ^10.1.0
-  hex: ^0.2.0
   http: ^0.13.4
   intl: ^0.18.1
   json_annotation: ^4.4.0
   overlay_support: ^2.0.1
   provider: ^6.0.2
-  share_plus: ^10.0.2
+  share_plus: ^10.0.0
   timeago: ^3.1.0
   tus_client: ^1.0.2
   url_launcher: ^6.0.20
@@ -62,19 +60,16 @@ dependencies:
   video_compress: ^3.1.0
   video_thumbnail: ^0.5.0
   image_picker: ^1.1.2
-  localstorage: ^5.0.0
+  localstorage: ^4.0.0+1
   permission_handler: ^11.3.1
   path_provider: ^2.0.11
   images_picker: ^1.2.11
   carousel_slider: ^5.0.0
   uuid: ^4.4.2
   web_socket_channel: ^3.0.1
-  encryptor: ^0.0.1
   qr_flutter: ^4.0.0
   pretty_qr_code: ^3.3.0
   webview_flutter: ^4.2.0
-  convert: ^3.1.1
-  chip_list: ^3.1.0
   get_storage: ^2.1.1
   flutter_downloader: ^1.11.2
   cached_network_image: ^3.3.0
@@ -83,18 +78,17 @@ dependencies:
   upgrader: ^10.3.0
   dart_rss: ^3.0.1
   inview_notifier_list: ^3.0.0
-  sentry_flutter: ^8.7.0
   equatable: ^2.0.5
   croppy: ^1.1.4
   image: ^4.1.4
-  # firebase_core: ^3.3.0
-  # firebase_analytics: ^11.2.1
-  # firebase_crashlytics: ^4.0.4
+  firebase_core: ^3.3.0
+  firebase_analytics: ^11.2.1
+  firebase_crashlytics: ^4.0.4
   go_router: ^14.2.3
   scrollable_positioned_list: ^0.3.8
   auto_size_text: ^3.0.0
   gap: ^3.0.1
-  marquee: ^2.2.3
+  auto_scroll_text: ^0.0.7
   flutter_spinkit: ^5.2.1
   miniplayer: ^1.0.1
   win32: ^5.5.4

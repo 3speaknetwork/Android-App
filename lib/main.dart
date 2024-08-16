@@ -8,9 +8,9 @@ import 'package:acela/src/screens/podcast/controller/podcast_player_controller.d
 import 'package:acela/src/screens/upload/video/controller/video_upload_controller.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
 import 'package:acela/src/utils/routes/app_router.dart';
-// import 'package:firebase_analytics/firebase_analytics.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
@@ -28,9 +28,9 @@ import 'src/screens/podcast/widgets/audio_player/audio_player_core_controls.dart
 Future<void> main() async {
   await dotenv.load(fileName: "dotenv");
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  await Firebase.initializeApp(
+    // options: DefaultFirebaseOptions.currentPlatform,
+  );
   await GetStorage.init();
   await FlutterDownloader.initialize(
     debug: true,
@@ -50,11 +50,11 @@ Future<void> main() async {
   if (kDebugMode) {
     runApp(const MyApp());
   } else {
-    // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-    // PlatformDispatcher.instance.onError = (error, stack) {
-    //   FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    //   return true;
-    // };
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
     runApp(MyApp());
   }
 }
@@ -96,9 +96,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   void logEvent() async {
-    // await FirebaseAnalytics.instance.logEvent(
-    //   name: 'app_entry',
-    // );
+    await FirebaseAnalytics.instance.logEvent(
+      name: 'app_entry',
+    );
   }
 
   // This widget is the root of your application.

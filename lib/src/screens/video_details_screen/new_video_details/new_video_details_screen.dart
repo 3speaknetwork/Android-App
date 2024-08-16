@@ -29,10 +29,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:wakelock/wakelock.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class NewVideoDetailsScreen extends StatefulWidget {
   const NewVideoDetailsScreen(
@@ -69,7 +69,7 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
     appData = context.read<HiveUserData>();
     videoSettingProvider = context.read<VideoSettingProvider>();
     super.initState();
-    Wakelock.enable();
+    WakelockPlus.enable();
     loadDataAndVideo();
     loadHiveInfo();
     loadSuggestions();
@@ -82,7 +82,7 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
           .removeListener(_videoPlayerListener);
     }
     super.dispose();
-    Wakelock.disable();
+    WakelockPlus.disable();
   }
 
   @override

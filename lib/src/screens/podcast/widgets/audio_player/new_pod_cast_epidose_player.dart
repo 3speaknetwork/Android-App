@@ -17,9 +17,10 @@ import 'package:acela/src/screens/podcast/widgets/podcast_player_widgets/progres
 import 'package:acela/src/utils/seconds_to_duration.dart';
 import 'package:acela/src/widgets/cached_image.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:auto_scroll_text/auto_scroll_text.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:marquee/marquee.dart';
+// import 'package:marquee/marquee.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:share_plus/share_plus.dart';
@@ -225,18 +226,23 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
                               : Transform.translate(
                                   offset: Offset(
                                     lerpDouble(-150, 0, widget.dragValue) ?? 0,
-                                    lerpDouble(-152.5, 0, widget.dragValue) ?? 0,
+                                    lerpDouble(-152.5, 0, widget.dragValue) ??
+                                        0,
                                   ),
                                   child: Container(
                                       height: lerpDouble(
                                               50,
-                                              MediaQuery.of(context).size.height *
+                                              MediaQuery.of(context)
+                                                      .size
+                                                      .height *
                                                   0.45,
                                               widget.dragValue) ??
                                           0,
                                       width: lerpDouble(
                                               50,
-                                              MediaQuery.of(context).size.width *
+                                              MediaQuery.of(context)
+                                                      .size
+                                                      .width *
                                                   0.85,
                                               widget.dragValue) ??
                                           0,
@@ -250,7 +256,8 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
                                       child: Selector<PodcastChapterController,
                                           String?>(
                                         selector: (_, myType) => myType.image,
-                                        builder: (context, chapterImage, child) {
+                                        builder:
+                                            (context, chapterImage, child) {
                                           return CachedImage(
                                             imageUrl:
                                                 chapterImage ?? originalImage,
@@ -280,7 +287,8 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
                                         height: 5,
                                       ),
                                       Text(
-                                        currentPodcastEpisode.datePublishedPretty
+                                        currentPodcastEpisode
+                                            .datePublishedPretty
                                             .toString(),
                                         style: TextStyle(fontSize: 12),
                                       ),
@@ -374,23 +382,14 @@ class _NewPodcastEpidosePlayerState extends State<NewPodcastEpidosePlayer> {
                       maxwidth,
                       3) >
                   1
-              ? Marquee(
-                  text: chapterTitle ?? originalTitle,
+              ? AutoScrollText(
+                  chapterTitle ?? originalTitle,
+                  intervalSpaces: 10,
+                  velocity: Velocity(
+                    pixelsPerSecond: Offset(50, 0),
+                  ),
                   style: TextStyle(
                       fontWeight: FontWeight.bold, fontSize: fontSize),
-                  scrollAxis: Axis.horizontal,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  blankSpace: 50,
-                  velocity: 40.0,
-                  pauseAfterRound: const Duration(milliseconds: 1000),
-                  showFadingOnlyWhenScrolling: true,
-                  fadingEdgeStartFraction: 0.1,
-                  fadingEdgeEndFraction: 0.1,
-                  startPadding: 0.0,
-                  accelerationDuration: const Duration(seconds: 2),
-                  accelerationCurve: Curves.linear,
-                  decelerationDuration: const Duration(milliseconds: 500),
-                  decelerationCurve: Curves.easeOut,
                 )
               : Text(
                   chapterTitle ?? originalTitle,
