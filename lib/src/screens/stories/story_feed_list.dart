@@ -45,7 +45,7 @@ class _StoryFeedListState extends State<StoryFeedList>
   var firstPageLoaded = false;
   var isLoading = false;
   var hasFailed = false;
-  CarouselController controller = CarouselController();
+  CarouselSliderController controller = CarouselSliderController();
   // final _scrollController = ScrollController();
 
   @override

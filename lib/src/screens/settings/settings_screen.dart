@@ -203,9 +203,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _appVersion(BuildContext context) {
     final String? appCurrentVersion =
-        Upgrader.sharedInstance.currentInstalledVersion();
+        Upgrader.sharedInstance.currentInstalledVersion;
     final String? newAvailableVersion =
-        Upgrader.sharedInstance.currentAppStoreVersion();
+        Upgrader.sharedInstance.currentAppStoreVersion;
     return ListTile(
       leading: const Icon(Icons.app_settings_alt_sharp),
       title: Text("Current Version $appCurrentVersion"),

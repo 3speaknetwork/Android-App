@@ -28,7 +28,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'hive_upvote_dialog.dart';
 
@@ -49,14 +49,14 @@ class _VideoDetailsScreenState extends State<VideoDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    Wakelock.enable();
+    WakelockPlus.enable();
     recommendedVideos = widget.vm.getRecommendedVideos();
   }
 
   @override
   void dispose() {
     super.dispose();
-    Wakelock.disable();
+    WakelockPlus.disable();
   }
 
   void onUserTap() {

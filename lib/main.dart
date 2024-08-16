@@ -1,4 +1,4 @@
-import 'package:acela/firebase_options.dart';
+// import 'package:acela/firebase_options.dart';
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/global_provider/image_resolution_provider.dart';
 import 'package:acela/src/global_provider/video_setting_provider.dart';
@@ -29,7 +29,7 @@ Future<void> main() async {
   await dotenv.load(fileName: "dotenv");
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+    // options: DefaultFirebaseOptions.currentPlatform,
   );
   await GetStorage.init();
   await FlutterDownloader.initialize(
@@ -111,8 +111,7 @@ class _MyAppState extends State<MyApp> {
           create: (context) => PodcastController(),
         ),
         ChangeNotifierProvider(
-          lazy: false,
-          create: (context) => VideoSettingProvider()),
+            lazy: false, create: (context) => VideoSettingProvider()),
         ChangeNotifierProvider(
           lazy: false,
           create: (context) => SettingsProvider(),
@@ -161,14 +160,14 @@ class _MyAppState extends State<MyApp> {
     const storage = FlutterSecureStorage();
     String? username = await storage.read(key: 'username');
     String? postingKey = await storage.read(key: 'postingKey');
-     String? cookie = await storage.read(key: 'cookie');
+    String? cookie = await storage.read(key: 'cookie');
     String? accessToken = await storage.read(key: 'accessToken');
     String? hasId = await storage.read(key: 'hasId');
     String? hasExpiry = await storage.read(key: 'hasExpiry');
     String? hasAuthKey = await storage.read(key: 'hasAuthKey');
     String resolution = await storage.read(key: 'resolution') ?? '480p';
     String rpc = await storage.read(key: 'rpc') ?? 'api.hive.blog';
-    String? postingAuth = await storage.read(key: 'postingAuth') ;
+    String? postingAuth = await storage.read(key: 'postingAuth');
     String union =
         await storage.read(key: 'union') ?? GQLCommunicator.defaultGQLServer;
     if (union == 'threespeak-union-graph-ql.sagarkothari88.one') {

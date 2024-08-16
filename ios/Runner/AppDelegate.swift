@@ -3,7 +3,7 @@ import Flutter
 import AVKit
 import flutter_downloader
 
-@UIApplicationMain
+@main
 @objc class AppDelegate: FlutterAppDelegate {
 	var acela: AcelaWebViewController?
 	let authBridge = AuthBridge()

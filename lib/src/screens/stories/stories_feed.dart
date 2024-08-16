@@ -28,7 +28,7 @@ class _StoriesFeedScreenState extends State<StoriesFeedScreen> {
   List<StoriesFeedResponseItem> items = [];
   var isLoading = false;
   var initialPage = 0;
-  CarouselController controller = CarouselController();
+  CarouselSliderController controller = CarouselSliderController();
   bool isFilterMenuOn = false;
 
   @override
@@ -106,7 +106,7 @@ class _StoriesFeedScreenState extends State<StoriesFeedScreen> {
     return SafeArea(
       child: Container(
         child: CarouselSlider(
-          carouselController: controller,
+          CarouselSliderController: controller,
           options: CarouselOptions(
             height: MediaQuery.of(context).size.height,
             enableInfiniteScroll: true,

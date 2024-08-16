@@ -16,7 +16,7 @@ class FavouriteShortsBody extends StatefulWidget {
 }
 
 class _FavouriteShortsBodyState extends State<FavouriteShortsBody> {
-  final CarouselController controller = CarouselController();
+  final CarouselSliderController controller = CarouselSliderController();
   final VideoFavoriteProvider dataProvider = VideoFavoriteProvider();
   
   @override

@@ -5,7 +5,7 @@ import 'package:acela/src/screens/settings/settings_screen.dart';
 import 'package:acela/src/utils/communicator.dart';
 import 'package:flutter/cupertino.dart';
 
-class VideoSaveMixin {
+mixin VideoSaveMixin {
   ValueNotifier<String> savingText = ValueNotifier('Saving video info');
   ValueNotifier<bool> isSaving = ValueNotifier(false);
 

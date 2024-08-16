@@ -135,6 +135,7 @@ class _GQLFeedScreenState extends State<GQLFeedScreen>
         },
       ),
       title: Text('3Speak.tv'),
+      subtitle: Text('Powered by Hive'),
     );
   }
 
@@ -142,11 +143,8 @@ class _GQLFeedScreenState extends State<GQLFeedScreen>
   Widget build(BuildContext context) {
     var appData = Provider.of<HiveUserData>(context);
     return UpgradeAlert(
-      upgrader: Upgrader(
-        // debugDisplayAlways: true, // for debugging
-        showIgnore: true,
-        showReleaseNotes: true,
-      ),
+      showIgnore: true,
+      showReleaseNotes: true,
       child: Scaffold(
         bottomNavigationBar: BottomNavBar(
           appData: widget.appData,
