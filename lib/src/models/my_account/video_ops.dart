@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:acela/src/utils/safe_convert.dart';
+import 'package:equatable/equatable.dart';
 
 class VideoOpsResponse {
   final bool success;
@@ -31,18 +32,17 @@ class ErrorResponse {
       ErrorResponse.fromJson(json.decode(jsonString));
 }
 
-class BeneficiariesJson {
+class BeneficiariesJson extends Equatable {
   final String account;
   int weight;
   final String src;
   final bool isDefault;
 
-  BeneficiariesJson({
-    required this.account,
-    required this.weight,
-    required this.src,
-    this.isDefault = false
-  });
+  BeneficiariesJson(
+      {required this.account,
+      required this.weight,
+      required this.src,
+      this.isDefault = false});
 
   factory BeneficiariesJson.fromJson(Map<String, dynamic>? json) =>
       BeneficiariesJson(
@@ -61,7 +61,7 @@ class BeneficiariesJson {
     return json.encode(data);
   }
 
-   BeneficiariesJson copyWith({
+  BeneficiariesJson copyWith({
     String? account,
     int? weight,
     String? src,
@@ -82,4 +82,7 @@ class BeneficiariesJson {
       'src': src,
     };
   }
+
+  @override
+  List<Object?> get props => [account, src];
 }

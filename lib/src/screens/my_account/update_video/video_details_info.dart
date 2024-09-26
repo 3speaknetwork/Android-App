@@ -323,7 +323,7 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
               .replaceAll("ipfs://", "")
               .replaceAll("/manifest.m3u8", "");
         }
-        List<BeneficiariesJson> newBene = beneficiaries
+        List<BeneficiariesJson> newBene = beneficiaries.toSet()
             .map((e) => e.copyWith(account: e.account.toLowerCase()))
             .toList()
           ..sort((a, b) =>
@@ -354,7 +354,7 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
         });
         log('Response from platform $response');
         var bridgeResponse = LoginBridgeResponse.fromJsonString(response);
-        if (bridgeResponse.error == "success") {
+        if ((bridgeResponse.error == "success" || bridgeResponse.error.isEmpty) && user.keychainData?.hasAuthKey == null) {
           showMessage(
               'Please wait. Video is posted on Hive but needs to be marked as published.');
           Future.delayed(const Duration(seconds: 6), () async {
@@ -573,6 +573,17 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
   }
 
   void setBeneficiares({String? userName, bool resetBeneficiares = false}) {
+    int mobileAppPayIndex = beneficiaries.indexWhere((element) =>
+        (element.account == 'sagarkothari88' &&
+            element.src == "MOBILE_APP_PAY"));
+    int mobileAppPayAndEncoderPayIndex = beneficiaries.indexWhere((element) =>
+        (element.account == 'sagarkothari88' &&
+            (element.src == "MOBILE_APP_PAY_AND_ENCODER_PAY" ||
+                element.src == "ENCODER_PAY_AND_MOBILE_APP_PAY")));
+
+    if (mobileAppPayIndex != -1 && mobileAppPayAndEncoderPayIndex != -1) {
+      beneficiaries.removeAt(mobileAppPayIndex);
+    }
     for (int i = 0; i < beneficiaries.length; i++) {
       if (widget.appData.username! != 'sagarkothari88' &&
           beneficiaries[i].account == 'sagarkothari88') {
@@ -580,15 +591,22 @@ class _VideoDetailsInfoState extends State<VideoDetailsInfo> {
       } else if (widget.appData.username! != 'spk.beneficiary' &&
           beneficiaries[i].account == 'spk.beneficiary') {
         beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
-      }
-      else if (beneficiaries[i].src == 'ENCODER_PAY') {
+      } else if (beneficiaries[i].src == 'ENCODER_PAY') {
         beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
       } else if (beneficiaries[i].src == 'MOBILE_APP_PAY_AND_ENCODER_PAY') {
         beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
+      } else if (beneficiaries[i].src == 'ENCODER_PAY_AND_MOBILE_APP_PAY') {
+        beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
+      } else if (beneficiaries[i].src == 'MOBILE_APP_PAY') {
+        beneficiaries[i] = beneficiaries[i].copyWith(isDefault: true);
       }
     }
-    if (beneficiaries
-            .indexWhere((element) => element.account == 'sagarkothari88') ==
+    if (beneficiaries.indexWhere((element) =>
+            (element.account == 'sagarkothari88' &&
+                element.src == "MOBILE_APP_PAY") ||
+            (element.account == 'sagarkothari88' &&
+                (element.src == "MOBILE_APP_PAY_AND_ENCODER_PAY" ||
+                    element.src == "ENCODER_PAY_AND_MOBILE_APP_PAY"))) ==
         -1) {
       beneficiaries.add(
         BeneficiariesJson(
