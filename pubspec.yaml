@@ -38,7 +38,6 @@ dependencies:
 
   crypto: ^3.0.3
   device_info_plus: ^10.1.2
-  ffmpeg_kit_flutter: ^6.0.3
   file_picker: ^5.2.10
   flutter:
     sdk: flutter
@@ -93,6 +92,8 @@ dependencies:
   miniplayer: ^1.0.1
   win32: ^5.5.4
   wakelock_plus: ^1.2.8
+  ffmpeg_kit_flutter_https_gpl: 6.0.3
+  archive: ^3.6.1
 
 dev_dependencies:
   flutter_test:
