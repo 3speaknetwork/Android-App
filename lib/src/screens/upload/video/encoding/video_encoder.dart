@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:acela/src/screens/upload/video/encoding/folder_path.dart';
 import 'package:acela/src/screens/upload/video/encoding/resolution.dart';
 import 'package:ffmpeg_kit_flutter_https_gpl/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_https_gpl/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_flutter_https_gpl/ffprobe_kit.dart' as ffprobe;
 import 'package:ffmpeg_kit_flutter_https_gpl/media_information_session.dart';
+import 'package:ffmpeg_kit_flutter_https_gpl/session.dart';
 import 'package:flutter/foundation.dart';
 
 class VideoEncoder {
@@ -16,6 +19,8 @@ class VideoEncoder {
   static String testPath = '/storage/emulated/0/Download';
 
   static String foldername = 'encoded_videos';
+  static String zipFileName = "video.zip";
+
   Future<VideoResolution?> getVideoResolution(String filePath) async {
     var execution = await ffprobe.FFprobeKit.execute(
       '-v error -select_streams v:0 -show_entries stream=width,height -of json -i $filePath',
@@ -118,14 +123,26 @@ class VideoEncoder {
     StreamController<double> combinedProgressStream =
         StreamController<double>();
 
-    combinedProgressStream.stream.listen((combinedProgress) {
-      progressListener.value = combinedProgress / 100;
-      debugPrint("Overall Progress: ${combinedProgress.toStringAsFixed(2)}%");
-      if (combinedProgress == 100) {
+    combinedProgressStream.stream.listen((combinedProgress) async {
+      try {
+        // throw Exception('error');
+        progressListener.value = combinedProgress / 100;
+        debugPrint("Overall Progress: ${combinedProgress.toStringAsFixed(2)}%");
+        if (combinedProgress == 100) {
+          combinedProgressStream.close();
+          await folderPath.zipFolder(encodingPath);
+          folderPath.printFolderContent(encodingPath);
+          print(folderPath.printM3u8Contents());
+          print(folderPath.printFolderContent(encodingPath));
+          onComplete();
+        }
+      } catch (e) {
         combinedProgressStream.close();
-        print(folderPath.printM3u8Contents());
-        onComplete();
+        log("error ${e.toString()}");
+        rethrow;
       }
+    }, onError: (e) {
+      throw e;
     });
     for (int i = 0; i < targetResolutions.length; i++) {
       VideoResolution resolution = targetResolutions[i];
@@ -136,11 +153,16 @@ class VideoEncoder {
         inputPath,
         encodingPath,
         resolution,
-        (individualProgress) {
+        () => combinedProgressStream.isClosed,
+        (individualProgress, session) {
           progressList[i] = individualProgress;
           double combinedProgress =
               progressList.reduce((a, b) => a + b) / targetResolutions.length;
-          combinedProgressStream.add(combinedProgress);
+          if (!combinedProgressStream.isClosed) {
+            combinedProgressStream.add(combinedProgress);
+          } else {
+            session?.cancel();
+          }
         },
       );
       debugPrint(
@@ -155,7 +177,8 @@ class VideoEncoder {
     String inputPath,
     String outputPath,
     VideoResolution resolution,
-    Function(double) onProgressUpdate,
+    bool Function() isStreamCancelled,
+    Function(double, FFmpegSession?) onProgressUpdate,
   ) async {
     String command;
     if (resolution.convertVideo) {
@@ -168,19 +191,27 @@ class VideoEncoder {
     MediaInformationSession info =
         await ffprobe.FFprobeKit.getMediaInformation(inputPath);
     String? duratio = info.getMediaInformation()?.getDuration();
-
-    FFmpegKit.executeAsync(
+    FFmpegSession? session;
+    session = await FFmpegKit.executeAsync(
       command,
       (session) {
-        onProgressUpdate(100);
+        onProgressUpdate(100, session);
         debugPrint('Video encoding completed successfully');
       },
       (log) {},
       (statistics) {
+        if (isStreamCancelled()) {
+          session?.cancel();
+          log('stream closed session cancelled');
+          return;
+        }
         double progress =
             ((statistics.getTime()) ~/ double.parse(duratio!)) / 10;
-        onProgressUpdate(progress);
+        onProgressUpdate(progress, null);
       },
-    );
+    ).catchError((e) {
+      log('error ${e.toString()}');
+      throw e;
+    });
   }
 }

@@ -40,6 +40,7 @@ mixin Upload {
 
     int fileSize = _checkFileSize(size);
     var path = pickedVideoFile.path;
+    // FolderPath().printFolderContent( FolderPath().path());
     encodeVideoAndThen(path, () async {
       // var videoUploadReponse = await _uploadToServer(path, videoUploadProgress);
       var name = 'videoUploadReponse.name';
@@ -171,12 +172,16 @@ mixin Upload {
 
   Future<void> encodeVideoAndThen(
       String filePath, VoidCallback onComplete) async {
-    VideoEncoder encoder = VideoEncoder();
-    VideoResolution? originalResolution =
-        await encoder.getVideoResolution(filePath);
-    List<VideoResolution> all =
-        encoder.generateTargetResolutions(originalResolution!);
-    await encoder.convertToMultipleResolutions(
-        filePath, all, videoUploadProgress, onComplete);
+    try {
+      VideoEncoder encoder = VideoEncoder();
+      VideoResolution? originalResolution =
+          await encoder.getVideoResolution(filePath);
+      List<VideoResolution> all =
+          encoder.generateTargetResolutions(originalResolution!);
+      await encoder.convertToMultipleResolutions(
+          filePath, all, videoUploadProgress, onComplete);
+    } catch (e) {
+      log('error ${e.toString()}');
+    }
   }
 }

@@ -11,12 +11,10 @@ class FolderPath {
     return appDocDir.path;
   }
 
-  String path() =>
-      "${getStorageDirectory()}/${VideoEncoder.foldername}";
+  String path() => "${getStorageDirectory()}/${VideoEncoder.foldername}";
 
   Future<String> createFolder({String? customFolderPath}) async {
-    String internalStoragePath =
-        customFolderPath ?? getStorageDirectory();
+    String internalStoragePath = customFolderPath ?? getStorageDirectory();
     String folderPath = '$internalStoragePath/${VideoEncoder.foldername}';
 
     Directory folder = Directory(folderPath);
@@ -25,6 +23,10 @@ class FolderPath {
     // }
 
     return folderPath;
+  }
+
+  File readZipFile() {
+    return File("${path()}/${VideoEncoder.zipFileName}");
   }
 
   Future<void> printM3u8Contents() async {
@@ -47,7 +49,6 @@ class FolderPath {
   }
 
   Future<bool> printFolderContent(String path) async {
-
     Directory folder = Directory(path);
     bool result = await folder.exists();
 
@@ -116,5 +117,40 @@ class FolderPath {
     ZipFileEncoder archiveBuilder = ZipFileEncoder();
     archiveBuilder.zipDirectory(Directory(sourcePath),
         filename: '$zipFilePath/out.zip');
+  }
+
+  Future<void> zipFolder(
+    String folderPath,
+  ) async {
+    // Get a directory reference
+    final folder = Directory(folderPath);
+
+    if (!folder.existsSync()) {
+      throw Exception("The folder does not exist");
+    }
+
+    // Create a ZIP archive
+    final archive = Archive();
+
+    // Recursively add files and directories
+    for (var entity in folder.listSync(recursive: true)) {
+      if (entity is File) {
+        // Read the file and add it to the archive
+        final fileBytes = entity.readAsBytesSync();
+        final relativePath = entity.path.substring(folder.path.length + 1);
+        archive.addFile(ArchiveFile(relativePath, fileBytes.length, fileBytes));
+      }
+    }
+
+    // Encode the archive and write it to a ZIP file
+    final zipData = ZipEncoder().encode(archive);
+
+    // final zipFile = File(folderPath);
+    // zipFile.writeAsBytesSync(zipData!);
+
+    final zipFile = File("$folderPath/${VideoEncoder.zipFileName}");
+    zipFile.writeAsBytesSync(zipData!);
+
+    print('Folder zipped successfully to ${zipFile.path}');
   }
 }
