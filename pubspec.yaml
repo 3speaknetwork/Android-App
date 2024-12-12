@@ -93,6 +93,7 @@ dependencies:
   miniplayer: ^1.0.1
   win32: ^5.5.4
   wakelock_plus: ^1.2.8
+  wakelock_web: ^0.4.0
 
 dev_dependencies:
   flutter_test:
