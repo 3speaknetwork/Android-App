@@ -54,6 +54,10 @@ mixin Upload {
       log('Uploaded thumbnail file name is ${thumbReponse.name}');
       uploadedVideoItem = await _encodeAndUploadInfo(path, hiveUserData,
           thumbReponse.name, originalFileName, fileSize, name);
+      
+      var zipPath = FolderPath().readZipFile().path;
+      var string = await Communicator().uploadZip(permlink: uploadedVideoItem.permlink, user: hiveUserData, uploadZipFilePath: zipPath);
+      debugPrint("We got data from server = $string");
       uploadStatus.value = UploadStatus.ended;
       _initiateNextUpload();
     });

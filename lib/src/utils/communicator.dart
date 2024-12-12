@@ -38,16 +38,16 @@ class VideoSize {
 
 class Communicator {
   // Production
-  static const tsServer = "https://studio.3speak.tv";
-  static const fsServer = "https://uploads.3speak.tv/files";
+  // static const tsServer = "https://studio.3speak.tv";
+  // static const fsServer = "https://uploads.3speak.tv/files";
 
   // Android
   // static const fsServer = "http://10.0.2.2:1080/files";
   // static const tsServer = "http://10.0.2.2:13050";
 
   // iOS
-  // static const tsServer = "http://localhost:13050";
-  // static const fsServer = "http://localhost:1080/files";
+  static const tsServer = "http://localhost:13050";
+  static const fsServer = "http://localhost:1080/files";
 
   // iOS Devices - Local Server Testing
   // static const tsServer = "http://192.168.29.53:13050";
@@ -412,6 +412,43 @@ class Communicator {
         var string = await response.stream.bytesToString();
         log('Video complete response is\n$string');
         return VideoDetails.fromJsonString(string);
+      } else {
+        var string = await response.stream.bytesToString();
+        var error = ErrorResponse.fromJsonString(string).error ??
+            response.reasonPhrase.toString();
+        log('Error from server is $error');
+        throw error;
+      }
+    } catch (e) {
+      log('Error from server is ${e.toString()}');
+      rethrow;
+    }
+  }
+
+  Future<String> uploadZip(
+      {required HiveUserData user,
+      required String permlink,
+      required String uploadZipFilePath}) async {
+    final uri = Uri.parse(
+        '${Communicator.tsServer}/mobile/api/upload_zip?permlink=$permlink');
+    var request = http.MultipartRequest('POST', uri);
+    var cookie = await getValidCookie(user);
+    Map<String, String> map = {
+      "cookie": cookie,
+      "Content-Type": "application/json"
+    };
+    request.headers.addAll(map);
+    try {
+      request.files.add(await http.MultipartFile.fromPath(
+        'file', // Key name expected by the server
+        uploadZipFilePath,
+      ));
+      http.StreamedResponse response = await request.send();
+      if (response.statusCode == 200) {
+        log("Successfully sent upload complete");
+        var string = await response.stream.bytesToString();
+        log('Video complete response is\n$string');
+        return string;
       } else {
         var string = await response.stream.bytesToString();
         var error = ErrorResponse.fromJsonString(string).error ??
