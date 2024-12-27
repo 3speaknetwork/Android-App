@@ -31,10 +31,18 @@ mixin Upload {
   void onUpload(
       {required XFile pickedVideoFile,
       required HiveUserData hiveUserData,
-      required Function(String) onError}) async {
-    var size = await pickedVideoFile.length();
-    var originalFileName = pickedVideoFile.name;
+      required Function(String) onError,
+      required bool isDeviceEncoding}) async {
+    if (isDeviceEncoding) {
+      await localEncodeAndUpload(pickedVideoFile, hiveUserData, onError);
+    } else {
+      await serverEncodeAndUpload(pickedVideoFile, hiveUserData, onError);
+    }
+  }
 
+  Future<void> localEncodeAndUpload(XFile pickedVideoFile,
+      HiveUserData hiveUserData, Function(String) onError) async {
+    var size = await pickedVideoFile.length();
     _initiateNextUpload();
     uploadStatus.value = UploadStatus.started;
     log('upload started');
@@ -43,10 +51,35 @@ mixin Upload {
     var path = pickedVideoFile.path;
     FolderPath().printFolderContent(FolderPath().path());
     encodeVideoAndThen(path, () async {
-      var videoUploadReponse = await _uploadToServer(path, videoUploadProgress);
-      var name = 'videoUploadReponse.name';
       _initiateNextUpload();
-      var thumbPath = await _getThumbnail(path);
+      await _setThumbnailForLocalEncode(path);
+      _initiateNextUpload();
+      var zipPath = FolderPath().readZipFile().path;
+      // var string = await Communicator().uploadZip(
+      //     permlink: uploadedVideoItem.permlink,
+      //     user: hiveUserData,
+      //     uploadZipFilePath: zipPath);
+      // debugPrint("We got data from server = $string");
+      uploadStatus.value = UploadStatus.ended;
+      _initiateNextUpload();
+    }, onError);
+  }
+
+  Future<void> serverEncodeAndUpload(XFile pickedVideoFile,
+      HiveUserData hiveUserData, Function(String) onError) async {
+    try {
+      var size = await pickedVideoFile.length();
+      var originalFileName = pickedVideoFile.name;
+
+      _initiateNextUpload();
+      uploadStatus.value = UploadStatus.started;
+      log('upload started');
+      int fileSize = _checkFileSize(size);
+      var path = pickedVideoFile.path;
+      var videoUploadReponse = await _uploadToServer(path, videoUploadProgress);
+      var name = videoUploadReponse.name;
+      _initiateNextUpload();
+      var thumbPath = await _getThumbnailForServerEncode(path);
       _initiateNextUpload();
       var thumbReponse = await uploadThumbnail(thumbPath);
       _initiateNextUpload();
@@ -55,16 +88,11 @@ mixin Upload {
       log('Uploaded thumbnail file name is ${thumbReponse.name}');
       uploadedVideoItem = await _encodeAndUploadInfo(path, hiveUserData,
           thumbReponse.name, originalFileName, fileSize, name);
-
-      var zipPath = FolderPath().readZipFile().path;
-      var string = await Communicator().uploadZip(
-          permlink: uploadedVideoItem.permlink,
-          user: hiveUserData,
-          uploadZipFilePath: zipPath);
-      debugPrint("We got data from server = $string");
       uploadStatus.value = UploadStatus.ended;
       _initiateNextUpload();
-    }, onError);
+    } catch (e) {
+      onError(e.toString());
+    }
   }
 
   bool isFreshUpload() {
@@ -87,7 +115,7 @@ mixin Upload {
     );
   }
 
-  Future<String> _getThumbnail(String path) async {
+  Future<String> _setThumbnailForLocalEncode(String path) async {
     try {
       FolderPath folderPath = FolderPath();
       var imagePath = await VideoThumbnail.thumbnailFile(
@@ -105,6 +133,25 @@ mixin Upload {
 
       await thumbnailFile.rename(newThumbnailPath);
       return newThumbnailPath;
+    } catch (e) {
+      throw 'Error generating video thumbnail ${e.toString()}';
+    }
+  }
+
+  Future<String> _getThumbnailForServerEncode(String path) async {
+    try {
+      Directory tempDir = Directory.systemTemp;
+      var imagePath = await VideoThumbnail.thumbnailFile(
+        video: path,
+        thumbnailPath: tempDir.path,
+        imageFormat: ImageFormat.PNG,
+        maxWidth: 320,
+        quality: 100,
+      );
+      if (imagePath == null) {
+        throw 'Could not generate video thumbnail';
+      }
+      return imagePath;
     } catch (e) {
       throw 'Error generating video thumbnail ${e.toString()}';
     }
@@ -153,29 +200,33 @@ mixin Upload {
 
   Future<UploadResponse> _uploadToServer(
       String path, ValueNotifier<double> progressIndicator) async {
-    final xfile = XFile(path);
-    final client = TusClient(
-      Uri.parse(Communicator.fsServer),
-      xfile,
-      store: TusMemoryStore(),
-    );
-    var name = "";
-    var url = '';
-    await client.upload(
-      onComplete: () async {
-        progressIndicator.value = 1.0;
-        debugPrint("Complete!");
-        debugPrint(client.uploadUrl.toString());
-        url = client.uploadUrl.toString();
-        var ipfsName = url.replaceAll("${Communicator.fsServer}/", "");
-        name = ipfsName;
-      },
-      onProgress: (progress) {
-        log("Progress: $progress");
-        progressIndicator.value = progress / 100.0;
-      },
-    );
-    return UploadResponse(name: name, url: url);
+    try {
+      final xfile = XFile(path);
+      final client = TusClient(
+        Uri.parse(Communicator.fsServer),
+        xfile,
+        store: TusMemoryStore(),
+      );
+      var name = "";
+      var url = '';
+      await client.upload(
+        onComplete: () async {
+          progressIndicator.value = 1.0;
+          debugPrint("Complete!");
+          debugPrint(client.uploadUrl.toString());
+          url = client.uploadUrl.toString();
+          var ipfsName = url.replaceAll("${Communicator.fsServer}/", "");
+          name = ipfsName;
+        },
+        onProgress: (progress) {
+          log("Progress: $progress");
+          progressIndicator.value = progress / 100.0;
+        },
+      );
+      return UploadResponse(name: name, url: url);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> encodeVideoAndThen(String filePath, VoidCallback onComplete,

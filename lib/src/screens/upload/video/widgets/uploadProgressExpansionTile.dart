@@ -10,7 +10,8 @@ class UploadProgressExpandableTile extends StatefulWidget {
       required this.thumbnailUploadProgress,
       required this.uploadStatus,
       required this.pageController,
-      required this.currentPage})
+      required this.currentPage,
+      required this.isLocalEncode})
       : super(key: key);
 
   final Function() onUpload;
@@ -19,6 +20,7 @@ class UploadProgressExpandableTile extends StatefulWidget {
   final ValueNotifier<double> thumbnailUploadProgress;
   final ValueNotifier<UploadStatus> uploadStatus;
   final PageController pageController;
+  final bool isLocalEncode;
 
   @override
   State<UploadProgressExpandableTile> createState() =>
@@ -106,7 +108,7 @@ class _UploadProgressExpandableTileState
     if (status == UploadStatus.idle) {
       return "Waiting to Upload";
     } else if (status == UploadStatus.started) {
-      return "Uploading (${(_pageIndex)}/4)";
+      return "Uploading (${(_pageIndex)}/${widget.isLocalEncode ? 3 : 4})";
     } else {
       return "Upload Complete";
     }
@@ -130,7 +132,7 @@ class _UploadProgressExpandableTileState
         visible: showWidgets,
         child: ListTile(
             leading: videoUploadProgressWidget(!isExpanded),
-            title: Text('Video Upload'),
+            title: Text(widget.isLocalEncode ? "Video Encode" : 'Video Upload'),
             trailing: videoUploadProgressWidget(isExpanded)),
       ),
       Visibility(
@@ -140,18 +142,21 @@ class _UploadProgressExpandableTileState
             title: const Text('Fetching Video Thumbnail'),
             trailing: fetchingVideoThumbnailProgressWidget(isExpanded)),
       ),
-      Visibility(
-        visible: showWidgets,
-        child: ListTile(
-            leading: thumbnailUploadProgressWidget(!isExpanded),
-            title: Text('Thumbnail Upload'),
-            trailing: thumbnailUploadProgressWidget(isExpanded)),
-      ),
+      if (!widget.isLocalEncode)
+        Visibility(
+          visible: showWidgets,
+          child: ListTile(
+              leading: thumbnailUploadProgressWidget(!isExpanded),
+              title: Text('Thumbnail Upload'),
+              trailing: thumbnailUploadProgressWidget(isExpanded)),
+        ),
       Visibility(
         visible: showWidgets,
         child: ListTile(
             leading: moveWidgetToEncodingQueueProgressWidget(!isExpanded),
-            title: const Text('Preparing for Encoding'),
+            title: Text(widget.isLocalEncode
+                ? "Video Upload"
+                : 'Preparing for Encoding'),
             trailing: moveWidgetToEncodingQueueProgressWidget(isExpanded)),
       ),
       Visibility(
@@ -220,12 +225,13 @@ class _UploadProgressExpandableTileState
   }
 
   Widget? moveWidgetToEncodingQueueProgressWidget(bool isVisible) {
+    int pageIndex = widget.isLocalEncode ? 3 : 4;
     if (!isVisible) {
       return null;
-    } else if (_pageIndex < 4) {
+    } else if (_pageIndex < pageIndex) {
       return const Icon(Icons.pending);
     } else {
-      if (_pageIndex == 4) {
+      if (_pageIndex == pageIndex) {
         return _progessIndicator(showBacgroundColor: false);
       } else {
         return const Icon(Icons.check, color: Colors.lightGreen);

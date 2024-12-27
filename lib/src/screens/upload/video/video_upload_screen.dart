@@ -21,12 +21,16 @@ import 'package:provider/provider.dart';
 
 class VideoUploadScreen extends StatefulWidget {
   const VideoUploadScreen(
-      {Key? key, required this.appData, required this.isCamera})
+      {Key? key,
+      required this.appData,
+      required this.isCamera,
+      required this.isDeviceEncode})
       : super(key: key);
 
   final HiveUserData appData;
 
   final bool isCamera;
+  final bool isDeviceEncode;
   @override
   State<VideoUploadScreen> createState() => _VideoUploadScreenState();
 }
@@ -44,6 +48,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
     tagsController = TextEditingController(text: controller.tags);
     controller.setBeneficiares(
         userName: context.read<HiveUserData>().username!);
+    controller.isDeviceEncoding = widget.isDeviceEncode;
     super.initState();
   }
 
@@ -94,6 +99,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                         thumbnailUploadProgress:
                             controller.thumbnailUploadProgress,
                         uploadStatus: controller.uploadStatus,
+                        isLocalEncode: widget.isDeviceEncode,
                         onUpload: () {
                           _onUpload(context, controller);
                         }),
@@ -227,19 +233,25 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
             ImagesPicker.saveVideoToAlbum(fileToSave);
           }
           controller.onUpload(
-            hiveUserData: widget.appData,
-            pickedVideoFile: file,
-          );
+              isDeviceEncoding: controller.isDeviceEncoding,
+              hiveUserData: widget.appData,
+              pickedVideoFile: file,
+              onError: (e) => _onError(e, context, controller));
         } else {
           showMessage('Video Picker Cancelled');
           Navigator.pop(context);
         }
       } catch (e) {
-        showMessage(e.toString());
-        Navigator.pop(context);
-        controller.resetController();
+        _onError(e, context, controller);
       }
     }
+  }
+
+  void _onError(
+      dynamic e, BuildContext context, VideoUploadController controller) {
+    showMessage(e.toString());
+    Navigator.pop(context);
+    controller.resetController();
   }
 
   void showMessage(

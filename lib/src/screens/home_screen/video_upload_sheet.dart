@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
+import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/video_encoder_switch.dart';
 import 'package:acela/src/screens/upload/video/video_upload_screen.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
 import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
@@ -45,6 +46,7 @@ class VideoUploadSheet {
 
   static void _showBottomSheetForVideoOptions(
       bool isReel, HiveUserData data, BuildContext context) {
+    final ValueNotifier<bool> isDeviceEncode = ValueNotifier(false);
     showAdaptiveActionSheet(
       context: context,
       title: const Text('How do you want to upload?'),
@@ -57,6 +59,7 @@ class VideoUploadSheet {
             var screen = VideoUploadScreen(
               isCamera: true,
               appData: data,
+              isDeviceEncode: isDeviceEncode.value,
             );
             var route = MaterialPageRoute(builder: (c) => screen);
             Navigator.of(context).pop();
@@ -70,10 +73,20 @@ class VideoUploadSheet {
               var screen = VideoUploadScreen(
                 isCamera: false,
                 appData: data,
+                isDeviceEncode: isDeviceEncode.value,
               );
               var route = MaterialPageRoute(builder: (c) => screen);
               Navigator.of(context).pop();
               Navigator.of(context).push(route);
+            }),
+        BottomSheetAction(
+            title: const Text('Encode video on device'),
+            leading: const Icon(Icons.emergency_outlined),
+            trailing: VideoEncoderSwitch(
+              valueNotifier: isDeviceEncode,
+            ),
+            onPressed: (c) {
+              isDeviceEncode.value = !isDeviceEncode.value;
             }),
       ],
       cancelAction: CancelAction(

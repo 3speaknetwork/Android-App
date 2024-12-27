@@ -20,6 +20,7 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
   List<BeneficiariesJson> beneficaries = [];
   String userName = '';
   late VideoLanguage language;
+  bool isDeviceEncoding = false;
 
   VideoUploadController() {
     setCommunity();
