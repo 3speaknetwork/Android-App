@@ -232,7 +232,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
           if (widget.isCamera) {
             ImagesPicker.saveVideoToAlbum(fileToSave);
           }
-          controller.onUpload(
+         await controller.onUpload(
               isDeviceEncoding: controller.isDeviceEncoding,
               hiveUserData: widget.appData,
               pickedVideoFile: file,

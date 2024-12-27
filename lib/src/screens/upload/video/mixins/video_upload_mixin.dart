@@ -28,7 +28,7 @@ mixin Upload {
   int page = 0;
   late VideoUploadInfo uploadedVideoItem;
 
-  void onUpload(
+  Future<void> onUpload(
       {required XFile pickedVideoFile,
       required HiveUserData hiveUserData,
       required Function(String) onError,
@@ -67,7 +67,7 @@ mixin Upload {
 
   Future<void> serverEncodeAndUpload(XFile pickedVideoFile,
       HiveUserData hiveUserData, Function(String) onError) async {
-    try {
+    
       var size = await pickedVideoFile.length();
       var originalFileName = pickedVideoFile.name;
 
@@ -90,9 +90,7 @@ mixin Upload {
           thumbReponse.name, originalFileName, fileSize, name);
       uploadStatus.value = UploadStatus.ended;
       _initiateNextUpload();
-    } catch (e) {
-      onError(e.toString());
-    }
+
   }
 
   bool isFreshUpload() {
@@ -116,26 +114,22 @@ mixin Upload {
   }
 
   Future<String> _setThumbnailForLocalEncode(String path) async {
-    try {
-      FolderPath folderPath = FolderPath();
-      var imagePath = await VideoThumbnail.thumbnailFile(
-        video: path,
-        thumbnailPath: folderPath.path(),
-        imageFormat: ImageFormat.PNG,
-        maxWidth: 320,
-        quality: 100,
-      );
-      if (imagePath == null) {
-        throw 'Could not generate video thumbnail';
-      }
-      final thumbnailFile = File(imagePath);
-      final newThumbnailPath = '${folderPath.path()}/thumbnail.png';
-
-      await thumbnailFile.rename(newThumbnailPath);
-      return newThumbnailPath;
-    } catch (e) {
-      throw 'Error generating video thumbnail ${e.toString()}';
+    FolderPath folderPath = FolderPath();
+    var imagePath = await VideoThumbnail.thumbnailFile(
+      video: path,
+      thumbnailPath: folderPath.path(),
+      imageFormat: ImageFormat.PNG,
+      maxWidth: 320,
+      quality: 100,
+    );
+    if (imagePath == null) {
+      throw 'Could not generate video thumbnail';
     }
+    final thumbnailFile = File(imagePath);
+    final newThumbnailPath = '${folderPath.path()}/thumbnail.png';
+
+    await thumbnailFile.rename(newThumbnailPath);
+    return newThumbnailPath;
   }
 
   Future<String> _getThumbnailForServerEncode(String path) async {
