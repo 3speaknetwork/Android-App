@@ -8,7 +8,6 @@ import 'package:ffmpeg_kit_flutter_https_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_https_gpl/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_flutter_https_gpl/ffprobe_kit.dart' as ffprobe;
 import 'package:ffmpeg_kit_flutter_https_gpl/media_information_session.dart';
-import 'package:ffmpeg_kit_flutter_https_gpl/session.dart';
 import 'package:flutter/foundation.dart';
 
 class VideoEncoder {
@@ -115,38 +114,22 @@ class VideoEncoder {
       String inputPath,
       List<VideoResolution> targetResolutions,
       ValueNotifier<double> progressListener,
-      VoidCallback onComplete) async {
+      VoidCallback onComplete,
+      Function(String) onError) async {
     FolderPath folderPath = FolderPath();
     await folderPath.deleteDirectory();
     String encodingPath = await folderPath.createFolder();
+
     List<double> progressList = List.filled(targetResolutions.length, 0.0);
+
     StreamController<double> combinedProgressStream =
         StreamController<double>();
 
-    combinedProgressStream.stream.listen((combinedProgress) async {
-      try {
-        // throw Exception('error');
-        progressListener.value = combinedProgress / 100;
-        debugPrint("Overall Progress: ${combinedProgress.toStringAsFixed(2)}%");
-        if (combinedProgress == 100) {
-          combinedProgressStream.close();
-          await folderPath.zipFolder(encodingPath);
-          folderPath.printFolderContent(encodingPath);
-          print(folderPath.printM3u8Contents());
-          print(folderPath.printFolderContent(encodingPath));
-          onComplete();
-        }
-      } catch (e) {
-        combinedProgressStream.close();
-        log("error ${e.toString()}");
-        rethrow;
-      }
-    }, onError: (e) {
-      throw e;
-    });
+    await _progressListener(combinedProgressStream, progressListener,
+        folderPath, encodingPath, onComplete, onError);
+
     for (int i = 0; i < targetResolutions.length; i++) {
       VideoResolution resolution = targetResolutions[i];
-
       debugPrint(
           '${i + 1} encoding stared for resolution ${resolution.resolution}');
       await encodeVideo(
@@ -154,7 +137,7 @@ class VideoEncoder {
         encodingPath,
         resolution,
         () => combinedProgressStream.isClosed,
-        (individualProgress, session) {
+        (individualProgress, session) async {
           progressList[i] = individualProgress;
           double combinedProgress =
               progressList.reduce((a, b) => a + b) / targetResolutions.length;
@@ -163,7 +146,7 @@ class VideoEncoder {
           } else {
             session?.cancel();
           }
-        },
+        },onError
       );
       debugPrint(
           '${i + 1} encoding ended for resolution ${resolution.resolution}');
@@ -173,13 +156,42 @@ class VideoEncoder {
     }
   }
 
+  Future<void> _progressListener(
+      StreamController<double> combinedProgressStream,
+      ValueNotifier<double> progressListener,
+      FolderPath folderPath,
+      String encodingPath,
+      VoidCallback onComplete,
+      Function(String) onError) async {
+    await combinedProgressStream.stream.listen((combinedProgress) async {
+      try {
+        progressListener.value = combinedProgress / 100;
+        debugPrint("Overall Progress: ${combinedProgress.toStringAsFixed(2)}%");
+        if (combinedProgress == 100) {
+          combinedProgressStream.close();
+          await folderPath.zipFolder(encodingPath);
+          folderPath.printFolderContent(encodingPath);
+          debugPrint(folderPath.printM3u8Contents().toString());
+          debugPrint(folderPath.printFolderContent(encodingPath).toString());
+          onComplete();
+        }
+      } catch (e) {
+        combinedProgressStream.close();
+        onError(e.toString());
+      }
+    }, onError: (e) {
+      combinedProgressStream.close();
+      onError(e.toString());
+    }, cancelOnError: true);
+  }
+
   Future<void> encodeVideo(
-    String inputPath,
-    String outputPath,
-    VideoResolution resolution,
-    bool Function() isStreamCancelled,
-    Function(double, FFmpegSession?) onProgressUpdate,
-  ) async {
+      String inputPath,
+      String outputPath,
+      VideoResolution resolution,
+      bool Function() isStreamCancelled,
+      Function(double, FFmpegSession?) onProgressUpdate,
+      Function(String) onError) async {
     String command;
     if (resolution.convertVideo) {
       command =
@@ -195,23 +207,26 @@ class VideoEncoder {
     session = await FFmpegKit.executeAsync(
       command,
       (session) {
-        onProgressUpdate(100, session);
-        debugPrint('Video encoding completed successfully');
+        if (!isStreamCancelled()) {
+          onProgressUpdate(100, session);
+          debugPrint('Video encoding completed successfully');
+        }
       },
       (log) {},
-      (statistics) {
-        if (isStreamCancelled()) {
-          session?.cancel();
-          log('stream closed session cancelled');
-          return;
-        }
+      (statistics) async {
         double progress =
             ((statistics.getTime()) ~/ double.parse(duratio!)) / 10;
-        onProgressUpdate(progress, null);
+        if (isStreamCancelled()) {
+          session?.cancel();
+          onProgressUpdate(progress, session);
+          debugPrint('stream closed session cancelled');
+          return;
+        } else {
+          onProgressUpdate(progress, null);
+        }
       },
     ).catchError((e) {
-      log('error ${e.toString()}');
-      throw e;
+      onError(e.toString());
     });
   }
 }

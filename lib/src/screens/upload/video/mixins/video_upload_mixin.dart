@@ -30,7 +30,8 @@ mixin Upload {
 
   void onUpload(
       {required XFile pickedVideoFile,
-      required HiveUserData hiveUserData}) async {
+      required HiveUserData hiveUserData,
+      required Function(String) onError}) async {
     var size = await pickedVideoFile.length();
     var originalFileName = pickedVideoFile.name;
 
@@ -40,9 +41,9 @@ mixin Upload {
 
     int fileSize = _checkFileSize(size);
     var path = pickedVideoFile.path;
-    // FolderPath().printFolderContent( FolderPath().path());
+    FolderPath().printFolderContent(FolderPath().path());
     encodeVideoAndThen(path, () async {
-      // var videoUploadReponse = await _uploadToServer(path, videoUploadProgress);
+      var videoUploadReponse = await _uploadToServer(path, videoUploadProgress);
       var name = 'videoUploadReponse.name';
       _initiateNextUpload();
       var thumbPath = await _getThumbnail(path);
@@ -54,13 +55,16 @@ mixin Upload {
       log('Uploaded thumbnail file name is ${thumbReponse.name}');
       uploadedVideoItem = await _encodeAndUploadInfo(path, hiveUserData,
           thumbReponse.name, originalFileName, fileSize, name);
-      
+
       var zipPath = FolderPath().readZipFile().path;
-      var string = await Communicator().uploadZip(permlink: uploadedVideoItem.permlink, user: hiveUserData, uploadZipFilePath: zipPath);
+      var string = await Communicator().uploadZip(
+          permlink: uploadedVideoItem.permlink,
+          user: hiveUserData,
+          uploadZipFilePath: zipPath);
       debugPrint("We got data from server = $string");
       uploadStatus.value = UploadStatus.ended;
       _initiateNextUpload();
-    });
+    }, onError);
   }
 
   bool isFreshUpload() {
@@ -160,8 +164,8 @@ mixin Upload {
     await client.upload(
       onComplete: () async {
         progressIndicator.value = 1.0;
-        log("Complete!");
-        log(client.uploadUrl.toString());
+        debugPrint("Complete!");
+        debugPrint(client.uploadUrl.toString());
         url = client.uploadUrl.toString();
         var ipfsName = url.replaceAll("${Communicator.fsServer}/", "");
         name = ipfsName;
@@ -174,18 +178,14 @@ mixin Upload {
     return UploadResponse(name: name, url: url);
   }
 
-  Future<void> encodeVideoAndThen(
-      String filePath, VoidCallback onComplete) async {
-    try {
-      VideoEncoder encoder = VideoEncoder();
-      VideoResolution? originalResolution =
-          await encoder.getVideoResolution(filePath);
-      List<VideoResolution> all =
-          encoder.generateTargetResolutions(originalResolution!);
-      await encoder.convertToMultipleResolutions(
-          filePath, all, videoUploadProgress, onComplete);
-    } catch (e) {
-      log('error ${e.toString()}');
-    }
+  Future<void> encodeVideoAndThen(String filePath, VoidCallback onComplete,
+      Function(String) onError) async {
+    VideoEncoder encoder = VideoEncoder();
+    VideoResolution? originalResolution =
+        await encoder.getVideoResolution(filePath);
+    List<VideoResolution> all =
+        encoder.generateTargetResolutions(originalResolution!);
+    await encoder.convertToMultipleResolutions(
+        filePath, all, videoUploadProgress, onComplete, onError);
   }
 }
