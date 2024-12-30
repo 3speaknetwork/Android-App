@@ -16,6 +16,7 @@ import 'package:acela/src/models/user_account/user_model.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/models/video_details_model/video_details.dart';
 import 'package:acela/src/models/video_upload/does_post_exists.dart';
+import 'package:acela/src/models/video_upload/video_device_encode_upload_model.dart';
 import 'package:acela/src/models/video_upload/video_upload_complete_request.dart';
 import 'package:acela/src/models/video_upload/video_upload_login_response.dart';
 import 'package:acela/src/models/video_upload/video_upload_prepare_response.dart';
@@ -425,33 +426,31 @@ class Communicator {
     }
   }
 
-  Future<String> uploadZip(
-      {required HiveUserData user,
-      required String permlink,
-      required String uploadZipFilePath}) async {
-    final uri = Uri.parse(
-        '${Communicator.tsServer}/mobile/api/upload_zip?permlink=$permlink');
-    var request = http.MultipartRequest('POST', uri);
+  Future<String> saveDeviceEncodedVideo({
+    required HiveUserData user,
+    required VideoDeviceEncodeUploadModel data,
+  }) async {
+    final uri = Uri.parse('${Communicator.tsServer}/mobile/api/upload_zip');
     var cookie = await getValidCookie(user);
-    Map<String, String> map = {
+
+    Map<String, String> headers = {
       "cookie": cookie,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     };
-    request.headers.addAll(map);
+
     try {
-      request.files.add(await http.MultipartFile.fromPath(
-        'file', // Key name expected by the server
-        uploadZipFilePath,
-      ));
-      http.StreamedResponse response = await request.send();
+      var response = await http.post(
+        uri,
+        headers: headers,
+        body: data.toJsonString(),
+      );
+
       if (response.statusCode == 200) {
         log("Successfully sent upload complete");
-        var string = await response.stream.bytesToString();
-        log('Video complete response is\n$string');
-        return string;
+        log('Video complete response is\n${response.body}');
+        return response.body;
       } else {
-        var string = await response.stream.bytesToString();
-        var error = ErrorResponse.fromJsonString(string).error ??
+        var error = ErrorResponse.fromJsonString(response.body).error ??
             response.reasonPhrase.toString();
         log('Error from server is $error');
         throw error;

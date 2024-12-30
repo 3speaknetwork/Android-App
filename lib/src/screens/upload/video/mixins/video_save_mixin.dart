@@ -1,5 +1,6 @@
 import 'package:acela/src/models/my_account/video_ops.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
+import 'package:acela/src/models/video_upload/video_device_encode_upload_model.dart';
 import 'package:acela/src/models/video_upload/video_upload_prepare_response.dart';
 import 'package:acela/src/screens/settings/settings_screen.dart';
 import 'package:acela/src/utils/communicator.dart';
@@ -26,18 +27,41 @@ mixin VideoSaveMixin {
     required Function(String) errorSnackbar,
   }) async {
     try {
-      String body = "${description}${hasPostingAuthority ? " <sub>Uploaded using 3Speak Mobile App</sub>" : ""}";
+      String body =
+          "${description}${hasPostingAuthority ? " <sub>Uploaded using 3Speak Mobile App</sub>" : ""}";
       isSaving.value = true;
       await Communicator().updateInfo(
-          user: user,
-          videoId: item.id,
-          title: title,
-          description: body,
-          isNsfwContent: isNsfwContent,
-          tags: tags,
-          beneficiaries: beneficiaries,
-          thumbnail: thumbIpfs.isEmpty ? null : thumbIpfs,
-          communityID: communityId,);
+        user: user,
+        videoId: item.id,
+        title: title,
+        description: body,
+        isNsfwContent: isNsfwContent,
+        tags: tags,
+        beneficiaries: beneficiaries,
+        thumbnail: thumbIpfs.isEmpty ? null : thumbIpfs,
+        communityID: communityId,
+      );
+      isSaving.value = false;
+      successDialog();
+    } catch (e) {
+      isSaving.value = false;
+      errorSnackbar(e.toString());
+    }
+  }
+
+  Future<void> saveDeviceEncodedVideo(
+    HiveUserData user,
+    VideoDeviceEncodeUploadModel data, {
+    required Function(String) errorSnackbar,
+    required VoidCallback successDialog,
+  }) async {
+    try {
+      isSaving.value = true;
+      var updatedData = data.copyWith(
+          description:
+              "${data.description}${" <sub>Uploaded using 3Speak Mobile App</sub>"}");
+      await Communicator()
+          .saveDeviceEncodedVideo(user: user, data: updatedData);
       isSaving.value = false;
       successDialog();
     } catch (e) {

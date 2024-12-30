@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/my_account/my_account_screen.dart';
 import 'package:acela/src/screens/upload/video/controller/video_upload_controller.dart';
@@ -149,7 +150,8 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                     const VideoUploadDivider(),
                     _languageTile(controller),
                     const VideoUploadDivider(),
-                    _thumbnailPicker(controller),
+                    if (!controller.isDeviceEncoding)
+                      _thumbnailPicker(controller),
                     const SizedBox(
                       height: 50,
                     )
@@ -163,11 +165,15 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
 
   ThumbnailPicker _thumbnailPicker(VideoUploadController controller) {
     return ThumbnailPicker(
+      isDeviceEncode: controller.isDeviceEncoding,
       thumbnailUploadStatus: controller.thumbnailUploadStatus,
       thumbnailUploadProgress: controller.thumbnailUploadProgress,
       thumbnailUploadRespone: controller.thumbnailUploadResponse,
       onUploadFile: (file) {
-        controller.uploadThumbnail(file.path);
+        if (controller.isDeviceEncoding) {
+        } else {
+          controller.uploadThumbnail(file.path);
+        }
       },
     );
   }
@@ -232,7 +238,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
           if (widget.isCamera) {
             ImagesPicker.saveVideoToAlbum(fileToSave);
           }
-         await controller.onUpload(
+          await controller.onUpload(
               isDeviceEncoding: controller.isDeviceEncoding,
               hiveUserData: widget.appData,
               pickedVideoFile: file,

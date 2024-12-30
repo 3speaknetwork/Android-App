@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/models/video_upload/upload_response.dart';
+import 'package:acela/src/models/video_upload/video_info.dart';
 import 'package:acela/src/models/video_upload/video_upload_prepare_response.dart';
 import 'package:acela/src/screens/upload/video/encoding/folder_path.dart';
 import 'package:acela/src/screens/upload/video/encoding/resolution.dart';
@@ -26,6 +27,7 @@ mixin Upload {
   ValueNotifier<UploadResponse?> thumbnailUploadResponse = ValueNotifier(null);
 
   int page = 0;
+  late VideoInfo videoInfo;
   late VideoUploadInfo uploadedVideoItem;
 
   Future<void> onUpload(
@@ -43,11 +45,11 @@ mixin Upload {
   Future<void> localEncodeAndUpload(XFile pickedVideoFile,
       HiveUserData hiveUserData, Function(String) onError) async {
     var size = await pickedVideoFile.length();
+    var originalFileName = pickedVideoFile.name;
+    videoInfo = VideoInfo(size: size, originalFilename: originalFileName);
     _initiateNextUpload();
     uploadStatus.value = UploadStatus.started;
-    log('upload started');
-
-    int fileSize = _checkFileSize(size);
+    _checkFileSize(size);
     var path = pickedVideoFile.path;
     FolderPath().printFolderContent(FolderPath().path());
     encodeVideoAndThen(path, () async {
@@ -55,11 +57,8 @@ mixin Upload {
       await _setThumbnailForLocalEncode(path);
       _initiateNextUpload();
       var zipPath = FolderPath().readZipFile().path;
-      // var string = await Communicator().uploadZip(
-      //     permlink: uploadedVideoItem.permlink,
-      //     user: hiveUserData,
-      //     uploadZipFilePath: zipPath);
-      // debugPrint("We got data from server = $string");
+      var response = await _uploadToServer(zipPath, null);
+      videoInfo = videoInfo.copyWith(tusId: response.url);
       uploadStatus.value = UploadStatus.ended;
       _initiateNextUpload();
     }, onError);
@@ -67,30 +66,28 @@ mixin Upload {
 
   Future<void> serverEncodeAndUpload(XFile pickedVideoFile,
       HiveUserData hiveUserData, Function(String) onError) async {
-    
-      var size = await pickedVideoFile.length();
-      var originalFileName = pickedVideoFile.name;
+    var size = await pickedVideoFile.length();
+    var originalFileName = pickedVideoFile.name;
 
-      _initiateNextUpload();
-      uploadStatus.value = UploadStatus.started;
-      log('upload started');
-      int fileSize = _checkFileSize(size);
-      var path = pickedVideoFile.path;
-      var videoUploadReponse = await _uploadToServer(path, videoUploadProgress);
-      var name = videoUploadReponse.name;
-      _initiateNextUpload();
-      var thumbPath = await _getThumbnailForServerEncode(path);
-      _initiateNextUpload();
-      var thumbReponse = await uploadThumbnail(thumbPath);
-      _initiateNextUpload();
+    _initiateNextUpload();
+    uploadStatus.value = UploadStatus.started;
+    log('upload started');
+    int fileSize = _checkFileSize(size);
+    var path = pickedVideoFile.path;
+    var videoUploadReponse = await _uploadToServer(path, videoUploadProgress);
+    var name = videoUploadReponse.name;
+    _initiateNextUpload();
+    var thumbPath = await _getThumbnailForServerEncode(path);
+    _initiateNextUpload();
+    var thumbReponse = await uploadThumbnail(thumbPath);
+    _initiateNextUpload();
 
-      log('Uploaded file name is $name');
-      log('Uploaded thumbnail file name is ${thumbReponse.name}');
-      uploadedVideoItem = await _encodeAndUploadInfo(path, hiveUserData,
-          thumbReponse.name, originalFileName, fileSize, name);
-      uploadStatus.value = UploadStatus.ended;
-      _initiateNextUpload();
-
+    log('Uploaded file name is $name');
+    log('Uploaded thumbnail file name is ${thumbReponse.name}');
+    uploadedVideoItem = await _encodeAndUploadInfo(path, hiveUserData,
+        thumbReponse.name, originalFileName, fileSize, name);
+    uploadStatus.value = UploadStatus.ended;
+    _initiateNextUpload();
   }
 
   bool isFreshUpload() {
@@ -193,7 +190,7 @@ mixin Upload {
   }
 
   Future<UploadResponse> _uploadToServer(
-      String path, ValueNotifier<double> progressIndicator) async {
+      String path, ValueNotifier<double>? progressIndicator) async {
     try {
       final xfile = XFile(path);
       final client = TusClient(
@@ -205,7 +202,7 @@ mixin Upload {
       var url = '';
       await client.upload(
         onComplete: () async {
-          progressIndicator.value = 1.0;
+          if (progressIndicator != null) progressIndicator.value = 1.0;
           debugPrint("Complete!");
           debugPrint(client.uploadUrl.toString());
           url = client.uploadUrl.toString();
@@ -214,7 +211,8 @@ mixin Upload {
         },
         onProgress: (progress) {
           log("Progress: $progress");
-          progressIndicator.value = progress / 100.0;
+          if (progressIndicator != null)
+            progressIndicator.value = progress / 100.0;
         },
       );
       return UploadResponse(name: name, url: url);
@@ -228,9 +226,18 @@ mixin Upload {
     VideoEncoder encoder = VideoEncoder();
     VideoResolution? originalResolution =
         await encoder.getVideoResolution(filePath);
+    videoInfo = videoInfo.copyWith(
+        height: originalResolution!.originalHeight,
+        width: originalResolution.originalWidth);
     List<VideoResolution> all =
-        encoder.generateTargetResolutions(originalResolution!);
+        encoder.generateTargetResolutions(originalResolution);
     await encoder.convertToMultipleResolutions(
-        filePath, all, videoUploadProgress, onComplete, onError);
+        filePath,
+        all,
+        videoUploadProgress,
+        onComplete,
+        (duration) =>
+            videoInfo = videoInfo.copyWith(duration: duration.toInt()),
+        onError);
   }
 }

@@ -33,6 +33,8 @@ class VideoEncoder {
 
     bool isLandscape = width > height;
     return VideoResolution(
+        originalHeight: height,
+        originalWidth: width,
         width: getEvenDigit(width),
         height: getEvenDigit(height),
         isLandscape: isLandscape,
@@ -115,6 +117,7 @@ class VideoEncoder {
       List<VideoResolution> targetResolutions,
       ValueNotifier<double> progressListener,
       VoidCallback onComplete,
+      Function(double) duration,
       Function(String) onError) async {
     FolderPath folderPath = FolderPath();
     await folderPath.deleteDirectory();
@@ -132,22 +135,20 @@ class VideoEncoder {
       VideoResolution resolution = targetResolutions[i];
       debugPrint(
           '${i + 1} encoding stared for resolution ${resolution.resolution}');
-      await encodeVideo(
-        inputPath,
-        encodingPath,
-        resolution,
-        () => combinedProgressStream.isClosed,
-        (individualProgress, session) async {
-          progressList[i] = individualProgress;
-          double combinedProgress =
-              progressList.reduce((a, b) => a + b) / targetResolutions.length;
-          if (!combinedProgressStream.isClosed) {
-            combinedProgressStream.add(combinedProgress);
-          } else {
-            session?.cancel();
-          }
-        },onError
-      );
+      await encodeVideo(inputPath, encodingPath, resolution,
+          
+          () => combinedProgressStream.isClosed,
+          duration,
+          (individualProgress, session) async {
+        progressList[i] = individualProgress;
+        double combinedProgress =
+            progressList.reduce((a, b) => a + b) / targetResolutions.length;
+        if (!combinedProgressStream.isClosed) {
+          combinedProgressStream.add(combinedProgress);
+        } else {
+          session?.cancel();
+        }
+      }, onError);
       debugPrint(
           '${i + 1} encoding ended for resolution ${resolution.resolution}');
       if (i == targetResolutions.length - 1) {
@@ -190,6 +191,7 @@ class VideoEncoder {
       String outputPath,
       VideoResolution resolution,
       bool Function() isStreamCancelled,
+      Function(double) setDuration,
       Function(double, FFmpegSession?) onProgressUpdate,
       Function(String) onError) async {
     String command;
@@ -203,6 +205,7 @@ class VideoEncoder {
     MediaInformationSession info =
         await ffprobe.FFprobeKit.getMediaInformation(inputPath);
     String? duratio = info.getMediaInformation()?.getDuration();
+    setDuration(double.parse(duratio!));
     FFmpegSession? session;
     session = await FFmpegKit.executeAsync(
       command,

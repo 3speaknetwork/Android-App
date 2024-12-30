@@ -2,6 +2,7 @@ import 'package:acela/src/models/my_account/video_ops.dart';
 import 'package:acela/src/models/user_account/action_response.dart';
 import 'package:acela/src/models/user_account/user_model.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
+import 'package:acela/src/models/video_upload/video_device_encode_upload_model.dart';
 import 'package:acela/src/screens/settings/settings_screen.dart';
 import 'package:acela/src/screens/upload/video/mixins/video_save_mixin.dart';
 import 'package:acela/src/screens/upload/video/mixins/video_upload_mixin.dart';
@@ -88,25 +89,48 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
       errorSnackbar('Title is Required');
     } else if (description.isEmpty) {
       errorSnackbar('Description is Required');
-    } else if (thumbnailUploadResponse.value == null) {
+    } else if (thumbnailUploadResponse.value == null && !isDeviceEncoding) {
       errorSnackbar('Thumbnail is Required');
     } else {
       bool? hasPostingAuthoriy = await _hasPostingAuthority();
       if (hasPostingAuthoriy == null) {
         errorSnackbar("Something went wrong, try again");
       } else {
-        await saveVideo(userData, uploadedVideoItem, hasPostingAuthoriy,
-            title: title,
-            description: description,
-            tags: tags,
-            beneficiaries: beneficaries,
-            communityId: communityId,
-            isNsfwContent: isNsfwContent,
-            language: language,
-            isPowerUp100: isPower100,
-            thumbIpfs: thumbnailUploadResponse.value!.name,
-            successDialog: () => successDialog(hasPostingAuthoriy),
-            errorSnackbar: errorSnackbar);
+        if (!isDeviceEncoding) {
+          await saveVideo(userData, uploadedVideoItem, hasPostingAuthoriy,
+              title: title,
+              description: description,
+              tags: tags,
+              beneficiaries: beneficaries,
+              communityId: communityId,
+              isNsfwContent: isNsfwContent,
+              language: language,
+              isPowerUp100: isPower100,
+              thumbIpfs: thumbnailUploadResponse.value!.name,
+              successDialog: () => successDialog(hasPostingAuthoriy),
+              errorSnackbar: errorSnackbar);
+        } else {
+          await saveDeviceEncodedVideo(
+              userData,
+              VideoDeviceEncodeUploadModel(
+                  originalFilename: videoInfo.originalFilename!,
+                  duration: videoInfo.duration!,
+                  size: videoInfo.duration!,
+                  width: videoInfo.width!,
+                  height: videoInfo.height!,
+                  owner: userData.username!,
+                  title: title,
+                  description: description,
+                  isReel: false,
+                  isNsfwContent: isNsfwContent,
+                  tags: tags,
+                  communityID: communityId,
+                  beneficiaries: beneficaries,
+                  rewardPowerup: isPower100,
+                  tusId: videoInfo.tusId!),
+              errorSnackbar: errorSnackbar,
+              successDialog: () => successDialog(hasPostingAuthoriy));
+        }
       }
     }
   }

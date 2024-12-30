@@ -10,12 +10,14 @@ class ThumbnailPicker extends StatefulWidget {
       required this.thumbnailUploadProgress,
       required this.thumbnailUploadRespone,
       required this.onUploadFile,
-      required this.thumbnailUploadStatus})
+      required this.thumbnailUploadStatus,
+      required this.isDeviceEncode})
       : super(key: key);
 
   final ValueNotifier<double> thumbnailUploadProgress;
   final ValueNotifier<UploadResponse?> thumbnailUploadRespone;
   final Function(XFile) onUploadFile;
+  final bool isDeviceEncode;
   final ValueNotifier<UploadStatus> thumbnailUploadStatus;
 
   @override
@@ -68,7 +70,9 @@ class _ThumbnailPickerState extends State<ThumbnailPicker> {
                                         widget.thumbnailUploadRespone,
                                     builder: (context, value, child) {
                                       return value != null
-                                          ? Image.network(value.url)
+                                          ? widget.isDeviceEncode
+                                              ? Image.asset(value.url)
+                                              : Image.network(value.url)
                                           : const SizedBox.shrink();
                                     },
                                   ),
