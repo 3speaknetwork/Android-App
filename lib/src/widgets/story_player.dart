@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/global_provider/video_setting_provider.dart';
-import 'package:acela/src/screens/podcast/widgets/favourite.dart';
-import 'package:acela/src/screens/video_details_screen/comment/hive_comment_dialog.dart';
 import 'package:acela/src/screens/video_details_screen/new_video_details/video_detail_favourite_provider.dart';
 import 'package:acela/src/utils/graphql/models/trending_feed_response.dart';
 import 'package:acela/src/models/hive_post_info/hive_post_info.dart';
@@ -14,6 +12,7 @@ import 'package:acela/src/screens/video_details_screen/new_video_details_info.da
 import 'package:acela/src/screens/video_details_screen/comment/video_details_comments.dart';
 import 'package:acela/src/utils/communicator.dart';
 import 'package:acela/src/utils/routes/routes.dart';
+import 'package:acela/src/widgets/favourite.dart';
 import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
 import 'package:better_player/better_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';

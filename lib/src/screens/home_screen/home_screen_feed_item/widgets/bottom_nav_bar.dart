@@ -2,7 +2,6 @@ import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/home_screen/video_upload_sheet.dart';
 import 'package:acela/src/screens/login/ha_login_screen.dart';
 import 'package:acela/src/screens/my_account/my_account_screen.dart';
-import 'package:acela/src/screens/podcast/view/podcast_trending.dart';
 import 'package:acela/src/screens/search/search_screen.dart';
 import 'package:acela/src/screens/stories/new_tab_based_stories.dart';
 import 'package:acela/src/screens/upload/podcast/podcast_upload_screen.dart';
@@ -172,9 +171,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
   }
 
   void _onTapPodcast() {
-    var screen = PodCastTrendingScreen(appData: widget.appData);
-    var route = MaterialPageRoute(builder: (c) => screen);
-    Navigator.of(context, rootNavigator: true).push(route);
   }
 
   void _onTapSearch() {

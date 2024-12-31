@@ -4,7 +4,6 @@ import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/global_provider/image_resolution_provider.dart';
 import 'package:acela/src/global_provider/video_setting_provider.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/feed_item_grid_view.dart';
-import 'package:acela/src/screens/podcast/widgets/favourite.dart';
 import 'package:acela/src/screens/trending_tags/trending_tag_videos.dart';
 import 'package:acela/src/screens/video_details_screen/new_video_details/video_detail_favourite_provider.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
@@ -614,16 +613,7 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
               },
               icon: Icon(Icons.share, color: color),
             ),
-            FavouriteWidget(
-                toastType: "Video",
-                iconColor: color,
-                isLiked: provider.isLikedVideoPresentLocally(item),
-                onAdd: () {
-                  provider.storeLikedVideoLocally(item);
-                },
-                onRemove: () {
-                  provider.storeLikedVideoLocally(item);
-                })
+           
           ],
         ),
       ),

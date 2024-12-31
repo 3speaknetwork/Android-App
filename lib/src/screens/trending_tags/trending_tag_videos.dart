@@ -1,6 +1,5 @@
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_list.dart';
-import 'package:acela/src/screens/podcast/widgets/favourite.dart';
 import 'package:acela/src/screens/stories/story_feed_list.dart';
 import 'package:acela/src/screens/trending_tags/tag_favourite_provider.dart';
 import 'package:flutter/material.dart';
@@ -67,15 +66,7 @@ class _TrendingTagVideosState extends State<TrendingTagVideos>
           tabs: tabs,
         ),
         actions: [
-          FavouriteWidget(
-            toastType: "Tag",
-              isLiked: provider.isTagPresentLocally(widget.tag),
-              onAdd: () {
-                provider.storeLikedTagLocally(widget.tag);
-              },
-              onRemove: () {
-                provider.storeLikedTagLocally(widget.tag);
-              })
+          
         ],
       ),
       body: TabBarView(

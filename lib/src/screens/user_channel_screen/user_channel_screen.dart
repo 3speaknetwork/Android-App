@@ -1,7 +1,6 @@
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_list.dart';
-import 'package:acela/src/screens/podcast/widgets/favourite.dart';
 import 'package:acela/src/screens/stories/story_feed_list.dart';
 import 'package:acela/src/screens/user_channel_screen/user_channel_following.dart';
 import 'package:acela/src/screens/user_channel_screen/user_channel_profile.dart';
@@ -126,15 +125,7 @@ class _UserChannelScreenState extends State<UserChannelScreen>
           ],
         ),
         actions: [
-           FavouriteWidget(
-            toastType: "User",
-              isLiked: userFavouriteProvider.isUserPresentLocally(widget.owner),
-              onAdd: () {
-                userFavouriteProvider.storeLikedUserLocally(widget.owner);
-              },
-              onRemove: () {
-                userFavouriteProvider.storeLikedUserLocally(widget.owner);
-              }),
+
           IconButton(
             onPressed: () async {
               Share.share("https://3speak.tv/rss/${widget.owner}.xml");

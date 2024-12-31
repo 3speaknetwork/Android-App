@@ -3,8 +3,6 @@ import 'package:acela/src/screens/favourites/favourite_shorts_body.dart';
 import 'package:acela/src/screens/favourites/favourite_tags_body.dart';
 import 'package:acela/src/screens/favourites/favourite_users_body.dart';
 import 'package:acela/src/screens/favourites/favourite_video_body.dart';
-import 'package:acela/src/screens/podcast/view/liked_podcasts.dart';
-import 'package:acela/src/screens/podcast/view/local_podcast_episode.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -68,19 +66,6 @@ class _UserFavouritesState extends State<UserFavourites>
         ),
         FavouriteTagsBody(),
         FavouriteUsersBody(),
-        LikedPodcasts(
-          playOnMiniPlayer: false,
-          appData: appData,
-          showAppBar: false,
-        ),
-        LocalEpisodeListView(
-          isOffline: false,
-          playOnMiniPlayer: false,
-        ),
-        LocalEpisodeListView(
-          isOffline: true,
-          playOnMiniPlayer: false,
-        ),
       ]),
     );
   }
