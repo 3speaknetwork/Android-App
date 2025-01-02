@@ -28,7 +28,7 @@ mixin VideoSaveMixin {
   }) async {
     try {
       String body =
-          "${description}${hasPostingAuthority ? " <sub>Uploaded using 3Speak Mobile App</sub>" : ""}";
+          "${description}${hasPostingAuthority ? "<br/><sub>Uploaded using 3Speak Mobile App</sub>" : ""}";
       await Communicator().updateInfo(
         user: user,
         videoId: item.id,
@@ -58,7 +58,7 @@ mixin VideoSaveMixin {
     try {
       var updatedData = data.copyWith(
           description:
-              "${data.description}${hasPostingAuthority ? " <sub>Uploaded using 3Speak Mobile App</sub>" : ""}");
+              "${data.description}${hasPostingAuthority ? "<br/><sub>Uploaded using 3Speak Mobile App</sub>" : ""}");
       await Communicator()
           .saveDeviceEncodedVideo(user: user, data: updatedData);
       isSaving.value = false;

@@ -70,12 +70,14 @@ class VideoEncoder {
   VideoResolution getResolution(
       VideoResolution resolution, int targetResolution) {
     if (resolution.isLandscape) {
-      int target =
-          ((targetResolution * resolution.height) / resolution.width).round();
-      return VideoResolution(
-          width: targetResolution,
-          height: getEvenDigit(target),
+      // int target =
+      //     ((targetResolution * resolution.height) / resolution.width).round();
+      int target = ((targetResolution * resolution.width) / resolution.height).round();
+      var res = VideoResolution(
+          width: getEvenDigit(target),
+          height: targetResolution,
           isLandscape: resolution.isLandscape);
+      return res;
     } else {
       int target =
           ((targetResolution * resolution.width) / resolution.height).round();
@@ -139,11 +141,12 @@ class VideoEncoder {
 
   isOriginalResolutionGreater(
       int resolution, VideoResolution originalResolution) {
-    if (originalResolution.isLandscape) {
-      return originalResolution.width >= resolution;
-    } else {
-      return originalResolution.height >= resolution;
-    }
+        return originalResolution.height >= resolution;
+    // if (originalResolution.isLandscape) {
+    //   return originalResolution.width >= resolution;
+    // } else {
+    //     return originalResolution.height >= resolution;
+    // }
   }
 
   Future convertToMultipleResolutions(
@@ -157,7 +160,8 @@ class VideoEncoder {
     await folderPath.deleteDirectory();
     String encodingPath = await folderPath.createFolder();
 
-    List<double> progressList = List.filled(targetResolutions.length, 0.0);
+    List<double> progressList = List.filled(2, 0.0);
+    List<String> scales = ['480', '720'];
 
     StreamController<double> combinedProgressStream =
         StreamController<double>();
@@ -165,19 +169,18 @@ class VideoEncoder {
     await _progressListener(
         combinedProgressStream, progressListener, onComplete, onError);
 
-    for (int i = 0; i < targetResolutions.length; i++) {
-      VideoResolution resolution = targetResolutions[i];
+    for (int i = 0; i < scales.length; i++) {
       debugPrint(
-          '${i + 1} encoding stared for resolution ${resolution.resolution}');
+          '${i + 1} encoding started for resolution ${scales[i]}');
       await encodeVideo(
           inputPath,
           encodingPath,
-          resolution,
+          scales[i],
           () => combinedProgressStream.isClosed,
           duration, (individualProgress, session) async {
         progressList[i] = individualProgress;
         double combinedProgress =
-            progressList.reduce((a, b) => a + b) / targetResolutions.length;
+            progressList.reduce((a, b) => a + b) / 2;
         if (!combinedProgressStream.isClosed) {
           combinedProgressStream.add(combinedProgress);
         } else {
@@ -185,8 +188,8 @@ class VideoEncoder {
         }
       }, onError);
       debugPrint(
-          '${i + 1} encoding ended for resolution ${resolution.resolution}');
-      if (i == targetResolutions.length - 1) {
+          '${i + 1} encoding ended for resolution ${scales[i]}');
+      if (i == 2 - 1) {
         folderPath.generateMasterManifest(encodingPath, targetResolutions);
       }
     }
@@ -219,19 +222,21 @@ class VideoEncoder {
   Future<void> encodeVideo(
       String inputPath,
       String outputPath,
-      VideoResolution resolution,
+      // VideoResolution resolution,
+      String scale,
       bool Function() isStreamCancelled,
       Function(double) setDuration,
       Function(double, FFmpegSession?) onProgressUpdate,
       Function(String) onError) async {
     String command;
-    if (resolution.convertVideo) {
-      command =
-          '-i $inputPath -vf scale=${resolution.width}:${resolution.height} -vcodec libx264 -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${VideoResolution.quality(resolution)}p_video.m3u8';
-    } else {
-      command =
-          '-i $inputPath -codec: copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${VideoResolution.quality(resolution)}p_video.m3u8';
-    }
+    command =
+          '-i $inputPath -vf scale=${scale}:-2,setsar=1:1 -c:v libx264 -crf 20 -b:v 8M -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${scale}p_video.m3u8';
+    // if (resolution.convertVideo) {
+      
+    // } else {
+    //   command =
+    //       '-i $inputPath -codec: copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${VideoResolution.quality(resolution)}p_video.m3u8';
+    // }
     String? duratio = info.getMediaInformation()?.getDuration();
     setDuration(double.parse(duratio!));
     FFmpegSession? session;

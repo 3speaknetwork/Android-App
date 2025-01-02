@@ -16,7 +16,7 @@ class VideoResolution extends Equatable {
     this.originalWidth,
     this.originalHeight,
     this.convertVideo = true,
-  }) : resolution = isLandscape ? '${width}p' : '${height}p';
+  }) : resolution = '${height}p' ;
 
   @override
   List<Object?> get props => [width, height, isLandscape, convertVideo];
