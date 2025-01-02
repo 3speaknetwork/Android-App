@@ -80,7 +80,7 @@ class FolderPath {
   }
 
   void generateMasterManifest(
-      String manifestPath, List<VideoResolution> resolutions) {
+      String manifestPath, List<String> scales) {
     String masterManifestPath = '$manifestPath/manifest.m3u8';
 
     File masterManifestFile = File(masterManifestPath);
@@ -90,27 +90,26 @@ class FolderPath {
 
     masterManifestAccessFile.writeStringSync('#EXTM3U\n');
     masterManifestAccessFile.writeStringSync('#EXT-X-VERSION:3\n');
-    for (var resolution in resolutions) {
-      if (resolution.resolution == '1080p') {
+    for (var resolution in scales) {
+      if (resolution == '1080') {
         masterManifestAccessFile.writeStringSync(
-            '#EXT-X-STREAM-INF:BANDWIDTH=2000000,CODECS="mp4a.40.2",RESOLUTION=${resolution.width}x${resolution.height},NAME=1080\n');
+            '#EXT-X-STREAM-INF:BANDWIDTH=2000000,CODECS="mp4a.40.2",RESOLUTION=${resolution}x-2,NAME=1080\n');
         masterManifestAccessFile
-            .writeStringSync('${resolution.resolution}_video.m3u8\n');
-      } else if (resolution.resolution == '720p') {
+            .writeStringSync('${resolution}p_video.m3u8\n');
+      } else if (resolution == '720') {
         masterManifestAccessFile.writeStringSync(
-            '#EXT-X-STREAM-INF:BANDWIDTH=1327000,CODECS="mp4a.40.2",RESOLUTION=${resolution.width}x${resolution.height},NAME=720\n');
+            '#EXT-X-STREAM-INF:BANDWIDTH=1327000,CODECS="mp4a.40.2",RESOLUTION=${resolution}x-2,NAME=720\n');
         masterManifestAccessFile
-            .writeStringSync('${resolution.resolution}_video.m3u8\n');
+            .writeStringSync('${resolution}p_video.m3u8\n');
       } else {
-        String resolutionName = resolution.resolution.replaceAll('p', '');
         masterManifestAccessFile.writeStringSync(
-            '#EXT-X-STREAM-INF:BANDWIDTH=763000,CODECS="mp4a.40.2",RESOLUTION=${resolution.width}x${resolution.height},NAME=$resolutionName\n');
+            '#EXT-X-STREAM-INF:BANDWIDTH=1327000,CODECS="mp4a.40.2",RESOLUTION=480x-2,NAME=720\n');
         masterManifestAccessFile
-            .writeStringSync('${resolution.resolution}_video.m3u8\n');
+            .writeStringSync('480p_video.m3u8\n');
       }
     }
     masterManifestAccessFile.closeSync();
-    debugPrint('Master Manifest generated');
+    debugPrint('Master Manifest generated at location - ${masterManifestPath}');
   }
 
   void createZip(String sourcePath, String zipFilePath) {

@@ -235,11 +235,11 @@ mixin Upload {
         isLandscape: originalResolution!.isLandscape,
         height: originalResolution.originalHeight,
         width: originalResolution.originalWidth);
-    List<VideoResolution> all =
-        encoder.generateTargetResolutions(originalResolution);
+    // List<VideoResolution> all =
+    //     encoder.generateTargetResolutions(originalResolution);
     await encoder.convertToMultipleResolutions(
         filePath,
-        all,
+        // all,
         videoUploadProgress,
         onComplete,
         (duration) =>
