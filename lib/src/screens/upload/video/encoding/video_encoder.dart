@@ -11,7 +11,7 @@ import 'package:ffmpeg_kit_flutter_https_gpl/media_information_session.dart';
 import 'package:flutter/foundation.dart';
 
 class VideoEncoder {
-  static List<int> allResolutions = [1080, 720, 480];
+  static List<int> allResolutions = [480]; // [1080, 720, 480];
 
   static String testFolderPath = '/storage/emulated/0/Download/$foldername';
 
