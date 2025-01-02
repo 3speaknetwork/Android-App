@@ -46,7 +46,7 @@ class VideoUploadSheet {
 
   static void _showBottomSheetForVideoOptions(
       bool isReel, HiveUserData data, BuildContext context) {
-    final ValueNotifier<bool> isDeviceEncode = ValueNotifier(false);
+    final ValueNotifier<bool> isDeviceEncode = ValueNotifier(true);
     showAdaptiveActionSheet(
       context: context,
       title: const Text('How do you want to upload?'),
