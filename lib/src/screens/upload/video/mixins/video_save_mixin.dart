@@ -29,7 +29,6 @@ mixin VideoSaveMixin {
     try {
       String body =
           "${description}${hasPostingAuthority ? " <sub>Uploaded using 3Speak Mobile App</sub>" : ""}";
-      isSaving.value = true;
       await Communicator().updateInfo(
         user: user,
         videoId: item.id,
@@ -51,15 +50,15 @@ mixin VideoSaveMixin {
 
   Future<void> saveDeviceEncodedVideo(
     HiveUserData user,
-    VideoDeviceEncodeUploadModel data, {
+    VideoDeviceEncodeUploadModel data,
+    bool hasPostingAuthority, {
     required Function(String) errorSnackbar,
     required VoidCallback successDialog,
   }) async {
     try {
-      isSaving.value = true;
       var updatedData = data.copyWith(
           description:
-              "${data.description}${" <sub>Uploaded using 3Speak Mobile App</sub>"}");
+              "${data.description}${hasPostingAuthority ? " <sub>Uploaded using 3Speak Mobile App</sub>" : ""}");
       await Communicator()
           .saveDeviceEncodedVideo(user: user, data: updatedData);
       isSaving.value = false;

@@ -5,6 +5,7 @@ class VideoInfo {
   final int? width;
   final int? height;
   final String? tusId;
+  final bool? isLandscape;
 
   VideoInfo({
     this.originalFilename,
@@ -13,6 +14,7 @@ class VideoInfo {
     this.width,
     this.height,
     this.tusId,
+    this.isLandscape
   });
 
   VideoInfo copyWith({
@@ -22,6 +24,7 @@ class VideoInfo {
     int? width,
     int? height,
     String? tusId,
+    bool? isLandscape
   }) {
     return VideoInfo(
       originalFilename: originalFilename ?? this.originalFilename,
@@ -30,6 +33,7 @@ class VideoInfo {
       width: width ?? this.width,
       height: height ?? this.height,
       tusId: tusId ?? this.tusId,
+      isLandscape: isLandscape ?? this.isLandscape
     );
   }
 }

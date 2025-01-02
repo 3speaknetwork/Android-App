@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
-
 import 'package:acela/src/screens/upload/video/encoding/folder_path.dart';
 import 'package:acela/src/screens/upload/video/encoding/resolution.dart';
 import 'package:ffmpeg_kit_flutter_https_gpl/ffmpeg_kit.dart';
@@ -11,7 +9,7 @@ import 'package:ffmpeg_kit_flutter_https_gpl/media_information_session.dart';
 import 'package:flutter/foundation.dart';
 
 class VideoEncoder {
-  static List<int> allResolutions = [1080, 720, 480];
+  static List<int> allResolutions = [720, 480];
 
   static String testFolderPath = '/storage/emulated/0/Download/$foldername';
 
@@ -20,16 +18,24 @@ class VideoEncoder {
   static String foldername = 'encoded_videos';
   static String zipFileName = "video.zip";
 
+  late MediaInformationSession info;
+
   Future<VideoResolution?> getVideoResolution(String filePath) async {
-    var execution = await ffprobe.FFprobeKit.execute(
-      '-v error -select_streams v:0 -show_entries stream=width,height -of json -i $filePath',
-    );
+    int rotation = await getVideoRotation(filePath);
 
-    String output = await execution.getOutput() ?? '';
-    Map<String, dynamic> jsonMap = json.decode(output);
+    int width =
+        info.getMediaInformation()!.getAllProperties()!['streams'][0]['width'];
+    int height =
+        info.getMediaInformation()!.getAllProperties()!['streams'][0]['height'];
 
-    int width = jsonMap['streams'][0]['width'];
-    int height = jsonMap['streams'][0]['height'];
+    if (rotation == 90 ||
+        rotation == 270 ||
+        rotation == -90 ||
+        rotation == -270) {
+      int temp = width;
+      width = height;
+      height = temp;
+    }
 
     bool isLandscape = width > height;
     return VideoResolution(
@@ -40,6 +46,25 @@ class VideoEncoder {
         isLandscape: isLandscape,
         convertVideo: !VideoEncoder.allResolutions
             .contains(isLandscape ? width : height));
+  }
+
+  Future<int> getVideoRotation(String filePath) async {
+    try {
+      info = await ffprobe.FFprobeKit.getMediaInformation(filePath);
+      var properties = info.getMediaInformation()?.getAllProperties();
+
+      if (properties?['streams'] is List &&
+          properties!['streams'].isNotEmpty &&
+          properties['streams'][0]['side_data_list'] is List &&
+          properties['streams'][0]['side_data_list'].isNotEmpty &&
+          properties['streams'][0]['side_data_list'][0]['rotation'] != null) {
+        return properties['streams'][0]['side_data_list'][0]['rotation'];
+      }
+      return 0;
+    } catch (e) {
+      print('Error retrieving video rotation: $e');
+      return 0;
+    }
   }
 
   VideoResolution getResolution(
@@ -80,13 +105,22 @@ class VideoEncoder {
           )) {
         targetResolutions
             .add(getResolution(targetResolutions.last, resolution));
-        targetResolutions.removeWhere((element) => !VideoEncoder.allResolutions
-            .contains(originalResolution.isLandscape
-                ? element.width
-                : element.height));
+        targetResolutions.removeWhere((element) {
+          int originalResolutionNum =
+              originalResolution.isLandscape ? element.width : element.height;
+          bool notContains =
+              !VideoEncoder.allResolutions.contains(originalResolutionNum);
+          if (notContains && VideoEncoder.allResolutions.length >= 2) {
+            if (originalResolutionNum < VideoEncoder.allResolutions.first &&
+                originalResolutionNum > VideoEncoder.allResolutions[1]) {
+              return false;
+            }
+          }
+          return notContains;
+        });
       }
     }
-    debugPrint(targetResolutions.toString());
+    log(targetResolutions.toString());
     return targetResolutions;
   }
 
@@ -128,18 +162,19 @@ class VideoEncoder {
     StreamController<double> combinedProgressStream =
         StreamController<double>();
 
-    await _progressListener(combinedProgressStream, progressListener,
-        folderPath, encodingPath, onComplete, onError);
+    await _progressListener(
+        combinedProgressStream, progressListener, onComplete, onError);
 
     for (int i = 0; i < targetResolutions.length; i++) {
       VideoResolution resolution = targetResolutions[i];
       debugPrint(
           '${i + 1} encoding stared for resolution ${resolution.resolution}');
-      await encodeVideo(inputPath, encodingPath, resolution,
-          
+      await encodeVideo(
+          inputPath,
+          encodingPath,
+          resolution,
           () => combinedProgressStream.isClosed,
-          duration,
-          (individualProgress, session) async {
+          duration, (individualProgress, session) async {
         progressList[i] = individualProgress;
         double combinedProgress =
             progressList.reduce((a, b) => a + b) / targetResolutions.length;
@@ -160,8 +195,6 @@ class VideoEncoder {
   Future<void> _progressListener(
       StreamController<double> combinedProgressStream,
       ValueNotifier<double> progressListener,
-      FolderPath folderPath,
-      String encodingPath,
       VoidCallback onComplete,
       Function(String) onError) async {
     await combinedProgressStream.stream.listen((combinedProgress) async {
@@ -170,10 +203,7 @@ class VideoEncoder {
         debugPrint("Overall Progress: ${combinedProgress.toStringAsFixed(2)}%");
         if (combinedProgress == 100) {
           combinedProgressStream.close();
-          await folderPath.zipFolder(encodingPath);
-          folderPath.printFolderContent(encodingPath);
-          debugPrint(folderPath.printM3u8Contents().toString());
-          debugPrint(folderPath.printFolderContent(encodingPath).toString());
+
           onComplete();
         }
       } catch (e) {
@@ -202,8 +232,6 @@ class VideoEncoder {
       command =
           '-i $inputPath -codec: copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${VideoResolution.quality(resolution)}p_video.m3u8';
     }
-    MediaInformationSession info =
-        await ffprobe.FFprobeKit.getMediaInformation(inputPath);
     String? duratio = info.getMediaInformation()?.getDuration();
     setDuration(double.parse(duratio!));
     FFmpegSession? session;
@@ -218,7 +246,7 @@ class VideoEncoder {
       (log) {},
       (statistics) async {
         double progress =
-            ((statistics.getTime()) ~/ double.parse(duratio!)) / 10;
+            ((statistics.getTime()) ~/ double.parse(duratio)) / 10;
         if (isStreamCancelled()) {
           session?.cancel();
           onProgressUpdate(progress, session);

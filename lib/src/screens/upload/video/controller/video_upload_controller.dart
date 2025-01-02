@@ -92,8 +92,10 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
     } else if (thumbnailUploadResponse.value == null && !isDeviceEncoding) {
       errorSnackbar('Thumbnail is Required');
     } else {
+      isSaving.value = true;
       bool? hasPostingAuthoriy = await _hasPostingAuthority();
       if (hasPostingAuthoriy == null) {
+        isSaving.value = false;
         errorSnackbar("Something went wrong, try again");
       } else {
         if (!isDeviceEncoding) {
@@ -121,13 +123,14 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
                   owner: userData.username!,
                   title: title,
                   description: description,
-                  isReel: false,
+                  isReel: !videoInfo.isLandscape! && videoInfo.duration! <= 90,
                   isNsfwContent: isNsfwContent,
                   tags: tags,
                   communityID: communityId,
                   beneficiaries: beneficaries,
                   rewardPowerup: isPower100,
                   tusId: videoInfo.tusId!),
+              hasPostingAuthoriy,
               errorSnackbar: errorSnackbar,
               successDialog: () => successDialog(hasPostingAuthoriy));
         }

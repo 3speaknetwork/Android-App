@@ -122,10 +122,15 @@ mixin Upload {
     if (imagePath == null) {
       throw 'Could not generate video thumbnail';
     }
+    String resultPath = folderPath.path();
     final thumbnailFile = File(imagePath);
-    final newThumbnailPath = '${folderPath.path()}/thumbnail.png';
+    final newThumbnailPath = '${resultPath}/thumbnail.png';
 
     await thumbnailFile.rename(newThumbnailPath);
+    await folderPath.zipFolder(resultPath);
+    folderPath.printFolderContent(resultPath);
+    debugPrint(folderPath.printM3u8Contents().toString());
+    debugPrint(folderPath.printFolderContent(resultPath).toString());
     return newThumbnailPath;
   }
 
@@ -227,7 +232,8 @@ mixin Upload {
     VideoResolution? originalResolution =
         await encoder.getVideoResolution(filePath);
     videoInfo = videoInfo.copyWith(
-        height: originalResolution!.originalHeight,
+        isLandscape: originalResolution!.isLandscape,
+        height: originalResolution.originalHeight,
         width: originalResolution.originalWidth);
     List<VideoResolution> all =
         encoder.generateTargetResolutions(originalResolution);
