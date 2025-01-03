@@ -23,10 +23,16 @@ class VideoEncoder {
   Future<VideoResolution?> getVideoResolution(String filePath) async {
     int rotation = await getVideoRotation(filePath);
 
-    int width =
-        info.getMediaInformation()?.getAllProperties()?['streams'][0]?['width'] ?? info.getMediaInformation()?.getAllProperties()?['streams'][1]?['width'] ?? 480;
-    int height =
-        info.getMediaInformation()?.getAllProperties()?['streams'][0]?['height'] ?? info.getMediaInformation()?.getAllProperties()?['streams'][1]?['height'] ?? 320;
+    int width = info.getMediaInformation()?.getAllProperties()?['streams'][0]
+            ?['width'] ??
+        info.getMediaInformation()?.getAllProperties()?['streams'][1]
+            ?['width'] ??
+        480;
+    int height = info.getMediaInformation()?.getAllProperties()?['streams'][0]
+            ?['height'] ??
+        info.getMediaInformation()?.getAllProperties()?['streams'][1]
+            ?['height'] ??
+        320;
 
     if (rotation == 90 ||
         rotation == 270 ||
@@ -72,7 +78,8 @@ class VideoEncoder {
     if (resolution.isLandscape) {
       // int target =
       //     ((targetResolution * resolution.height) / resolution.width).round();
-      int target = ((targetResolution * resolution.width) / resolution.height).round();
+      int target =
+          ((targetResolution * resolution.width) / resolution.height).round();
       var res = VideoResolution(
           width: getEvenDigit(target),
           height: targetResolution,
@@ -141,7 +148,7 @@ class VideoEncoder {
 
   isOriginalResolutionGreater(
       int resolution, VideoResolution originalResolution) {
-        return originalResolution.height >= resolution;
+    return originalResolution.height >= resolution;
     // if (originalResolution.isLandscape) {
     //   return originalResolution.width >= resolution;
     // } else {
@@ -159,8 +166,8 @@ class VideoEncoder {
     await folderPath.deleteDirectory();
     String encodingPath = await folderPath.createFolder();
 
-    List<double> progressList = List.filled(3, 0.0);
-    List<String> scales = ['480', '720', '1080'];
+    List<double> progressList = List.filled(2, 0.0);
+    List<String> scales = ['480', '720'];
 
     StreamController<double> combinedProgressStream =
         StreamController<double>();
@@ -179,7 +186,7 @@ class VideoEncoder {
           duration, (individualProgress, session) async {
         progressList[i] = individualProgress;
         double combinedProgress =
-            progressList.reduce((a, b) => a + b) / 3;
+            progressList.reduce((a, b) => a + b) / 2;
         if (!combinedProgressStream.isClosed) {
           combinedProgressStream.add(combinedProgress);
         } else {
@@ -188,7 +195,7 @@ class VideoEncoder {
       }, onError);
       debugPrint(
           '${i + 1} encoding ended for resolution ${scales[i]}');
-      if (i == 3 - 1) {
+      if (i == 2 - 1) {
         folderPath.generateMasterManifest(encodingPath, scales);
         debugPrint('Manifest file generated');
       }
@@ -229,14 +236,11 @@ class VideoEncoder {
       Function(double, FFmpegSession?) onProgressUpdate,
       Function(String) onError) async {
     String command;
-    command =
-          '-i $inputPath -vf scale=${scale}:-2,setsar=1:1 -c:v libx264 -crf 20 -b:v 8M -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${scale}p_video.m3u8';
-    // if (resolution.convertVideo) {
-      
-    // } else {
-    //   command =
-    //       '-i $inputPath -codec: copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${VideoResolution.quality(resolution)}p_video.m3u8';
-    // }
+    if (scale == '720') {
+      command = '''-i $inputPath -vf scale=${scale}:-2,setsar=1:1 -c:v libx264 -crf 20 -b:v 1M -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${scale}p_video.m3u8''';
+    } else {
+      command = '''-i $inputPath -vf scale=${scale}:-2,setsar=1:1 -c:v libx264 -crf 20 -b:v 0.5M -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${scale}p_video.m3u8''';
+    }
     String? duratio = info.getMediaInformation()?.getDuration();
     setDuration(double.parse(duratio!));
     FFmpegSession? session;
