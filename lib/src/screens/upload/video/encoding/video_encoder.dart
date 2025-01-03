@@ -24,9 +24,9 @@ class VideoEncoder {
     int rotation = await getVideoRotation(filePath);
 
     int width =
-        info.getMediaInformation()!.getAllProperties()!['streams'][0]['width'];
+        info.getMediaInformation()?.getAllProperties()?['streams'][0]?['width'] ?? info.getMediaInformation()?.getAllProperties()?['streams'][1]?['width'] ?? 480;
     int height =
-        info.getMediaInformation()!.getAllProperties()!['streams'][0]['height'];
+        info.getMediaInformation()?.getAllProperties()?['streams'][0]?['height'] ?? info.getMediaInformation()?.getAllProperties()?['streams'][1]?['height'] ?? 320;
 
     if (rotation == 90 ||
         rotation == 270 ||
