@@ -166,8 +166,8 @@ class VideoEncoder {
     await folderPath.deleteDirectory();
     String encodingPath = await folderPath.createFolder();
 
-    List<double> progressList = List.filled(2, 0.0);
-    List<String> scales = ['480', '720'];
+    List<String> scales = ['480']; //, '720'];
+    List<double> progressList = List.filled(scales.length, 0.0);
 
     StreamController<double> combinedProgressStream =
         StreamController<double>();
@@ -186,7 +186,7 @@ class VideoEncoder {
           duration, (individualProgress, session) async {
         progressList[i] = individualProgress;
         double combinedProgress =
-            progressList.reduce((a, b) => a + b) / 2;
+            progressList.reduce((a, b) => a + b) / scales.length;
         if (!combinedProgressStream.isClosed) {
           combinedProgressStream.add(combinedProgress);
         } else {
@@ -195,7 +195,7 @@ class VideoEncoder {
       }, onError);
       debugPrint(
           '${i + 1} encoding ended for resolution ${scales[i]}');
-      if (i == 2 - 1) {
+      if (i == scales.length - 1) {
         folderPath.generateMasterManifest(encodingPath, scales);
         debugPrint('Manifest file generated');
       }
