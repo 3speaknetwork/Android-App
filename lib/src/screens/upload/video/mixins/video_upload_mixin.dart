@@ -20,6 +20,7 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 mixin Upload {
   PageController pageController = PageController();
   ValueNotifier<double> videoUploadProgress = ValueNotifier(0);
+  ValueNotifier<double> finalUploadProgress = ValueNotifier(0);
   ValueNotifier<double> thumbnailUploadProgress = ValueNotifier(0);
   ValueNotifier<UploadStatus> uploadStatus = ValueNotifier(UploadStatus.idle);
   ValueNotifier<UploadStatus> thumbnailUploadStatus =
@@ -57,7 +58,7 @@ mixin Upload {
       await _setThumbnailForLocalEncode(path);
       _initiateNextUpload();
       var zipPath = FolderPath().readZipFile().path;
-      var response = await _uploadToServer(zipPath, null);
+      var response = await _uploadToServer(zipPath, finalUploadProgress);
       videoInfo = videoInfo.copyWith(tusId: response.url);
       uploadStatus.value = UploadStatus.ended;
       _initiateNextUpload();

@@ -97,6 +97,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                         currentPage: controller.page,
                         pageController: controller.pageController,
                         mediaUploadProgress: controller.videoUploadProgress,
+                        finalUploadProgress: controller.finalUploadProgress,
                         thumbnailUploadProgress:
                             controller.thumbnailUploadProgress,
                         uploadStatus: controller.uploadStatus,

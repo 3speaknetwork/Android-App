@@ -8,6 +8,7 @@ class UploadProgressExpandableTile extends StatefulWidget {
       required this.onUpload,
       required this.mediaUploadProgress,
       required this.thumbnailUploadProgress,
+      required this.finalUploadProgress,
       required this.uploadStatus,
       required this.pageController,
       required this.currentPage,
@@ -18,6 +19,7 @@ class UploadProgressExpandableTile extends StatefulWidget {
   final int currentPage;
   final ValueNotifier<double> mediaUploadProgress;
   final ValueNotifier<double> thumbnailUploadProgress;
+  final ValueNotifier<double> finalUploadProgress;
   final ValueNotifier<UploadStatus> uploadStatus;
   final PageController pageController;
   final bool isLocalEncode;
@@ -232,7 +234,16 @@ class _UploadProgressExpandableTileState
       return const Icon(Icons.pending);
     } else {
       if (_pageIndex == pageIndex) {
-        return _progessIndicator(showBacgroundColor: false);
+        if (widget.isLocalEncode) {
+          return ValueListenableBuilder<double>(
+            valueListenable: widget.finalUploadProgress,
+            builder: (context, progress, child) {
+              return _progessIndicator(progress: progress);
+            },
+          );
+        } else {
+          return _progessIndicator(showBacgroundColor: false);
+        }
       } else {
         return const Icon(Icons.check, color: Colors.lightGreen);
       }
