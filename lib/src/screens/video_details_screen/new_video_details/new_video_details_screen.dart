@@ -229,9 +229,20 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
       changeControlsVisibility(true);
     } else {
       if (item.isVideo) {
-        setupVideo(
-          item.videoV2M3U8(appData),
-        );
+        var url = item.videoV2M3U8(appData);
+        try {
+          var data = await http.get(Uri.parse(url));
+          if (data.body.contains('failed to resolve /ipfs')) {
+            debugPrint('Invalid url. let\'s update it ${url}');
+            url = item.mobileEncodedVideoUrl();
+          } else {
+            debugPrint('Valid URL. lets not update it. - ${data.body}');
+          }
+        } catch(e) {
+          debugPrint('Invalid url. let\'s update it ${url}');
+          url = item.mobileEncodedVideoUrl();
+        }
+        setupVideo(url);
       } else {
         setupVideo(item.playUrl!);
       }

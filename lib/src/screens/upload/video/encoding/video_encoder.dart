@@ -237,9 +237,9 @@ class VideoEncoder {
       Function(String) onError) async {
     String command;
     if (scale == '720') {
-      command = '''-i $inputPath -vf scale=${scale}:-2,setsar=1:1 -c:v libx264 -crf 20 -b:v 1M -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${scale}p_video.m3u8''';
+      command = '''-i $inputPath -vf scale=${scale}:-2,setsar=1:1 -c:v libx264 -crf 22 -b:v 0.65M -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${scale}p_video.m3u8''';
     } else {
-      command = '''-i $inputPath -vf scale=${scale}:-2,setsar=1:1 -c:v libx264 -crf 20 -b:v 0.5M -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${scale}p_video.m3u8''';
+      command = '''-i $inputPath -vf scale=${scale}:-2,setsar=1:1 -c:v libx264 -crf 22 -b:v 0.35M -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${scale}p_video.m3u8''';
     }
     String? duratio = info.getMediaInformation()?.getDuration();
     setDuration(double.parse(duratio!));

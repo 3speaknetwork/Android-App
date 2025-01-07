@@ -202,6 +202,21 @@ class GQLFeedItem {
     return spkvideo?.playUrl ?? '';
   }
 
+  // 480p_video.m3u8
+  String mobileEncodedVideoUrl() {
+    if ((spkvideo?.playUrl ?? '').contains('ipfs')) {
+      // example
+      // https://ipfs-3speak.b-cdn.net/ipfs/QmTRDJcgtt66pxs3ZnQCdRw57b69NS2TQvF4yHwaux5grT/manifest.m3u8
+      // https://ipfs-3speak.b-cdn.net/ipfs/QmTRDJcgtt66pxs3ZnQCdRw57b69NS2TQvF4yHwaux5grT/480p/index.m3u8
+      // https://ipfs-3speak.b-cdn.net/ipfs/QmWADpD1PWPnmYVkSZvgokU5vcN2qZqvsHCA985GZ5Jf4r/manifest.m3u8
+      var url = (spkvideo?.playUrl ?? '')
+          .replaceAll('ipfs://', IpfsNodeProvider().nodeUrl)
+          .replaceAll('manifest', '480p_video');
+      return url;
+    }
+    return spkvideo?.playUrl ?? '';
+  }
+
   String get hlsUrl {
     if ((spkvideo?.playUrl ?? '').contains('ipfs')) {
       // example
