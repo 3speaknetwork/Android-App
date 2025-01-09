@@ -1,37 +1,37 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/global_provider/image_resolution_provider.dart';
 import 'package:acela/src/global_provider/video_setting_provider.dart';
-import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/feed_item_grid_view.dart';
-import 'package:acela/src/screens/podcast/widgets/favourite.dart';
-import 'package:acela/src/screens/trending_tags/trending_tag_videos.dart';
-import 'package:acela/src/screens/video_details_screen/new_video_details/video_detail_favourite_provider.dart';
-import 'package:acela/src/utils/graphql/gql_communicator.dart';
-import 'package:acela/src/utils/graphql/models/trending_feed_response.dart';
 import 'package:acela/src/models/hive_post_info/hive_post_info.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
+import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/feed_item_grid_view.dart';
+import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/new_feed_list_item.dart';
 import 'package:acela/src/screens/login/ha_login_screen.dart';
-import 'package:acela/src/screens/user_channel_screen/user_channel_screen.dart';
-import 'package:acela/src/screens/video_details_screen/hive_upvote_dialog.dart';
-import 'package:acela/src/screens/video_details_screen/new_video_details_info.dart';
+import 'package:acela/src/screens/podcast/widgets/favourite.dart';
+import 'package:acela/src/screens/trending_tags/trending_tag_videos.dart';
 import 'package:acela/src/screens/video_details_screen/comment/video_details_comments.dart';
+import 'package:acela/src/screens/video_details_screen/hive_upvote_dialog.dart';
+import 'package:acela/src/screens/video_details_screen/new_video_details/video_detail_favourite_provider.dart';
+import 'package:acela/src/screens/video_details_screen/new_video_details_info.dart';
+import 'package:acela/src/utils/graphql/gql_communicator.dart';
+import 'package:acela/src/utils/graphql/models/trending_feed_response.dart';
 import 'package:acela/src/utils/routes/routes.dart';
 import 'package:acela/src/utils/seconds_to_duration.dart';
 import 'package:acela/src/widgets/box_loading/video_detail_feed_loader.dart';
 import 'package:acela/src/widgets/box_loading/video_feed_loader.dart';
 import 'package:acela/src/widgets/cached_image.dart';
-import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/new_feed_list_item.dart';
 import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
 import 'package:better_player/better_player.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:timeago/timeago.dart' as timeago;
-import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class NewVideoDetailsScreen extends StatefulWidget {
@@ -98,20 +98,26 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
       widget.permlink,
       appData.language,
     );
-    setState(() {
-      suggestions = items;
-      isSuggestionsLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        suggestions = items;
+        isSuggestionsLoading = false;
+      });
+    }
   }
 
   void loadHiveInfo() async {
-    setState(() {
-      postInfo = null;
-    });
+    if (mounted) {
+      setState(() {
+        postInfo = null;
+      });
+    }
     var data = await fetchHiveInfoForThisVideo(appData.rpc);
-    setState(() {
-      postInfo = data;
-    });
+    if (mounted) {
+      setState(() {
+        postInfo = data;
+      });
+    }
   }
 
   Future<HivePostInfoPostResultBody> fetchHiveInfoForThisVideo(
@@ -215,18 +221,23 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
   void loadDataAndVideo() async {
     if (widget.item != null) {
       item = widget.item!;
-      isLoadingVideo = false;
     } else {
       var data = await GQLCommunicator()
           .getVideoDetails(widget.author, widget.permlink);
-      setState(() {
-        item = data;
-        isLoadingVideo = false;
-      });
+      if (mounted) {
+        setState(() {
+          item = data;
+        });
+      }
     }
     if (widget.betterPlayerController != null) {
       _betterPlayerController = widget.betterPlayerController!;
       changeControlsVisibility(true);
+      if (mounted) {
+        setState(() {
+          isLoadingVideo = false;
+        });
+      }
     } else {
       if (item.isVideo) {
         var url = item.videoV2M3U8(appData);
@@ -238,13 +249,18 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
           } else {
             debugPrint('Valid URL. lets not update it. - ${data.body}');
           }
-        } catch(e) {
+        } catch (e) {
           debugPrint('Invalid url. let\'s update it ${url}');
           url = item.mobileEncodedVideoUrl();
         }
         setupVideo(url);
       } else {
         setupVideo(item.playUrl!);
+      }
+      if (mounted) {
+        setState(() {
+          isLoadingVideo = false;
+        });
       }
 
       if (videoSettingProvider.isMuted) {

@@ -20,6 +20,9 @@ import 'package:acela/src/models/video_upload/video_device_encode_upload_model.d
 import 'package:acela/src/models/video_upload/video_upload_complete_request.dart';
 import 'package:acela/src/models/video_upload/video_upload_login_response.dart';
 import 'package:acela/src/models/video_upload/video_upload_prepare_response.dart';
+import 'package:acela/src/screens/report/model/report/error_model.dart';
+import 'package:acela/src/screens/report/model/report/report_post.dart';
+import 'package:acela/src/screens/report/model/report_user_model.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -270,7 +273,7 @@ class Communicator {
               union: union,
               cookie: cookie,
               postingAuthority: null,
-              accessToken: null,
+              accessToken: token,
               resolution: resolution,
               rpc: rpc,
               loaded: true,
@@ -877,6 +880,135 @@ class Communicator {
     } catch (e) {
       return ActionSingleDataResponse(
           status: ResponseStatus.failed, errorMessage: e.toString());
+    }
+  }
+
+  Future<ActionSingleDataResponse<bool>> reportPost(
+      ReportPostModel report, HiveUserData user) async {
+    try {
+      var headers = {
+        'Content-Type': 'application/json',
+        "authorization": user.accessToken!,
+      };
+
+      Response response = await http.post(
+        Uri.parse('$tsServer/mobile/report-post'),
+        headers: headers,
+        body: report.toRawJson(),
+      );
+
+      if (response.statusCode == 200) {
+        return ActionSingleDataResponse(
+            errorMessage: "",
+            status: ResponseStatus.success,
+            isSuccess: true,
+            data: true);
+      } else {
+        return ActionSingleDataResponse(
+            errorMessage: ErrorModel.fromJsonString(response.body).error,
+            status: ResponseStatus.failed);
+      }
+    } catch (e) {
+      return ActionSingleDataResponse(
+        errorMessage: "Something went wrong",
+        status: ResponseStatus.failed,
+      );
+    }
+  }
+  Future<ActionSingleDataResponse<bool>> reportUser(
+      ReportUserModel report, HiveUserData user) async {
+    try {
+      var headers = {
+        'Content-Type': 'application/json',
+        "authorization": user.accessToken!,
+      };
+
+      Response response = await http.post(
+        Uri.parse('$tsServer/mobile/report-user'),
+        headers: headers,
+        body: report.toRawJson(),
+      );
+
+      if (response.statusCode == 200) {
+        return ActionSingleDataResponse(
+            errorMessage: "",
+            status: ResponseStatus.success,
+            isSuccess: true,
+            data: true);
+      } else {
+        return ActionSingleDataResponse(
+            errorMessage: ErrorModel.fromJsonString(response.body).error,
+            status: ResponseStatus.failed);
+      }
+    } catch (e) {
+      return ActionSingleDataResponse(
+        errorMessage: "Something went wrong",
+        status: ResponseStatus.failed,
+      );
+    }
+  }
+
+  Future<ActionListDataResponse<ReportPostModel>> readReportedPosts(
+      HiveUserData user) async {
+    try {
+      var headers = {
+        'Content-Type': 'application/json',
+        "authorization": user.accessToken!,
+      };
+      Response response = await http.get(
+        Uri.parse('$tsServer/mobile/reported-posts'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return ActionListDataResponse<ReportPostModel>(
+            errorMessage: "",
+            status: ResponseStatus.success,
+            isSuccess: true,
+            data: ReportPostModel.fromRawListJson(response.body));
+      } else {
+        return ActionListDataResponse(
+          errorMessage: "Something went wrong",
+          status: ResponseStatus.failed,
+        );
+      }
+    } catch (e) {
+      return ActionListDataResponse(
+        errorMessage: e.toString(),
+        status: ResponseStatus.failed,
+      );
+    }
+  }
+
+  Future<ActionListDataResponse<ReportUserModel>> readReportedUsers(
+      HiveUserData user) async {
+    try {
+      var headers = {
+        'Content-Type': 'application/json',
+        "authorization": user.accessToken!,
+      };
+      Response response = await http.get(
+        Uri.parse('$tsServer/mobile/reported-users'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return ActionListDataResponse<ReportUserModel>(
+            errorMessage: "",
+            status: ResponseStatus.success,
+            isSuccess: true,
+            data: ReportUserModel.fromRawListJson(response.body));
+      } else {
+        return ActionListDataResponse(
+          errorMessage: "Something went wrong",
+          status: ResponseStatus.failed,
+        );
+      }
+    } catch (e) {
+      return ActionListDataResponse(
+        errorMessage: e.toString(),
+        status: ResponseStatus.failed,
+      );
     }
   }
 }

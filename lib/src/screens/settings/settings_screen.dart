@@ -2,8 +2,8 @@ import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/global_provider/image_resolution_provider.dart';
 import 'package:acela/src/global_provider/ipfs_node_provider.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
-import 'package:acela/src/screens/home_screen/new_home_screen.dart';
 import 'package:acela/src/screens/my_account/account_settings/widgets/delete_dialog.dart';
+import 'package:acela/src/screens/policy_aggrement/presentation/policy_aggrement_view.dart';
 import 'package:acela/src/screens/settings/add_cutom_union_indexer.dart';
 import 'package:acela/src/utils/communicator.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
@@ -93,7 +93,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         String? hasAuthKey = await storage.read(key: 'hasAuthKey');
         String? cookie = await storage.read(key: 'cookie');
         String? accessToken = await storage.read(key: 'accessToken');
-        String? postingAuth = await storage.read(key: 'postingAuth') ;
+        String? postingAuth = await storage.read(key: 'postingAuth');
         String rpc = await storage.read(key: 'rpc') ?? 'api.hive.blog';
         String union = await storage.read(key: 'union') ??
             GQLCommunicator.defaultGQLServer;
@@ -180,7 +180,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             accessToken: appData.accessToken,
             resolution: appData.resolution,
             rpc: appData.rpc,
-            postingAuthority: appData.postingAuthority.toString() ,
+            postingAuthority: appData.postingAuthority.toString(),
             union: appData.union,
             loaded: true,
             language: language.code == 'all' ? null : language.code,
@@ -581,6 +581,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _eula() {
+    return ListTile(
+      leading: const Icon(Icons.shield),
+      title: const Text("View EULA"),
+      trailing: Icon(Icons.arrow_right),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PolicyAggrementView(
+              hideButton: true,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void showIpfsNodeBottomSheet() {
     List<String> nodes = [];
     nodes.add(IpfsNodeProvider().defaultIpfsNode);
@@ -661,6 +679,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _unionIndexer(context, user),
         _divider(),
         _ipfsNode(),
+        _divider(),
+        _eula(),
         _divider(),
         _appVersion(context),
         _divider(),

@@ -5,6 +5,7 @@ import 'package:acela/src/global_provider/image_resolution_provider.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/feed_item_grid_view.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/new_feed_list_item.dart';
+import 'package:acela/src/screens/report/controller/report_controller.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
 import 'package:acela/src/utils/graphql/models/trending_feed_response.dart';
 import 'package:acela/src/widgets/box_loading/video_feed_loader.dart';
@@ -50,6 +51,7 @@ class _HomeScreenFeedListState extends State<HomeScreenFeedList>
   @override
   bool get wantKeepAlive => true;
 
+  List<GQLFeedItem> originalItems = [];
   List<GQLFeedItem> items = [];
   int pageLimit = 50;
   var firstPageLoaded = false;
@@ -105,41 +107,41 @@ class _HomeScreenFeedListState extends State<HomeScreenFeedList>
           return GQLCommunicator().getTrendingTagFeed(
             widget.owner ?? 'threespeak',
             false,
-            firstPage ? 0 : items.length,
+            firstPage ? 0 : originalItems.length,
             widget.appData.language,
           );
         case HomeScreenFeedType.trendingFeed:
-          return GQLCommunicator().getTrendingFeed(
-              false, firstPage ? 0 : items.length, widget.appData.language);
+          return GQLCommunicator().getTrendingFeed(false,
+              firstPage ? 0 : originalItems.length, widget.appData.language);
         case HomeScreenFeedType.newUploads:
-          return GQLCommunicator().getNewUploadsFeed(
-              false, firstPage ? 0 : items.length, widget.appData.language);
+          return GQLCommunicator().getNewUploadsFeed(false,
+              firstPage ? 0 : originalItems.length, widget.appData.language);
         case HomeScreenFeedType.firstUploads:
-          return GQLCommunicator().getFirstUploadsFeed(
-              false, firstPage ? 0 : items.length, widget.appData.language);
+          return GQLCommunicator().getFirstUploadsFeed(false,
+              firstPage ? 0 : originalItems.length, widget.appData.language);
         case HomeScreenFeedType.userFeed:
           return GQLCommunicator().getMyFeed(
               widget.appData.username ?? 'sagarkothari88',
               false,
-              firstPage ? 0 : items.length,
+              firstPage ? 0 : originalItems.length,
               widget.appData.language);
         case HomeScreenFeedType.userChannelFeed:
           return GQLCommunicator().getUserFeed(
               [widget.owner ?? 'sagarkothari88'],
               false,
-              firstPage ? 0 : items.length,
+              firstPage ? 0 : originalItems.length,
               widget.appData.language);
         case HomeScreenFeedType.userChannelShorts:
           return GQLCommunicator().getUserFeed(
               [widget.owner ?? 'sagarkothari88'],
               true,
-              firstPage ? 0 : items.length,
+              firstPage ? 0 : originalItems.length,
               widget.appData.language);
         case HomeScreenFeedType.community:
           return GQLCommunicator().getCommunity(
               widget.community ?? 'hive-181335',
               true,
-              firstPage ? 0 : items.length,
+              firstPage ? 0 : originalItems.length,
               widget.appData.language);
       }
     } catch (e) {
@@ -162,10 +164,13 @@ class _HomeScreenFeedListState extends State<HomeScreenFeedList>
           if (newItems.length < pageLimit - 1) {
             isPageEnded = true;
           }
-          items = newItems;
-          if (items.isEmpty && widget.onEmptyDataCallback != null) {
+          originalItems = newItems;
+          if (originalItems.isEmpty && widget.onEmptyDataCallback != null) {
             widget.onEmptyDataCallback!();
           }
+
+          _filterFromReports();
+
           isLoading = false;
           firstPageLoaded = true;
         });
@@ -185,7 +190,8 @@ class _HomeScreenFeedListState extends State<HomeScreenFeedList>
           if (newItems.isNotEmpty) {
             newItems.removeAt(0);
           }
-          items = items + newItems;
+          originalItems = originalItems + newItems;
+          _filterFromReports();
           isLoading = false;
           firstPageLoaded = true;
         });
@@ -198,10 +204,37 @@ class _HomeScreenFeedListState extends State<HomeScreenFeedList>
     }
   }
 
+  List<GQLFeedItem> _filterFromReports() {
+    final reportController = context.read<ReportController>();
+    return items = [...originalItems]..removeWhere((item) {
+        final isReportedPost = reportController.reportedPosts.any((report) =>
+            report.username == item.author?.username ||
+            report.permlink == item.permlink);
+
+        final isReportedUser = reportController.reportedUsers
+            .any((user) => user.username == item.author?.username);
+
+        return isReportedPost || isReportedUser;
+      });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isGridView = MediaQuery.of(context).size.shortestSide > 600;
     super.build(context);
+    context.select<ReportController, bool>((e) {
+      if (e.shouldRefresh) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _filterFromReports();
+            });
+          }
+          context.read<ReportController>().turnRefreshOff();
+        });
+      }
+      return false;
+    });
     var screenWidth = MediaQuery.of(context).size.width;
     if (isLoading && !firstPageLoaded) {
       return VideoFeedLoader(
@@ -288,7 +321,9 @@ class _HomeScreenFeedListState extends State<HomeScreenFeedList>
             _setInViewIndex(items.length - 1);
           },
           builder: (context, index) {
+            GQLFeedItem item = items[index];
             return LayoutBuilder(
+              key: ValueKey('${item.author}/${item.permlink}'),
               builder: (context, constraints) {
                 return InViewNotifierWidget(
                   id: '$index',

@@ -5,6 +5,7 @@ import 'package:acela/src/global_provider/video_setting_provider.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/podcast/controller/podcast_controller.dart';
 import 'package:acela/src/screens/podcast/controller/podcast_player_controller.dart';
+import 'package:acela/src/screens/report/controller/report_controller.dart';
 import 'package:acela/src/screens/upload/video/controller/video_upload_controller.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
 import 'package:acela/src/utils/routes/app_router.dart';
@@ -106,7 +107,31 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
+        StreamProvider<HiveUserData>.value(
+            value: server.hiveUserData,
+            initialData: HiveUserData(
+              resolution: '480p',
+              keychainData: null,
+              accessToken: null,
+              postingKey: null,
+              username: null,
+              cookie: null,
+              postingAuthority: null,
+              rpc: 'api.hive.blog',
+              union: GQLCommunicator.defaultGQLServer,
+              loaded: false,
+              language: null,
+            ),),
+         ChangeNotifierProxyProvider<HiveUserData, ReportController>(
+      lazy: false,
+      create: (_) => ReportController(),
+      update: (_, hiveUserData, reportController) {
+        reportController?.updateHiveUserData(hiveUserData);
+        return reportController!;
+      },
+    ),
+        
+        ChangeNotifierProvider( 
           lazy: false,
           create: (context) => PodcastController(),
         ),
@@ -123,28 +148,13 @@ class _MyAppState extends State<MyApp> {
       ],
       child: OverlaySupport.global(
         child: futureBuilder(
-          StreamProvider<HiveUserData>.value(
-            value: server.hiveUserData,
-            initialData: HiveUserData(
-              resolution: '480p',
-              keychainData: null,
-              accessToken: null,
-              postingKey: null,
-              username: null,
-              cookie: null,
-              postingAuthority: null,
-              rpc: 'api.hive.blog',
-              union: GQLCommunicator.defaultGQLServer,
-              loaded: false,
-              language: null,
-            ),
-            child: StreamProvider<bool>.value(
+          StreamProvider<bool>.value(
               value: server.theme,
               initialData: true,
               child: const AcelaApp(),
             ),
           ),
-        ),
+        
       ),
     );
   }

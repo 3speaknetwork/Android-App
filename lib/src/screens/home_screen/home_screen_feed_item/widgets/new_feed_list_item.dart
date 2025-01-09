@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/global_provider/image_resolution_provider.dart';
 import 'package:acela/src/global_provider/video_setting_provider.dart';
@@ -10,9 +11,11 @@ import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/home
 import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/home_feed_video_timer.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/mute_unmute_button.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/play_pause_button.dart';
+import 'package:acela/src/screens/report/widgets/report_pop_up_menu.dart';
 import 'package:acela/src/screens/video_details_screen/new_video_details/video_detail_favourite_provider.dart';
 import 'package:acela/src/screens/video_details_screen/video_details_screen.dart';
 import 'package:acela/src/screens/video_details_screen/video_details_view_model.dart';
+import 'package:acela/src/utils/enum.dart';
 import 'package:acela/src/utils/graphql/models/trending_feed_response.dart';
 import 'package:acela/src/utils/routes/routes.dart';
 import 'package:acela/src/utils/seconds_to_duration.dart';
@@ -22,6 +25,7 @@ import 'package:better_player/better_player.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -42,7 +46,7 @@ class NewFeedListItem extends StatefulWidget {
       required this.votes,
       required this.hiveRewards,
       this.item,
-      this.appData,
+      required this.appData,
       this.showVideo = false,
       this.onFavouriteRemoved,
       this.isGridView = false})
@@ -61,7 +65,7 @@ class NewFeedListItem extends StatefulWidget {
   final Function onTap;
   final Function onUserTap;
   final GQLFeedItem? item;
-  final HiveUserData? appData;
+  final HiveUserData appData;
   final bool showVideo;
   final VoidCallback? onFavouriteRemoved;
   final bool isGridView;
@@ -90,6 +94,9 @@ class _NewFeedListItemState extends State<NewFeedListItem>
   void dispose() {
     homeFeedVideoController.dispose();
     if (_betterPlayerController != null) {
+      _betterPlayerController!.videoPlayerController!
+          .removeListener(videoPlayerListener);
+      _betterPlayerController!.removeEventsListener(videoEventListener);
       _betterPlayerController!.videoPlayerController?.dispose();
       _betterPlayerController!.dispose();
     }
@@ -178,7 +185,7 @@ class _NewFeedListItemState extends State<NewFeedListItem>
 
   void _initVideo() async {
     if (widget.item!.isVideo) {
-      setupVideo(widget.item!.videoV2M3U8(widget.appData!));
+      setupVideo(widget.item!.videoV2M3U8(widget.appData));
     } else {
       setupVideo(widget.item!.playUrl!);
     }
@@ -221,7 +228,7 @@ class _NewFeedListItemState extends State<NewFeedListItem>
     return InkWell(
       onTap: () {
         widget.onTap();
-        if (widget.item == null || widget.appData == null) {
+        if (widget.item == null) {
           var viewModel = VideoDetailsViewModel(
             author: widget.author,
             permlink: widget.permlink,
@@ -276,11 +283,24 @@ class _NewFeedListItemState extends State<NewFeedListItem>
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(bottom: 2.0),
-                          child: Text(
-                            widget.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: titleStyle,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  widget.title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: titleStyle,
+                                ),
+                              ),
+                              Gap(10),
+                              ReportPopUpMenu(
+                                iconSize: 20,
+                                type: Report.post,
+                                author: widget.author,
+                                permlink: widget.permlink,
+                              )
+                            ],
                           ),
                         ),
                         Row(
@@ -319,7 +339,7 @@ class _NewFeedListItemState extends State<NewFeedListItem>
                               width: 15,
                             ),
                             UpvoteButton(
-                              appData: widget.appData!,
+                              appData: widget.appData,
                               item: widget.item!,
                               votes: widget.votes,
                             ),
@@ -469,7 +489,7 @@ class _NewFeedListItemState extends State<NewFeedListItem>
       child: Column(
         children: [
           HomeFeedVideoFullScreenButton(
-              appData: widget.appData!,
+              appData: widget.appData,
               item: widget.item!,
               betterPlayerController: _betterPlayerController!),
           Padding(

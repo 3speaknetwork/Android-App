@@ -2,11 +2,13 @@ import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_list.dart';
 import 'package:acela/src/screens/podcast/widgets/favourite.dart';
+import 'package:acela/src/screens/report/widgets/report_pop_up_menu.dart';
 import 'package:acela/src/screens/stories/story_feed_list.dart';
 import 'package:acela/src/screens/user_channel_screen/user_channel_following.dart';
 import 'package:acela/src/screens/user_channel_screen/user_channel_profile.dart';
 import 'package:acela/src/screens/user_channel_screen/user_channel_videos.dart';
 import 'package:acela/src/screens/user_channel_screen/user_favourite_provider.dart';
+import 'package:acela/src/utils/enum.dart';
 import 'package:acela/src/widgets/custom_circle_avatar.dart';
 import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 class UserChannelScreen extends StatefulWidget {
-  const UserChannelScreen( {Key? key, required this.owner, this.onPop})
+  const UserChannelScreen({Key? key, required this.owner, this.onPop})
       : super(key: key);
   final String owner;
   final VoidCallback? onPop;
@@ -117,17 +119,19 @@ class _UserChannelScreenState extends State<UserChannelScreen>
             const SizedBox(
               width: 10,
             ),
-            Text(
-              widget.owner,
-              style: TextStyle(fontSize: 16),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            Expanded(
+              child: Text(
+                widget.owner,
+                style: TextStyle(fontSize: 16),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             )
           ],
         ),
         actions: [
-           FavouriteWidget(
-            toastType: "User",
+          FavouriteWidget(
+              toastType: "User",
               isLiked: userFavouriteProvider.isUserPresentLocally(widget.owner),
               onAdd: () {
                 userFavouriteProvider.storeLikedUserLocally(widget.owner);
@@ -147,6 +151,10 @@ class _UserChannelScreenState extends State<UserChannelScreen>
             },
             icon: Icon(Icons.share),
           ),
+          ReportPopUpMenu(
+            type: Report.user,
+            author: widget.owner,
+          )
         ],
         bottom: TabBar(
           controller: _tabController,
