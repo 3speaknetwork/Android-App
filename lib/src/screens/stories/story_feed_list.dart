@@ -24,13 +24,14 @@ class StoryFeedList extends StatefulWidget {
     required this.appData,
     required this.feedType,
     this.username,
-    this.community,
+    this.community, required this.isCurrentTab,
   });
 
   final StoryFeedType feedType;
   final HiveUserData appData;
   final String? username;
   final String? community;
+  final bool isCurrentTab;
 
   @override
   State<StoryFeedList> createState() => _StoryFeedListState();
@@ -157,7 +158,7 @@ class _StoryFeedListState extends State<StoryFeedList>
           ),
         );
       } else {
-        return StoryFeedDataBody(items: items,appData: widget.appData,controller: controller,);
+        return StoryFeedDataBody(items: items,appData: widget.appData,controller: controller,isCurrentTab: widget.isCurrentTab,);
       }
     }
   }

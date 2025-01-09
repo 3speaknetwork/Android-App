@@ -27,7 +27,7 @@ class CommentTile extends StatefulWidget {
   final CommentItemModel comment;
   final bool isPadded;
   final int index;
-  final String currentUser;
+  final String? currentUser;
   final String searchKey;
   final ItemScrollController itemScrollController;
 
@@ -132,15 +132,17 @@ class _CommentTileState extends State<CommentTile>
           if (isHidden) {
             _showCommentUnMuteDialog();
           } else {
-            if (!widget.comment.isLocallyAdded) {
+            if(widget.currentUser != null){
+              if (!widget.comment.isLocallyAdded) {
               _showBottomSheet(item, onUpvote: () {
                 context.read<CommentController>().onUpvote(
-                    item, widget.index, widget.currentUser, widget.searchKey);
+                    item, widget.index, widget.currentUser!, widget.searchKey);
                 setState(() {
                   votes++;
                   isUpvoted = true;
                 });
               });
+            }
             }
           }
         },

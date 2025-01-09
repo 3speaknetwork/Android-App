@@ -31,10 +31,13 @@ dependencies:
     git:
       url: https://github.com/florent37/Flutter-AssetsAudioPlayer.git
       ref: master
-  adaptive_action_sheet: ^2.0.1
-  better_player:
+
+  auth:
     git:
-      url: https://github.com/RAMb002/betterplayer.git
+      url: https://github.com/sag333ar/hive_flutter_plugin.git
+      ref: master
+
+  adaptive_action_sheet: ^2.0.1
 
   crypto: ^3.0.3
   device_info_plus: ^10.1.2
@@ -43,10 +46,10 @@ dependencies:
     sdk: flutter
   flutter_dotenv: ^5.0.2
   flutter_markdown: ^0.7.3+1
-  flutter_secure_storage: ^8.0.0
+  flutter_secure_storage: ^9.2.2
   font_awesome_flutter: ^10.1.0
   http: ^0.13.4
-  intl: ^0.18.1
+  intl: ^0.19.0
   json_annotation: ^4.4.0
   overlay_support: ^2.0.1
   provider: ^6.0.2
@@ -54,13 +57,13 @@ dependencies:
   timeago: ^3.1.0
   tus_client: ^1.0.2
   url_launcher: ^6.0.20
-  video_player: ^2.2.14
+  video_player: ^2.9.2
   video_player_web_hls: ^1.0.0+3
   video_compress: ^3.1.0
   video_thumbnail: ^0.5.0
   image_picker: ^1.1.2
   localstorage: ^4.0.0+1
-  permission_handler: ^11.3.1
+  # permission_handler: ^11.3.1
   path_provider: ^2.0.11
   images_picker: ^1.2.11
   carousel_slider: ^5.0.0
@@ -73,8 +76,7 @@ dependencies:
   cached_network_image: ^3.3.0
   audio_service: ^0.18.12
   just_audio: ^0.9.35
-  upgrader: ^10.3.0
-  dart_rss: ^3.0.1
+  upgrader: ^11.1.0
   inview_notifier_list: ^3.0.0
   equatable: ^2.0.5
   croppy: ^1.1.4
@@ -94,6 +96,7 @@ dependencies:
   ffmpeg_kit_flutter_https_gpl: 6.0.3
   archive: ^3.6.1
   wakelock_web: ^0.4.0
+  chewie: ^1.9.0
 
 dev_dependencies:
   flutter_test:

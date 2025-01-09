@@ -129,7 +129,7 @@ class _VideoDetailsCommentsState extends State<VideoDetailsComments> {
               '${item.author}/${item.permlink}/${item.created.toIso8601String()}'),
           itemScrollController: itemScrollController,
           isPadded: item.depth != 1 && searchController.text.isEmpty,
-          currentUser: widget.appData.username!,
+          currentUser: widget.appData.username,
           comment: item,
           index: index,
           searchKey: searchController.text.trim(),

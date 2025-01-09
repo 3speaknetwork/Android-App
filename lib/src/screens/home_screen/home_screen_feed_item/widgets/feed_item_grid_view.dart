@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 
 class FeedItemGridView extends StatelessWidget {
   const FeedItemGridView({
-    Key? key,
+    super.key,
     required this.screenWidth,
     required this.items,
     required this.appData,
-     this.scrollController,
-     this.nextPageLoader,
-  }) : super(key: key);
+    this.scrollController,
+    this.nextPageLoader,
+  });
 
   final double screenWidth;
   final List<GQLFeedItem> items;
@@ -26,7 +26,7 @@ class FeedItemGridView extends StatelessWidget {
       child: CustomScrollView(
         controller: scrollController,
         slivers: [
-          FeedItemGridWidget(items: items,appData: appData),
+          FeedItemGridWidget(items: items, appData: appData),
           SliverToBoxAdapter(
             child: nextPageLoader,
           ),
@@ -34,31 +34,26 @@ class FeedItemGridView extends StatelessWidget {
       ),
     );
   }
-
-
 }
 
 class FeedItemGridWidget extends StatelessWidget {
   const FeedItemGridWidget({
-    Key? key,
+    super.key,
     required this.items,
     required this.appData,
-  }) : super(key: key);
+  });
 
   final List<GQLFeedItem> items;
   final HiveUserData appData;
 
   @override
   Widget build(BuildContext context) {
-    var width = MediaQuery.of(context).size.width ;
     return SliverGrid.builder(
       itemCount: items.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: getCrossAxisCount(width),
-        childAspectRatio:
-            MediaQuery.of(context).orientation == Orientation.landscape
-                ? 1.25
-                : 1.4,
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 350,
+        mainAxisExtent: 250,
+        childAspectRatio: 10 / 9,
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,
       ),
@@ -85,17 +80,5 @@ class FeedItemGridWidget extends StatelessWidget {
         );
       },
     );
-  }
-
-    int getCrossAxisCount(double width) {
-    if (width > 1300) {
-      return 4;
-    } else if (width > 974 && width < 1300) {
-      return 3;
-    } else if (width > 650 && width < 974) {
-      return 2;
-    } else {
-      return 2;
-    }
   }
 }

@@ -1,4 +1,6 @@
 // import 'package:acela/firebase_options.dart';
+import 'dart:async';
+
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/global_provider/image_resolution_provider.dart';
 import 'package:acela/src/global_provider/video_setting_provider.dart';
@@ -6,13 +8,17 @@ import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/upload/video/controller/video_upload_controller.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
 import 'package:acela/src/utils/routes/app_router.dart';
+import 'package:auth/core/configs/get_it.dart';
+import 'package:auth/core/models/app_data.dart';
+import 'package:auth/core/models/app_meta_data.dart';
+import 'package:auth/core/models/auth_flags.dart';
+import 'package:auth/core/models/json_meta_data_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
-import 'dart:async';
 import 'package:upgrader/upgrader.dart';
 
 Future<void> main() async {
@@ -22,12 +28,24 @@ Future<void> main() async {
 
   // await Upgrader.clearSavedSettings(); // for debugging
   await Upgrader.sharedInstance.initialize();
-    runApp(const MyApp());
-
+  await Config.ensureInitialized(
+    appData: const AppData(
+      appMetaData: AppMetaData(
+        appName: "3Speak",
+        appDescription: '3Speak',
+        developerName: "sagarkothari88",
+        appTagName: "3Speak",
+        hiveSignerAppName: "thehivemobileapp",
+        jsonMetaDataFieldFlags: JsonMetaDataFieldFlags(),
+      ),
+      authFlags: AuthViewFlags(enableHiveSighner: false),
+    ),
+  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -62,20 +80,17 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-
         ChangeNotifierProvider(
             lazy: false, create: (context) => VideoSettingProvider()),
         ChangeNotifierProvider(
           lazy: false,
           create: (context) => SettingsProvider(),
         ),
-
         ChangeNotifierProvider(create: (context) => VideoUploadController())
       ],
       child: OverlaySupport.global(
@@ -162,7 +177,7 @@ class _MyAppState extends State<MyApp> {
 }
 
 class AcelaApp extends StatelessWidget {
-  const AcelaApp({Key? key}) : super(key: key);
+  const AcelaApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +192,7 @@ class AcelaApp extends StatelessWidget {
               primaryColorDark: Colors.black,
               scaffoldBackgroundColor: Colors.black,
               cardTheme: CardTheme(
-                  shape: RoundedRectangleBorder(
+                  shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(4))),
                   color: Colors.grey.shade900),
             )
@@ -186,7 +201,7 @@ class AcelaApp extends StatelessWidget {
               primaryColorLight: Colors.black,
               primaryColorDark: Colors.white,
               cardTheme: CardTheme(
-                  shape: RoundedRectangleBorder(
+                  shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(4))),
                   color: Colors.grey.shade200),
             ),

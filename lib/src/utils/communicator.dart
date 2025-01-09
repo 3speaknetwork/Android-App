@@ -10,7 +10,6 @@ import 'package:acela/src/models/hive_post_info/hive_user_posting_key.dart';
 import 'package:acela/src/models/home_screen_feed_models/home_feed.dart';
 import 'package:acela/src/models/login/memo_response.dart';
 import 'package:acela/src/models/my_account/video_ops.dart';
-import 'package:acela/src/models/podcast/upload/podcast_episode_upload_response.dart';
 import 'package:acela/src/models/user_account/action_response.dart';
 import 'package:acela/src/models/user_account/user_model.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
@@ -706,59 +705,7 @@ class Communicator {
     }
   }
 
-  Future<PodcastEpisodeUploadResponse> uploadPodcast({
-    required HiveUserData user,
-    required String oFilename,
-    required int duration,
-    required int size,
-    required String title,
-    required String description,
-    required bool isNsfwContent,
-    required String tags,
-    required String thumbnail,
-    required String communityID,
-    required bool declineRewards,
-    required String episode, // upload path where podcast episode was uploaded
-  }) async {
-    var request = http.Request(
-        'POST', Uri.parse('${Communicator.tsServer}/mobile/api/podcast/add'));
-    request.body = json.encode({
-      'oFilename': oFilename,
-      'duration': duration,
-      'size': size,
-      'isNsfwContent': isNsfwContent,
-      'title': title,
-      'description': description,
-      'communityID': communityID,
-      'thumbnail': thumbnail,
-      'episode': episode,
-    });
-    var cookie = await getValidCookie(user);
-    Map<String, String> map = {
-      "cookie": cookie,
-      "Content-Type": "application/json",
-      "authorization": "Bearer $cookie"
-    };
-    request.headers.addAll(map);
-    try {
-      http.StreamedResponse response = await request.send();
-      if (response.statusCode == 200) {
-        var string = await response.stream.bytesToString();
-        return PodcastEpisodeUploadResponse
-            .podcastEpisodeUploadResponseFromJson(string);
-      } else {
-        var string = await response.stream.bytesToString();
-        var error = ErrorResponse.fromJsonString(string).error ??
-            response.reasonPhrase.toString();
-        log('Error from server is $error');
-        throw error;
-      }
-    } catch (e) {
-      log('Error from server is ${e.toString()}');
-      rethrow;
-    }
-  }
-
+ 
   Future<ActionResponse> login(
     String userName,
     String proofOfPayload,

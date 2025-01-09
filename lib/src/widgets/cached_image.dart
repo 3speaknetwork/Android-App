@@ -9,6 +9,7 @@ class CachedImage extends StatelessWidget {
       this.imageWidth,
       this.loadingIndicatorSize,
       this.borderRadius,
+      this.isCached = true,
       this.fit})
       : super(key: key);
 
@@ -18,6 +19,7 @@ class CachedImage extends StatelessWidget {
   final double? loadingIndicatorSize;
   final BoxFit? fit;
   final double? borderRadius;
+  final bool isCached;
 
   @override
   Widget build(BuildContext context) {
@@ -27,33 +29,29 @@ class CachedImage extends StatelessWidget {
               ? Colors.grey.shade400
               : Colors.grey.shade900,
           borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 0))),
-      child: CachedNetworkImage(
-        imageUrl: imageUrl ?? '',
-        height: imageHeight,
-        width: imageWidth,
-        fit: fit ?? (imageHeight != null ? BoxFit.cover : null),
-        // progressIndicatorBuilder: (context, url, downloadProgress) =>
-        //     imageHeight != null
-        //         ? Center(
-        //             child: SizedBox(
-        //               height: loadingIndicatorSize ?? 50,
-        //               width: loadingIndicatorSize ?? 50,
-        //               child: CircularProgressIndicator(
-        //                 value: downloadProgress.progress,
-        //                 strokeWidth: 1.5,
-        //               ),
-        //             ),
-        //           )
-        //         : CircularProgressIndicator(
-        //             value: downloadProgress.progress,
-        //             strokeWidth: 1.5,
-        //           ),
-        errorWidget: (context, url, error) => Image.asset(
-          'assets/ctt-logo.png',
-          height: imageHeight,
-          width: imageWidth,
-        ),
-      ),
+      child: isCached
+          ? CachedNetworkImage(
+              imageUrl: imageUrl ?? '',
+              height: imageHeight,
+              width: imageWidth,
+              fit: fit ?? (imageHeight != null ? BoxFit.cover : null),
+              errorWidget: (context, url, error) => _errorWidget(),
+            )
+          : Image.network(
+              imageUrl ?? "",
+              height: imageHeight,
+              width: imageWidth,
+              fit: fit ?? (imageHeight != null ? BoxFit.cover : null),
+              errorBuilder: (context, error, stackTrace) => _errorWidget(),
+            ),
+    );
+  }
+
+  Image _errorWidget() {
+    return Image.asset(
+      'assets/ctt-logo.png',
+      height: imageHeight,
+      width: imageWidth,
     );
   }
 }

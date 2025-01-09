@@ -6,7 +6,6 @@ import 'package:acela/src/models/communities_models/response/community_details_r
 import 'package:acela/src/models/home_screen_feed_models/home_feed.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_list.dart';
-import 'package:acela/src/screens/stories/story_feed_list.dart';
 import 'package:acela/src/screens/video_details_screen/video_details_screen.dart';
 import 'package:acela/src/screens/video_details_screen/video_details_view_model.dart';
 import 'package:acela/src/utils/routes/routes.dart';
@@ -92,8 +91,8 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
   void onTap(HomeFeedItem item) {
     var viewModel =
         VideoDetailsViewModel(author: item.author, permlink: item.permlink);
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => VideoDetailsScreen(vm: viewModel)));
+    // Navigator.of(context).push(MaterialPageRoute(
+    //     builder: (context) => VideoDetailsScreen(vm: viewModel)));
   }
 
   void onUserTap(HomeFeedItem item) {
@@ -108,13 +107,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
     );
   }
 
-  Widget _shortsScreen(HiveUserData appData) {
-    return StoryFeedList(
-      appData: appData,
-      feedType: StoryFeedType.community,
-      community: widget.name,
-    );
-  }
+
 
   String _generateMarkDown(CommunityDetailsResponse data) {
     return "## About:\n${data.result.about}\n\n## Information:\n${data.result.description}\n\n## Flags:\n${data.result.flagText}\n\n## Total Authors:\n${data.result.numAuthors}\n\n## Subscribers:\n${data.result.subscribers}\n\n## Created At:\n${Utilities.parseAndFormatDateTime(data.result.createdAt)}";
@@ -234,7 +227,7 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
         controller: _tabController,
         children: [
           _screen(appData),
-          _shortsScreen(appData),
+          SizedBox(),
           _about(appData),
           _team(appData),
         ],

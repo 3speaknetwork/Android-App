@@ -250,11 +250,11 @@ class _MyAccountScreenState extends State<MyAccountScreen>
           title: Text('Play Video'),
           onPressed: (context) {
             Navigator.of(context).pop();
-            var vm = VideoDetailsViewModel(
-                author: item.owner, permlink: item.permlink);
-            var details = VideoDetailsScreen(vm: vm);
-            var route = MaterialPageRoute(builder: (_) => details);
-            Navigator.of(context).push(route);
+            // var vm = VideoDetailsViewModel(
+            //     author: item.owner, permlink: item.permlink);
+            // var details = VideoDetailsScreen(vm: vm);
+            // var route = MaterialPageRoute(builder: (_) => details);
+            // Navigator.of(context).push(route);
           },
         ),
       );
@@ -265,9 +265,9 @@ class _MyAccountScreenState extends State<MyAccountScreen>
         title: Text('Preview'),
         onPressed: (context) {
           Navigator.of(context).pop();
-          var screen = VideoPreviewScreen(data: widget.data, item: item);
-          var route = MaterialPageRoute(builder: (c) => screen);
-          Navigator.of(context).push(route);
+          // var screen = VideoPreviewScreen(data: widget.data, item: item);
+          // var route = MaterialPageRoute(builder: (c) => screen);
+          // Navigator.of(context).push(route);
         },
       ));
     }

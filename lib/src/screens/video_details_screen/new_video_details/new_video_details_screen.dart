@@ -1,59 +1,56 @@
 import 'dart:convert';
-import 'dart:io';
+
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/global_provider/image_resolution_provider.dart';
 import 'package:acela/src/global_provider/video_setting_provider.dart';
-import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/feed_item_grid_view.dart';
-import 'package:acela/src/screens/trending_tags/trending_tag_videos.dart';
-import 'package:acela/src/screens/video_details_screen/new_video_details/video_detail_favourite_provider.dart';
-import 'package:acela/src/utils/graphql/gql_communicator.dart';
-import 'package:acela/src/utils/graphql/models/trending_feed_response.dart';
 import 'package:acela/src/models/hive_post_info/hive_post_info.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
+import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/feed_item_grid_view.dart';
+import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/new_feed_list_item.dart';
 import 'package:acela/src/screens/login/ha_login_screen.dart';
-import 'package:acela/src/screens/user_channel_screen/user_channel_screen.dart';
-import 'package:acela/src/screens/video_details_screen/hive_upvote_dialog.dart';
-import 'package:acela/src/screens/video_details_screen/new_video_details_info.dart';
+import 'package:acela/src/screens/trending_tags/trending_tag_videos.dart';
 import 'package:acela/src/screens/video_details_screen/comment/video_details_comments.dart';
+import 'package:acela/src/screens/video_details_screen/hive_upvote_dialog.dart';
+import 'package:acela/src/screens/video_details_screen/new_video_details/video_detail_favourite_provider.dart';
+import 'package:acela/src/screens/video_details_screen/new_video_details_info.dart';
+import 'package:acela/src/utils/graphql/gql_communicator.dart';
+import 'package:acela/src/utils/graphql/models/trending_feed_response.dart';
 import 'package:acela/src/utils/routes/routes.dart';
 import 'package:acela/src/utils/seconds_to_duration.dart';
 import 'package:acela/src/widgets/box_loading/video_detail_feed_loader.dart';
 import 'package:acela/src/widgets/box_loading/video_feed_loader.dart';
 import 'package:acela/src/widgets/cached_image.dart';
-import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/new_feed_list_item.dart';
 import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
-import 'package:better_player/better_player.dart';
-import 'package:flutter/foundation.dart';
+import 'package:auth/core/widgets/user/user_profile_image.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import 'package:timeago/timeago.dart' as timeago;
-import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:timeago/timeago.dart' as timeago;
+import 'package:video_player/video_player.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class NewVideoDetailsScreen extends StatefulWidget {
-  const NewVideoDetailsScreen(
-      {Key? key,
-      this.item,
-      this.betterPlayerController,
-      required this.author,
-      required this.permlink,
-      this.onPop});
+  const NewVideoDetailsScreen({
+    super.key,
+    this.item,
+    required this.author,
+    required this.permlink,
+  });
 
   final GQLFeedItem? item;
   final String author;
   final String permlink;
-  final VoidCallback? onPop;
-  final BetterPlayerController? betterPlayerController;
 
   @override
   State<NewVideoDetailsScreen> createState() => _NewVideoDetailsScreenState();
 }
 
 class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
-  late BetterPlayerController _betterPlayerController;
+  late VideoPlayerController _videoPlayerController;
+  ChewieController? _chewieController;
   late GQLFeedItem item;
   bool isLoadingVideo = true;
   HivePostInfoPostResultBody? postInfo;
@@ -76,19 +73,10 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
 
   @override
   void dispose() {
-    if (widget.betterPlayerController == null) {
-      _betterPlayerController.videoPlayerController!
-          .removeListener(_videoPlayerListener);
-    }
-    super.dispose();
+    _videoPlayerController.dispose();
+    _chewieController?.dispose();
     WakelockPlus.disable();
-  }
-
-  @override
-  void deactivate() {
-    changeControlsVisibility(false);
-    if (widget.onPop != null) widget.onPop!();
-    super.deactivate();
+    super.dispose();
   }
 
   void loadSuggestions() async {
@@ -154,61 +142,29 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
         });
   }
 
-  void setupVideo(String url) {
-    BetterPlayerConfiguration betterPlayerConfiguration =
-        BetterPlayerConfiguration(
-      // aspectRatio: size.width / size.height,
-      fit: BoxFit.contain,
+  void setupVideo(
+    String url,
+  ) async {
+    _videoPlayerController = VideoPlayerController.networkUrl(
+      Uri.parse(url),
+    );
+    await _videoPlayerController.initialize();
+    _chewieController = ChewieController(
+      videoPlayerController: _videoPlayerController,
       autoPlay: true,
-      fullScreenByDefault: false,
-      placeholder: videoThumbnail(),
-      controlsConfiguration: BetterPlayerControlsConfiguration(
-        enablePip: false,
-        enableFullscreen: defaultTargetPlatform == TargetPlatform.android,
-        enableSkips: true,
-      ),
-      autoDetectFullscreenAspectRatio: false,
-      deviceOrientationsOnFullScreen: const [
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-        DeviceOrientation.portraitDown,
-        DeviceOrientation.portraitUp
-      ],
-      deviceOrientationsAfterFullScreen: const [
-        DeviceOrientation.portraitDown,
-        DeviceOrientation.portraitUp
-      ],
-      autoDispose: true,
-      expandToFill: true,
-      allowedScreenSleep: false,
+      looping: false,
+      autoInitialize: true
+      // aspectRatio: 16 / 9,
+      // errorBuilder: (context, errorMessage) {
+      //   return Center(
+      //     child: Text(
+      //       'An error occurred: $errorMessage',
+      //       style: TextStyle(color: Colors.red),
+      //     ),
+      // );
+      // },
     );
-    BetterPlayerDataSource dataSource = BetterPlayerDataSource(
-      BetterPlayerDataSourceType.network,
-      (item.isVideo)
-          ? Platform.isAndroid
-              ? url.replaceAll("/manifest.m3u8", "/480p/index.m3u8")
-              : url
-          : item.playUrl!,
-      videoFormat: item.isVideo
-          ? BetterPlayerVideoFormat.hls
-          : BetterPlayerVideoFormat.other,
-    );
-    _betterPlayerController = BetterPlayerController(betterPlayerConfiguration);
-    _betterPlayerController.setupDataSource(dataSource);
-  }
-
-  void _videoPlayerListener() {
-    if (_betterPlayerController.videoPlayerController != null &&
-        _betterPlayerController.videoPlayerController!.value.initialized) {
-      if (_betterPlayerController.videoPlayerController!.value.volume == 0.0 &&
-          !videoSettingProvider.isMuted) {
-        videoSettingProvider.changeMuteStatus(true);
-      } else if (_betterPlayerController.videoPlayerController!.value.volume !=
-              0.0 &&
-          videoSettingProvider.isMuted) {
-        videoSettingProvider.changeMuteStatus(false);
-      }
-    }
+    setState(() {});
   }
 
   void loadDataAndVideo() async {
@@ -223,38 +179,14 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
         isLoadingVideo = false;
       });
     }
-    if (widget.betterPlayerController != null) {
-      _betterPlayerController = widget.betterPlayerController!;
-      changeControlsVisibility(true);
+
+    if (item.isVideo) {
+      setupVideo(
+        item.videoV2M3U8(appData),
+      );
     } else {
-      if (item.isVideo) {
-        setupVideo(
-          item.videoV2M3U8(appData),
-        );
-      } else {
-        setupVideo(item.playUrl!);
-      }
-
-      if (videoSettingProvider.isMuted) {
-        _betterPlayerController.setVolume(0.0);
-      }
-      _betterPlayerController.videoPlayerController!
-          .addListener(_videoPlayerListener);
+      setupVideo(item.playUrl!);
     }
-  }
-
-  void fullscreenTapped() async {
-    _betterPlayerController.pause();
-    var position =
-        await _betterPlayerController.videoPlayerController?.position;
-    var seconds = position?.inSeconds;
-    if (seconds == null) return;
-    debugPrint('position is $position');
-    const platform = MethodChannel('com.example.acela/auth');
-    await platform.invokeMethod('playFullscreen', {
-      'url': item.videoV2M3U8(appData),
-      'seconds': seconds,
-    });
   }
 
   Widget _videoPlayerStack(double screenHeight, bool isGridView) {
@@ -263,71 +195,32 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
         tag: '${item.author}/${item.permlink}',
         child: SizedBox(
           height: isGridView ? screenHeight * 0.4 : 230,
-          child: Stack(
-            children: [
-              BetterPlayer(
-                controller: _betterPlayerController,
-              ),
-              _fullScreenButtonForIos(),
-            ],
-          ),
+          child: _chewieController != null &&
+                  _chewieController!.videoPlayerController.value.isInitialized
+              ? Chewie(
+                  controller: _chewieController!,
+                )
+              : const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 20),
+                    Text('Loading'),
+                  ],
+                ),
         ),
-      ),
-    );
-  }
-
-  Padding _fullScreenButtonForIos() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10.0),
-      child: Column(
-        children: [
-          SizedBox(height: 10),
-          Row(
-            children: [
-              SizedBox(width: 10),
-              CircleAvatar(
-                backgroundColor: Colors.black.withOpacity(0.6),
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  icon: Icon(
-                    Icons.arrow_back_outlined,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              SizedBox(width: 10),
-              Visibility(
-                visible: defaultTargetPlatform == TargetPlatform.iOS,
-                child: CircleAvatar(
-                  backgroundColor: Colors.black.withOpacity(0.6),
-                  child: IconButton(
-                    onPressed: () {
-                      fullscreenTapped();
-                    },
-                    icon: Icon(
-                      Icons.fullscreen,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
 
   Widget _userInfo() {
     String timeInString =
-        item.createdAt != null ? "${timeago.format(item.createdAt!)}" : "";
+        item.createdAt != null ? timeago.format(item.createdAt!) : "";
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.only(top: 10.0, bottom: 5),
         child: ListTile(
-          contentPadding: EdgeInsets.only(top: 0, left: 15, right: 15),
+          contentPadding: const EdgeInsets.only(top: 0, left: 15, right: 15),
           dense: true,
           splashColor: Colors.transparent,
           onTap: () {
@@ -335,14 +228,8 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
               'author': item.author?.username ?? "sagarkothari88"
             });
           },
-          leading: ClipOval(
-            child: CachedImage(
-              imageUrl:
-                  'https://images.hive.blog/u/${item.author?.username ?? 'sagarkothari88'}/avatar',
-              imageHeight: 40,
-              imageWidth: 40,
-            ),
-          ),
+          leading:
+              UserProfileimage(url: item.author?.username ?? 'sagarkothari88'),
           title: Text(
             item.title ?? 'No title',
             style: TextStyle(
@@ -397,19 +284,19 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
             }
           }
         } else {
-          postInfo!.activeVotes.forEach((element) {
+          for (var element in postInfo!.activeVotes) {
             voters.add(element.voter);
-          });
+          }
         }
       } else {
-        postInfo!.activeVotes.forEach((element) {
+        for (var element in postInfo!.activeVotes) {
           voters.add(element.voter);
-        });
+        }
       }
     }
-    postInfo!.activeVotes.forEach((element) {
+    for (var element in postInfo!.activeVotes) {
       print(element.voter);
-    });
+    }
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -431,7 +318,8 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
             ),
             Expanded(
               child: ListView.builder(
-                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                 itemCount: voters.length,
                 itemBuilder: (context, index) {
                   return ListTile(
@@ -477,8 +365,8 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
         androidBorderRadius: 30,
         actions: [
           BottomSheetAction(
-              title: Text('Log in'),
-              leading: Icon(Icons.login),
+              title: const Text('Log in'),
+              leading: const Icon(Icons.login),
               onPressed: (c) {
                 Navigator.of(c).pop();
                 var screen = HiveAuthLoginScreen(appData: appData);
@@ -527,7 +415,6 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
             item: item,
           ),
         ));
-    _playVideoAfterPush();
   }
 
   void seeCommentsPressed() {
@@ -544,12 +431,6 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
         },
       ),
     );
-    _playVideoAfterPush();
-  }
-
-  void _playVideoAfterPush() {
-    Future.delayed(Duration(milliseconds: 800))
-        .then((value) => _betterPlayerController.play());
   }
 
   Widget _actionBar(double width) {
@@ -613,7 +494,6 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
               },
               icon: Icon(Icons.share, color: color),
             ),
-           
           ],
         ),
       ),
@@ -641,14 +521,14 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
         child: SizedBox(
           height: 33,
           child: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               scrollDirection: Axis.horizontal,
               itemCount: tags.length,
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: InkWell(
-                    borderRadius: BorderRadius.all(
+                    borderRadius: const BorderRadius.all(
                       Radius.circular(18),
                     ),
                     onTap: () {
@@ -658,14 +538,14 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
                     },
                     child: Container(
                       alignment: Alignment.center,
-                      padding:
-                          EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 5, horizontal: 15),
                       decoration: BoxDecoration(
                         border: Border.all(
                             color: Theme.of(context)
                                 .primaryColorLight
                                 .withOpacity(0.3)),
-                        borderRadius: BorderRadius.all(
+                        borderRadius: const BorderRadius.all(
                           Radius.circular(18),
                         ),
                       ),
@@ -685,51 +565,37 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
     );
   }
 
-  void changeControlsVisibility(bool showControls) {
-    if (widget.betterPlayerController != null) {
-      widget.betterPlayerController!.setControlsAlwaysVisible(false);
-      widget.betterPlayerController!.setControlsEnabled(showControls);
-      widget.betterPlayerController!.setControlsVisibility(showControls);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
     final isGridView = MediaQuery.of(context).size.shortestSide > 600;
-    return PopScope(
-      onPopInvoked: (value) {
-        changeControlsVisibility(false);
-        if (widget.onPop != null) widget.onPop!();
-      },
-      child: Scaffold(
-        body: SafeArea(
-            child: CustomScrollView(
-          slivers: [
-            !isLoadingVideo
-                ? _videoPlayerStack(height, isGridView)
-                : sliverSizedBox(),
-            !isLoadingVideo ? _userInfo() : sliverSizedBox(),
-            !isLoadingVideo ? _actionBar(width) : sliverSizedBox(),
-            !isLoadingVideo ? _chipList() : sliverSizedBox(),
-            SliverVisibility(
-              visible: isLoadingVideo,
-              sliver: SliverToBoxAdapter(
-                child: VideoDetailFeedLoader(isGridView: isGridView),
-              ),
+    return Scaffold(
+      body: SafeArea(
+          child: CustomScrollView(
+        slivers: [
+          !isLoadingVideo
+              ? _videoPlayerStack(height, isGridView)
+              : sliverSizedBox(),
+          !isLoadingVideo ? _userInfo() : sliverSizedBox(),
+          !isLoadingVideo ? _actionBar(width) : sliverSizedBox(),
+          !isLoadingVideo ? _chipList() : sliverSizedBox(),
+          SliverVisibility(
+            visible: isLoadingVideo,
+            sliver: SliverToBoxAdapter(
+              child: VideoDetailFeedLoader(isGridView: isGridView),
             ),
-            isSuggestionsLoading
-                ? VideoFeedLoader(
-                    isSliver: true,
-                    isGridView: isGridView,
-                  )
-                : isGridView
-                    ? _sliverGridView()
-                    : _sliverListView(),
-          ],
-        )),
-      ),
+          ),
+          isSuggestionsLoading
+              ? VideoFeedLoader(
+                  isSliver: true,
+                  isGridView: isGridView,
+                )
+              : isGridView
+                  ? _sliverGridView()
+                  : _sliverListView(),
+        ],
+      )),
     );
   }
 

@@ -1,10 +1,10 @@
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/about/about_home_screen.dart';
 import 'package:acela/src/screens/communities_screen/communities_screen.dart';
-import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/bottom_nav_bar.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/tab_title_toast.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_list.dart';
 import 'package:acela/src/screens/login/ha_login_screen.dart';
+import 'package:acela/src/screens/stories/new_tab_based_stories.dart';
 import 'package:acela/src/screens/trending_tags/trending_tags.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +12,7 @@ import 'package:upgrader/upgrader.dart';
 
 class GQLFeedScreen extends StatefulWidget {
   const GQLFeedScreen({
-    Key? key,
+    super.key,
     required this.appData,
     required this.username,
   });
@@ -31,21 +31,21 @@ class _GQLFeedScreenState extends State<GQLFeedScreen>
   List<Tab> myTabs() {
     return widget.username != null
         ? <Tab>[
-            Tab(icon: Icon(Icons.person)),
+            const Tab(icon: Icon(Icons.person)),
             // Tab(icon: Icon(Icons.home)),
-            Tab(icon: Icon(Icons.local_fire_department)),
-            Tab(icon: Icon(Icons.play_arrow)),
-            Tab(icon: Icon(Icons.looks_one)),
-            Tab(icon: Icon(Icons.handshake)),
-            Tab(icon: Icon(Icons.tag)),
+            const Tab(icon: Icon(Icons.local_fire_department)),
+            const Tab(icon: Icon(Icons.play_arrow)),
+            const Tab(icon: Icon(Icons.looks_one)),
+            const Tab(icon: Icon(Icons.handshake)),
+            const Tab(icon: Icon(Icons.tag)),
           ]
         : <Tab>[
             // Tab(icon: Icon(Icons.home)),
-            Tab(icon: Icon(Icons.local_fire_department)),
-            Tab(icon: Icon(Icons.play_arrow)),
-            Tab(icon: Icon(Icons.looks_one)),
-            Tab(icon: Icon(Icons.handshake)),
-            Tab(icon: Icon(Icons.tag)),
+            const Tab(icon: Icon(Icons.local_fire_department)),
+            const Tab(icon: Icon(Icons.play_arrow)),
+            const Tab(icon: Icon(Icons.looks_one)),
+            const Tab(icon: Icon(Icons.handshake)),
+            const Tab(icon: Icon(Icons.tag)),
           ];
   }
 
@@ -134,8 +134,8 @@ class _GQLFeedScreenState extends State<GQLFeedScreen>
           Navigator.of(context).push(route);
         },
       ),
-      title: Text('3Speak.tv'),
-      subtitle: Text('Powered by Hive'),
+      title: const Text('3Speak.tv'),
+      subtitle: const Text('Powered by Hive'),
     );
   }
 
@@ -146,10 +146,6 @@ class _GQLFeedScreenState extends State<GQLFeedScreen>
       showIgnore: true,
       showReleaseNotes: true,
       child: Scaffold(
-        bottomNavigationBar: BottomNavBar(
-          appData: widget.appData,
-          username: widget.username,
-        ),
         appBar: AppBar(
           title: appBarHeader(),
           bottom: TabBar(
@@ -162,6 +158,24 @@ class _GQLFeedScreenState extends State<GQLFeedScreen>
             tabs: myTabs(),
           ),
           actions: [
+            GestureDetector(
+              onTap: () {
+                var screen = GQLStoriesScreen(appData: widget.appData);
+                var route = MaterialPageRoute(builder: (c) => screen);
+                Navigator.of(context).push(route);
+              },
+              child: SizedBox(
+                height: 25,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 0.0),
+                  child: Image.asset(
+                    'assets/branding/three_shorts_icon.png',
+                    height: 23,
+                    width: 23,
+                  ),
+                ),
+              ),
+            ),
             if (widget.username == null)
               Padding(
                 padding: const EdgeInsets.only(right: 15.0),
@@ -169,16 +183,16 @@ class _GQLFeedScreenState extends State<GQLFeedScreen>
                   height: 25,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
+                        shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.all(Radius.circular(4))),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 2, vertical: 0)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 2, vertical: 0)),
                     onPressed: () {
                       var screen = HiveAuthLoginScreen(appData: widget.appData);
                       var route = MaterialPageRoute(builder: (c) => screen);
                       Navigator.of(context).push(route);
                     },
-                    child: Text('Log In'),
+                    child: const Text('Log In'),
                   ),
                 ),
               ),

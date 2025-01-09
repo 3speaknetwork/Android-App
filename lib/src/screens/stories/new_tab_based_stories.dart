@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 class GQLStoriesScreen extends StatefulWidget {
   const GQLStoriesScreen({
-    Key? key,
+    super.key,
     required this.appData,
   });
 
@@ -22,11 +22,10 @@ class _GQLStoriesScreenState extends State<GQLStoriesScreen>
   List<Tab> myTabs() {
     return widget.appData.username != null
         ? <Tab>[
-            // Tab(icon: Icon(Icons.home)),
-            Tab(icon: Icon(Icons.local_fire_department)),
-            Tab(icon: Icon(Icons.play_arrow)),
-            Tab(icon: Icon(Icons.looks_one)),
-            Tab(icon: Icon(Icons.person)),
+            const Tab(icon: Icon(Icons.local_fire_department)),
+            const Tab(icon: Icon(Icons.play_arrow)),
+            const Tab(icon: Icon(Icons.looks_one)),
+            const Tab(icon: Icon(Icons.person)),
             Tab(
               icon: Image.asset(
                 'assets/ctt-logo.png',
@@ -36,9 +35,9 @@ class _GQLStoriesScreenState extends State<GQLStoriesScreen>
             ),
           ]
         : <Tab>[
-            Tab(icon: Icon(Icons.local_fire_department)),
-            Tab(icon: Icon(Icons.play_arrow)),
-            Tab(icon: Icon(Icons.looks_one)),
+            const Tab(icon: Icon(Icons.local_fire_department)),
+            const Tab(icon: Icon(Icons.play_arrow)),
+            const Tab(icon: Icon(Icons.looks_one)),
             Tab(
               icon: Image.asset(
                 'assets/ctt-logo.png',
@@ -110,7 +109,7 @@ class _GQLStoriesScreenState extends State<GQLStoriesScreen>
         height: 40,
         width: 40,
       ),
-      title: Text(
+      title: const Text(
         '3Speak.tv',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -128,8 +127,8 @@ class _GQLStoriesScreenState extends State<GQLStoriesScreen>
     return Scaffold(
       appBar: AppBar(
         leadingWidth: 40,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 8.0),
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 8.0),
           child: BackButton(),
         ),
         title: appBarHeader(),
@@ -145,32 +144,43 @@ class _GQLStoriesScreenState extends State<GQLStoriesScreen>
           children: widget.appData.username != null
               ? [
                   StoryFeedList(
+                      isCurrentTab: currentIndex == 0,
                       appData: widget.appData,
                       feedType: StoryFeedType.trendingFeed),
                   StoryFeedList(
+                      isCurrentTab: currentIndex == 1,
                       appData: widget.appData,
                       feedType: StoryFeedType.newUploads),
                   StoryFeedList(
+                      isCurrentTab: currentIndex == 2,
                       appData: widget.appData,
                       feedType: StoryFeedType.firstUploads),
                   StoryFeedList(
+                      isCurrentTab: currentIndex == 3,
                       appData: widget.appData,
                       feedType: StoryFeedType.userFeed),
                   StoryFeedList(
-                      appData: widget.appData, feedType: StoryFeedType.cttFeed),
+                      isCurrentTab: currentIndex == 4,
+                      appData: widget.appData,
+                      feedType: StoryFeedType.cttFeed),
                 ]
               : [
                   StoryFeedList(
+                      isCurrentTab: currentIndex == 0,
                       appData: widget.appData,
                       feedType: StoryFeedType.trendingFeed),
                   StoryFeedList(
+                      isCurrentTab: currentIndex == 1,
                       appData: widget.appData,
                       feedType: StoryFeedType.newUploads),
                   StoryFeedList(
+                      isCurrentTab: currentIndex == 2,
                       appData: widget.appData,
                       feedType: StoryFeedType.firstUploads),
                   StoryFeedList(
-                      appData: widget.appData, feedType: StoryFeedType.cttFeed),
+                      isCurrentTab: currentIndex == 3,
+                      appData: widget.appData,
+                      feedType: StoryFeedType.cttFeed),
                 ],
         ),
       ),
@@ -185,7 +195,7 @@ class _GQLStoriesScreenState extends State<GQLStoriesScreen>
         onPressed: () {
           VideoUploadSheet.show(data, context);
         },
-        icon: Icon(Icons.add),
+        icon: const Icon(Icons.add),
       ),
     );
   }

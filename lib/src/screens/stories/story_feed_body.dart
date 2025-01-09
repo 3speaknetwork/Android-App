@@ -1,4 +1,3 @@
-
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/utils/graphql/models/trending_feed_response.dart';
 import 'package:acela/src/widgets/story_player.dart';
@@ -10,13 +9,15 @@ class StoryFeedDataBody extends StatefulWidget {
       {Key? key,
       required this.items,
       required this.appData,
-      required this.controller, this.onRemoveFavouriteCallback})
+      required this.controller,
+      this.onRemoveFavouriteCallback, required this.isCurrentTab})
       : super(key: key);
 
   final List<GQLFeedItem> items;
   final HiveUserData appData;
   final CarouselSliderController controller;
   final VoidCallback? onRemoveFavouriteCallback;
+  final bool isCurrentTab;
 
   @override
   State<StoryFeedDataBody> createState() => _StoryFeedDataBodyState();
@@ -32,6 +33,7 @@ class _StoryFeedDataBodyState extends State<StoryFeedDataBody> {
     return StoryPlayer(
       item: item,
       data: widget.appData,
+      isCurrentTab: widget.isCurrentTab,
       onRemoveFavouriteCallback: widget.onRemoveFavouriteCallback,
       didFinish: () {
         setState(() {

@@ -24,8 +24,6 @@ class AppRouter {
               (state.extra) as NewVideoDetailScreenNavigationParameter?;
           return NewVideoDetailsScreen(
             item: parameters?.item,
-            onPop: parameters?.onPop,
-            betterPlayerController: parameters?.betterPlayerController,
             author: state.pathParameters['author']!,
             permlink: state.pathParameters['permlink']!,
           );

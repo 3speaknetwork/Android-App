@@ -1,6 +1,5 @@
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_list.dart';
-import 'package:acela/src/screens/stories/story_feed_list.dart';
 import 'package:acela/src/screens/trending_tags/tag_favourite_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -77,11 +76,12 @@ class _TrendingTagVideosState extends State<TrendingTagVideos>
             feedType: HomeScreenFeedType.trendingTag,
             owner: widget.tag,
           ),
-          StoryFeedList(
-            appData: appData,
-            feedType: StoryFeedType.trendingTag,
-            username: widget.tag,
-          ),
+          SizedBox()
+          // StoryFeedList(
+          //   appData: appData,
+          //   feedType: StoryFeedType.trendingTag,
+          //   username: widget.tag,
+          // ),
         ],
       ),
     );

@@ -1,0 +1,101 @@
+Flutter crash report.
+Please report a bug at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter run --machine --start-paused -d chrome --devtools-server-address http://127.0.0.1:9103/ --target G:\flutter\android_app\lib\main.dart
+
+## exception
+
+StateError: Bad state: No running isolate (inspector is not set).
+
+```
+#0      ChromeProxyService.inspector (package:dwds/src/services/chrome_proxy_service.dart:79:7)
+#1      _waitForResumeEventToRunMain.<anonymous closure> (package:dwds/src/dwds_vm_client.dart:464:30)
+#2      _rootRunUnary (dart:async/zone.dart:1430:13)
+#3      _CustomZone.runUnary (dart:async/zone.dart:1324:19)
+#4      _CustomZone.runUnaryGuarded (dart:async/zone.dart:1233:7)
+#5      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:366:11)
+#6      _DelayedData.perform (dart:async/stream_impl.dart:542:14)
+#7      _PendingEvents.handleNext (dart:async/stream_impl.dart:647:11)
+#8      _PendingEvents.schedule.<anonymous closure> (dart:async/stream_impl.dart:618:7)
+#9      StackZoneSpecification._run (package:stack_trace/src/stack_zone_specification.dart:207:15)
+#10     StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:48)
+#11     _rootRun (dart:async/zone.dart:1406:47)
+#12     _CustomZone.run (dart:async/zone.dart:1317:19)
+#13     _CustomZone.runGuarded (dart:async/zone.dart:1225:7)
+#14     _CustomZone.bindCallbackGuarded.<anonymous closure> (dart:async/zone.dart:1265:23)
+#15     StackZoneSpecification._run (package:stack_trace/src/stack_zone_specification.dart:207:15)
+#16     StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:48)
+#17     _rootRun (dart:async/zone.dart:1414:13)
+#18     _CustomZone.run (dart:async/zone.dart:1317:19)
+#19     _CustomZone.runGuarded (dart:async/zone.dart:1225:7)
+#20     _CustomZone.bindCallbackGuarded.<anonymous closure> (dart:async/zone.dart:1265:23)
+#21     _microtaskLoop (dart:async/schedule_microtask.dart:40:21)
+#22     _startMicrotaskLoop (dart:async/schedule_microtask.dart:49:5)
+#23     _runPendingImmediateCallback (dart:isolate-patch/isolate_patch.dart:118:13)
+#24     _RawReceivePort._handleMessage (dart:isolate-patch/isolate_patch.dart:185:5)
+```
+
+## flutter doctor
+
+```
+[✓] Flutter (Channel stable, 3.27.1, on Microsoft Windows [Version 10.0.22631.4602], locale en-IN)
+    • Flutter version 3.27.1 on channel stable at G:\flutter_new\flutter
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision 17025dd882 (3 weeks ago), 2024-12-17 03:23:09 +0900
+    • Engine revision cb4b5fff73
+    • Dart version 3.6.0
+    • DevTools version 2.40.2
+
+[✓] Windows Version (Installed version of Windows is version 10 or higher)
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 35.0.0)
+    • Android SDK at C:\Users\HP\AppData\Local\Android\sdk
+    • Platform android-35, build-tools 35.0.0
+    • Java binary at: G:\New folder (3)\jbr\bin\java
+    • Java version OpenJDK Runtime Environment (build 17.0.11+0--11852314)
+    • All Android licenses accepted.
+
+[✓] Chrome - develop for the web
+    • Chrome at C:\Program Files\Google\Chrome\Application\chrome.exe
+
+[!] Android Studio (version 2023.2)
+    • Android Studio at G:\New folder (2)
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    ✗ Unable to determine bundled Java version.
+    • Try updating or re-installing Android Studio.
+
+[✓] Android Studio (version 2024.1)
+    • Android Studio at G:\New folder (3)
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 17.0.11+0--11852314)
+
+[✓] Android Studio (version 4.2)
+    • Android Studio at G:\android studio\Android Studio
+    • Flutter plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/9212-flutter
+    • Dart plugin can be installed from:
+      🔨 https://plugins.jetbrains.com/plugin/6351-dart
+    • Java version OpenJDK Runtime Environment (build 11.0.8+10-b944.6842174)
+
+[✓] VS Code (version 1.96.2)
+    • VS Code at C:\Users\HP\AppData\Local\Programs\Microsoft VS Code
+    • Flutter extension version 3.102.0
+
+[✓] Connected device (3 available)
+    • SM A135F (mobile) • RZ8T401PECK • android-arm    • Android 13 (API 33)
+    • Chrome (web)      • chrome      • web-javascript • Google Chrome 131.0.6778.205
+    • Edge (web)        • edge        • web-javascript • Microsoft Edge 131.0.2903.112
+
+[✓] Network resources
+    • All expected network resources are available.
+
+! Doctor found issues in 1 category.
+```

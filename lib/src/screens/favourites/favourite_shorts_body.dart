@@ -1,5 +1,4 @@
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
-import 'package:acela/src/screens/stories/story_feed_body.dart';
 import 'package:acela/src/screens/video_details_screen/new_video_details/video_detail_favourite_provider.dart';
 import 'package:acela/src/utils/graphql/models/trending_feed_response.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -23,15 +22,17 @@ class _FavouriteShortsBodyState extends State<FavouriteShortsBody> {
   Widget build(BuildContext context) {
     final List<GQLFeedItem> shorts =
         dataProvider.getLikedVideos(isShorts: true);
-    return shorts.isNotEmpty
-        ? StoryFeedDataBody(
-            onRemoveFavouriteCallback: () {
-              setState(() {});
-            },
-            items: shorts,
-            appData: widget.appData,
-            controller: controller)
-        : Center(
+    return 
+    // shorts.isNotEmpty
+    //     ? StoryFeedDataBody(
+    //         onRemoveFavouriteCallback: () {
+    //           setState(() {});
+    //         },
+    //         items: shorts,
+    //         appData: widget.appData,
+    //         controller: controller)
+    //     :
+         Center(
             child: Text("No Bookmarked shorts found"),
           );
   }

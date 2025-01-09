@@ -181,8 +181,8 @@ class UserChannelVideosState extends State<UserChannelVideos>
         return _listTile(list[index], context, (item) {
           var viewModel = VideoDetailsViewModel(
               author: item.author, permlink: item.permlink);
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => VideoDetailsScreen(vm: viewModel)));
+          // Navigator.of(context).push(MaterialPageRoute(
+          //     builder: (context) => VideoDetailsScreen(vm: viewModel)));
         }, (owner) {
           log("tapped on user ${owner.author}");
         });
