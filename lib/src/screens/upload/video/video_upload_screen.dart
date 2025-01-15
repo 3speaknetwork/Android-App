@@ -25,13 +25,15 @@ class VideoUploadScreen extends StatefulWidget {
       {Key? key,
       required this.appData,
       required this.isCamera,
-      required this.isDeviceEncode})
+      required this.isDeviceEncode,
+      this.thumbnailFile})
       : super(key: key);
 
   final HiveUserData appData;
 
   final bool isCamera;
   final bool isDeviceEncode;
+  final File? thumbnailFile;
   @override
   State<VideoUploadScreen> createState() => _VideoUploadScreenState();
 }
@@ -44,6 +46,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
   @override
   void initState() {
     final controller = context.read<VideoUploadController>();
+    controller.pickedThumbnail = widget.thumbnailFile;
     titleController = TextEditingController(text: controller.title);
     descriptionController = TextEditingController(text: controller.description);
     tagsController = TextEditingController(text: controller.tags);

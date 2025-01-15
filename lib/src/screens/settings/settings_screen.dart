@@ -5,6 +5,7 @@ import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/my_account/account_settings/widgets/delete_dialog.dart';
 import 'package:acela/src/screens/policy_aggrement/presentation/policy_aggrement_view.dart';
 import 'package:acela/src/screens/settings/add_cutom_union_indexer.dart';
+import 'package:acela/src/screens/settings/video_encoding_quality_picker_view.dart';
 import 'package:acela/src/utils/communicator.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
 import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
@@ -599,6 +600,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _videoEncoding() {
+    return ListTile(
+      leading: const Icon(Icons.video_file),
+      title: const Text("Video Encoding Resolutions"),
+      trailing: Icon(Icons.arrow_right),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VideoEncodingQualityPickerView(),
+          ),
+        );
+      },
+    );
+  }
+
   void showIpfsNodeBottomSheet() {
     List<String> nodes = [];
     nodes.add(IpfsNodeProvider().defaultIpfsNode);
@@ -674,6 +691,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _divider(),
         _image(context),
         _divider(),
+        _videoEncoding(),
+        _divider(),
         _rpc(context, user),
         _divider(),
         _unionIndexer(context, user),
@@ -682,6 +701,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _divider(),
         _eula(),
         _divider(),
+        
         _appVersion(context),
         _divider(),
         _deleteAccount(),

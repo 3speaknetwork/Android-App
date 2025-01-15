@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/video_encoder_switch.dart';
+import 'package:acela/src/screens/upload/video/thumbnail_picker_view.dart';
 import 'package:acela/src/screens/upload/video/video_upload_screen.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
 import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
@@ -56,11 +57,21 @@ class VideoUploadSheet {
           title: const Text('Camera'),
           leading: const Icon(Icons.camera_alt),
           onPressed: (c) {
-            var screen = VideoUploadScreen(
-              isCamera: true,
-              appData: data,
-              isDeviceEncode: isDeviceEncode.value,
-            );
+              var screen;
+              if (isDeviceEncode.value) {
+                screen = ThumbnailPickerView(
+                  isCamera: true,
+                  appData: data,
+                  isDeviceEncode: isDeviceEncode.value,
+                );
+              } else {
+                screen = VideoUploadScreen(
+                  isCamera: true,
+                  appData: data,
+                  isDeviceEncode: isDeviceEncode.value,
+                );
+              }
+  
             var route = MaterialPageRoute(builder: (c) => screen);
             Navigator.of(context).pop();
             Navigator.of(context).push(route);
@@ -70,11 +81,21 @@ class VideoUploadSheet {
             title: const Text('Photo Gallery'),
             leading: const Icon(Icons.photo_library),
             onPressed: (c) {
-              var screen = VideoUploadScreen(
-                isCamera: false,
-                appData: data,
-                isDeviceEncode: isDeviceEncode.value,
-              );
+              var screen;
+              if (isDeviceEncode.value) {
+                screen = ThumbnailPickerView(
+                  isCamera: false,
+                  appData: data,
+                  isDeviceEncode: isDeviceEncode.value,
+                );
+              } else {
+                screen = VideoUploadScreen(
+                  isCamera: false,
+                  appData: data,
+                  isDeviceEncode: isDeviceEncode.value,
+                );
+              }
+
               var route = MaterialPageRoute(builder: (c) => screen);
               Navigator.of(context).pop();
               Navigator.of(context).push(route);

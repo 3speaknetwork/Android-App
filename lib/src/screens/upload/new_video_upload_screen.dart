@@ -302,12 +302,13 @@ class _NewVideoUploadScreenState extends State<NewVideoUploadScreen> {
     AlertDialog alert = AlertDialog(
       title: Text("🎉 Upload Complete 🎉"),
       content: Text(
-          "✅ Your Video is in-process\n\n✅ Video has be added to encoding queue\n\n👀 Check status from My Account\n\n📝 Let's edit video details now."),
+          "As soon as your video is uploaded on decentralised IPFS infrastructure, it'll be published"),
       actions: [
         nowButton,
       ],
     );
-    showDialog(context: context, builder: (c) => alert, barrierDismissible: false);
+    showDialog(
+        context: context, builder: (c) => alert, barrierDismissible: false);
   }
 
   void showMessage(String string) {

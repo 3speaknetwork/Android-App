@@ -96,7 +96,7 @@ class _VideoUploadSucessDialogState extends State<VideoUploadSucessDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-                "✅ Your Video is in-process.\n✅ Video has be added to encoding queue.\n⏳Video will be processed."),
+                "As soon as your video is uploaded on decentralised IPFS infrastructure, it'll be published"),
             SizedBox(
               height: 10,
             ),

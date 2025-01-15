@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:acela/src/screens/upload/video/encoding/folder_path.dart';
 import 'package:acela/src/screens/upload/video/encoding/resolution.dart';
+import 'package:acela/src/utils/storages/video_storage.dart';
 import 'package:ffmpeg_kit_flutter_https_gpl/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_https_gpl/ffmpeg_session.dart';
 import 'package:ffmpeg_kit_flutter_https_gpl/ffprobe_kit.dart' as ffprobe;
@@ -19,6 +20,7 @@ class VideoEncoder {
   static String zipFileName = "video.zip";
 
   late MediaInformationSession info;
+  final VideoStorage _storage = VideoStorage();
 
   Future<VideoResolution?> getVideoResolution(String filePath) async {
     int rotation = await getVideoRotation(filePath);
@@ -166,7 +168,7 @@ class VideoEncoder {
     await folderPath.deleteDirectory();
     String encodingPath = await folderPath.createFolder();
 
-    List<String> scales = ['480']; //, '720'];
+    List<String> scales = _storage.readEncodingQualities();
     List<double> progressList = List.filled(scales.length, 0.0);
 
     StreamController<double> combinedProgressStream =
@@ -176,8 +178,7 @@ class VideoEncoder {
         combinedProgressStream, progressListener, onComplete, onError);
 
     for (int i = 0; i < scales.length; i++) {
-      debugPrint(
-          '${i + 1} encoding started for resolution ${scales[i]}');
+      debugPrint('${i + 1} encoding started for resolution ${scales[i]}');
       await encodeVideo(
           inputPath,
           encodingPath,
@@ -193,8 +194,7 @@ class VideoEncoder {
           session?.cancel();
         }
       }, onError);
-      debugPrint(
-          '${i + 1} encoding ended for resolution ${scales[i]}');
+      debugPrint('${i + 1} encoding ended for resolution ${scales[i]}');
       if (i == scales.length - 1) {
         folderPath.generateMasterManifest(encodingPath, scales);
         debugPrint('Manifest file generated');
@@ -237,9 +237,11 @@ class VideoEncoder {
       Function(String) onError) async {
     String command;
     if (scale == '720') {
-      command = '''-i $inputPath -vf scale=${scale}:-2,setsar=1:1 -c:v libx264 -crf 22 -b:v 0.65M -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${scale}p_video.m3u8''';
+      command =
+          '''-i $inputPath -vf scale=${scale}:-2,setsar=1:1 -c:v libx264 -crf 22 -b:v 0.65M -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${scale}p_video.m3u8''';
     } else {
-      command = '''-i $inputPath -vf scale=${scale}:-2,setsar=1:1 -c:v libx264 -crf 22 -b:v 0.35M -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${scale}p_video.m3u8''';
+      command =
+          '''-i $inputPath -vf scale=${scale}:-2,setsar=1:1 -c:v libx264 -crf 22 -b:v 0.35M -start_number 0 -hls_time 10 -hls_list_size 0 -f hls $outputPath/${scale}p_video.m3u8''';
     }
     String? duratio = info.getMediaInformation()?.getDuration();
     setDuration(double.parse(duratio!));

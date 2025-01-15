@@ -152,6 +152,7 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
     page = 0;
     thumbnailUploadProgress.value = 0;
     videoUploadProgress.value = 0;
+    finalUploadProgress.value = 0;
     uploadStatus.value = UploadStatus.idle;
     pageController.dispose();
     pageController = PageController();
@@ -165,6 +166,8 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
     thumbnailUploadResponse = ValueNotifier(null);
     thumbnailUploadStatus.value = UploadStatus.idle;
     isSaving.value = false;
+    pickedThumbnail = null;
+    isDeviceEncoding = false;
   }
 
   @override

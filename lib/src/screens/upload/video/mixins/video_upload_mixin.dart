@@ -30,6 +30,7 @@ mixin Upload {
   int page = 0;
   late VideoInfo videoInfo;
   late VideoUploadInfo uploadedVideoItem;
+  File? pickedThumbnail;
 
   Future<void> onUpload(
       {required XFile pickedVideoFile,
@@ -113,21 +114,26 @@ mixin Upload {
 
   Future<String> _setThumbnailForLocalEncode(String path) async {
     FolderPath folderPath = FolderPath();
-    var imagePath = await VideoThumbnail.thumbnailFile(
-      video: path,
-      thumbnailPath: folderPath.path(),
-      imageFormat: ImageFormat.PNG,
-      maxWidth: 320,
-      quality: 100,
-    );
-    if (imagePath == null) {
-      throw 'Could not generate video thumbnail';
-    }
     String resultPath = folderPath.path();
-    final thumbnailFile = File(imagePath);
     final newThumbnailPath = '${resultPath}/thumbnail.png';
+    File thumbnailFile;
+    if (pickedThumbnail == null) {
+      var imagePath = await VideoThumbnail.thumbnailFile(
+        video: path,
+        thumbnailPath: folderPath.path(),
+        imageFormat: ImageFormat.PNG,
+        maxWidth: 320,
+        quality: 100,
+      );
+      if (imagePath == null) {
+        throw 'Could not generate video thumbnail';
+      }
+      thumbnailFile = File(imagePath);
+      await thumbnailFile.rename(newThumbnailPath);
+    } else {
+      thumbnailFile = await pickedThumbnail!.copy(newThumbnailPath);
+    }
 
-    await thumbnailFile.rename(newThumbnailPath);
     await folderPath.zipFolder(resultPath);
     folderPath.printFolderContent(resultPath);
     debugPrint(folderPath.printM3u8Contents().toString());
