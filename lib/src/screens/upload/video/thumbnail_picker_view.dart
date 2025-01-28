@@ -11,11 +11,13 @@ class ThumbnailPickerView extends StatefulWidget {
       {super.key,
       required this.appData,
       required this.isCamera,
-      required this.isDeviceEncode});
+      required this.isDeviceEncode,
+      required this.videoFile});
 
   final HiveUserData appData;
   final bool isCamera;
   final bool isDeviceEncode;
+  final XFile videoFile;
   @override
   State<ThumbnailPickerView> createState() => _ThumbnailPickerViewState();
 }
@@ -36,11 +38,13 @@ class _ThumbnailPickerViewState extends State<ThumbnailPickerView> {
           onPressed: () {
             var screen = VideoUploadScreen(
               isCamera: widget.isCamera,
+              videoFile: widget.videoFile,
               appData: widget.appData,
               isDeviceEncode: widget.isDeviceEncode,
               thumbnailFile: file,
             );
             var route = MaterialPageRoute(builder: (c) => screen);
+            Navigator.of(context).pop();
             Navigator.of(context).pop();
             Navigator.of(context).push(route);
           },

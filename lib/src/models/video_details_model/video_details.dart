@@ -38,6 +38,7 @@ class VideoDetails {
   final String originalFilename;
   final bool firstUpload;
   final String beneficiaries;
+  final bool isPowerUp;
   final String visible_status;
 
   String getThumbnail() {
@@ -118,6 +119,7 @@ class VideoDetails {
     this.playUrl = "",
     this.steemPosted = false,
     this.status = "",
+    this.isPowerUp = false,
     required this.encodingProgress,
     required this.video_v2,
     required this.tags,
@@ -144,7 +146,7 @@ class VideoDetails {
         for (var item in array) {
           var name = item.account;
           var weight = item.weight;
-          if ((weight / 100) >= 1 ) {
+          if ((weight / 100) >= 1) {
             beneficiariesToSet.add(
               BeneficiariesJson(
                 account: name,
@@ -172,7 +174,7 @@ class VideoDetails {
         views: asInt(json, 'views'),
         tagsV2: asList(json, 'tags_v2').map((e) => e.toString()).toList(),
         id: asString(json, '_id'),
-        encodingProgress: json!=null ? asInt(json, 'encodingProgress') : null,
+        encodingProgress: json != null ? asInt(json, 'encodingProgress') : null,
         community: asString(json, 'community'),
         permlink: asString(json, 'permlink'),
         duration: asDouble(json, 'duration'),
@@ -183,6 +185,7 @@ class VideoDetails {
         title: asString(json, 'title'),
         language: asString(json, 'language'),
         playUrl: asString(json, 'playUrl'),
+        isPowerUp: asBool(json, 'rewardPowerup'),
         steemPosted: asBool(json, 'steemPosted'),
         status: asString(json, 'status'),
         tags: asString(json, 'tags'),
@@ -206,6 +209,7 @@ class VideoDetails {
         'duration': duration,
         'size': size,
         'owner': owner,
+        'rewardPowerup' : isPowerUp,
         'description': description,
         'thumbnail': thumbnail,
         'title': title,

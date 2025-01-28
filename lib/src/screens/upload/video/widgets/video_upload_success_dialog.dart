@@ -4,12 +4,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class VideoUploadSucessDialog extends StatefulWidget {
-  const VideoUploadSucessDialog({
-    Key? key,
-    required this.hasPostingAuthority,
-  }) : super(key: key);
+  const VideoUploadSucessDialog(
+      {Key? key, required this.hasPostingAuthority,required this.publishLater})
+      : super(key: key);
 
   final bool hasPostingAuthority;
+  final bool publishLater;
 
   @override
   State<VideoUploadSucessDialog> createState() =>
@@ -101,9 +101,11 @@ class _VideoUploadSucessDialogState extends State<VideoUploadSucessDialog> {
               height: 10,
             ),
             Text(
-              widget.hasPostingAuthority
-                  ? "🚨 Your Video will be automatically published 🚨"
-                  : "🚨 You will have to publish from my account after it is processed. It will NOT be published automatically. 🚨 ",
+              widget.publishLater == true
+                  ? "🚨 You can publish the video later from my account.🚨"
+                  : widget.hasPostingAuthority
+                      ? "🚨 Your Video will be automatically published 🚨"
+                      : "🚨 You will have to publish from my account after it is processed. It will NOT be published automatically. 🚨 ",
               style: TextStyle(
                   color: colors[colorIndex],
                   fontSize: 15,

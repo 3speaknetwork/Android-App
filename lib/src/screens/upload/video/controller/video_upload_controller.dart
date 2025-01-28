@@ -77,12 +77,11 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
     this.language = language ?? VideoLanguage(code: "en", name: "English");
   }
 
-  Future<void> validateAndSaveVideo(
-    HiveUserData userData, {
-    required Function(bool) successDialog,
-    required Function(String) successSnackbar,
-    required Function(String) errorSnackbar,
-  }) async {
+  Future<void> validateAndSaveVideo(HiveUserData userData,
+      {required Function(bool) successDialog,
+      required Function(String) successSnackbar,
+      required Function(String) errorSnackbar,
+      required bool publishLater}) async {
     if (uploadStatus.value != UploadStatus.ended) {
       errorSnackbar('Only after the video is upload, you can pulish the video');
     } else if (title.isEmpty) {
@@ -115,24 +114,26 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
           await saveDeviceEncodedVideo(
               userData,
               VideoDeviceEncodeUploadModel(
-                  originalFilename: videoInfo.originalFilename!,
-                  duration: videoInfo.duration!,
-                  size: videoInfo.duration!,
-                  width: videoInfo.width!,
-                  height: videoInfo.height!,
+                  originalFilename: videoInfo!.originalFilename!,
+                  duration: videoInfo!.duration!,
+                  size: videoInfo!.duration!,
+                  width: videoInfo!.width!,
+                  height: videoInfo!.height!,
                   owner: userData.username!,
                   title: title,
                   description: description,
-                  isReel: !videoInfo.isLandscape! && videoInfo.duration! <= 90,
+                  isReel:
+                      !videoInfo!.isLandscape! && videoInfo!.duration! <= 90,
                   isNsfwContent: isNsfwContent,
                   tags: tags,
                   communityID: communityId,
                   beneficiaries: beneficaries,
                   rewardPowerup: isPower100,
-                  tusId: videoInfo.tusId!),
+                  publishLater: publishLater,
+                  tusId: videoInfo!.tusId!),
               hasPostingAuthoriy,
               errorSnackbar: errorSnackbar,
-              successDialog: () => successDialog(hasPostingAuthoriy));
+              successDialog: () => successDialog(hasPostingAuthoriy && !publishLater));
         }
       }
     }
@@ -158,6 +159,7 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
     pageController = PageController();
     title = '';
     description = '';
+    videoInfo = null;
     setCommunity();
     setTags();
     isNsfwContent = false;

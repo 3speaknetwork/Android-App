@@ -663,6 +663,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "10.8.0"
+  fraction:
+    dependency: "direct main"
+    description:
+      name: fraction
+      sha256: "7804c9a73d26bd3d5ccf52b7225eecd0af4e33b310729726dc8f8bb14c217716"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.4"
   frontend_server_client:
     dependency: transitive
     description:
@@ -1508,6 +1516,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  transparent_image:
+    dependency: transitive
+    description:
+      name: transparent_image
+      sha256: e8991d955a2094e197ca24c645efec2faf4285772a4746126ca12875e54ca02f
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   tus_client:
     dependency: "direct main"
     description:
@@ -1636,6 +1652,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.3"
+  video_editor:
+    dependency: "direct main"
+    description:
+      name: video_editor
+      sha256: "263be52e052118389f372f055f59c2fda5c7beecfdb706b899d2e05be8740c22"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   video_player:
     dependency: "direct main"
     description:

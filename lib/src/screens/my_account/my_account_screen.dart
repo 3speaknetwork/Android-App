@@ -1,15 +1,10 @@
-import 'dart:developer';
-
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/models/user_stream/hive_user_stream.dart';
 import 'package:acela/src/models/video_details_model/video_details.dart';
 import 'package:acela/src/screens/favourites/user_favourites.dart';
-import 'package:acela/src/screens/my_account/update_thumb/update_thumb_screen.dart';
-import 'package:acela/src/screens/my_account/update_video/video_primary_info.dart';
+import 'package:acela/src/screens/my_account/update_video/publish_video_screen.dart';
 import 'package:acela/src/screens/my_account/video_preview.dart';
 import 'package:acela/src/screens/settings/settings_screen.dart';
-import 'package:acela/src/screens/video_details_screen/video_details_screen.dart';
-import 'package:acela/src/screens/video_details_screen/video_details_view_model.dart';
 import 'package:acela/src/utils/communicator.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
 import 'package:acela/src/utils/routes/routes.dart';
@@ -142,7 +137,8 @@ class _MyAccountScreenState extends State<MyAccountScreen>
     } else if (item.status == "encoding_failed" ||
         item.status.toLowerCase() == "deleted") {
       return const Icon(Icons.cancel_outlined, color: Colors.red);
-    } else if (item.status == 'publish_manual') {
+    } else if (item.status == 'publish_manual' ||
+        item.status == 'publish_later') {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -154,8 +150,14 @@ class _MyAccountScreenState extends State<MyAccountScreen>
                       borderRadius: BorderRadius.all(Radius.circular(4))),
                   padding: EdgeInsets.symmetric(horizontal: 2, vertical: 0)),
               onPressed: () {
-                var screen =
-                    VideoPrimaryInfo(item: item, justForEditing: false);
+                // var screen =
+                //     VideoPrimaryInfo(item: item, justForEditing: false);
+                var screen = PublishVideoScreen(
+                  item: item,
+                  hasKey: widget.data.keychainData?.hasId ?? "",
+                  hasAuthKey: widget.data.keychainData?.hasAuthKey ?? "",
+                  appData: widget.data,
+                );
                 var route = MaterialPageRoute(builder: (c) => screen);
                 Navigator.of(context).push(route);
               },
@@ -228,36 +230,16 @@ class _MyAccountScreenState extends State<MyAccountScreen>
       actions.add(BottomSheetAction(
           title: const Text("Publish"),
           onPressed: (context) {
-            var screen = VideoPrimaryInfo(item: item, justForEditing: false);
+            // var screen = VideoPrimaryInfo(item: item, justForEditing: false);
+            var screen = PublishVideoScreen(
+              item: item,
+              hasKey: widget.data.keychainData?.hasId ?? "",
+              hasAuthKey: widget.data.keychainData?.hasAuthKey ?? "",
+              appData: widget.data,
+            );
             var route = MaterialPageRoute(builder: (c) => screen);
             Navigator.of(context).push(route);
           }));
-    }
-    actions.add(
-      BottomSheetAction(
-        title: const Text('Change Thumbnail'),
-        onPressed: (context) {
-          Navigator.of(context).pop();
-          var screen = UpdateThumbScreen(item: item);
-          var route = MaterialPageRoute(builder: (c) => screen);
-          Navigator.of(context).push(route);
-        },
-      ),
-    );
-    if (item.status == 'published') {
-      actions.add(
-        BottomSheetAction(
-          title: Text('Play Video'),
-          onPressed: (context) {
-            Navigator.of(context).pop();
-            var vm = VideoDetailsViewModel(
-                author: item.owner, permlink: item.permlink);
-            var details = VideoDetailsScreen(vm: vm);
-            var route = MaterialPageRoute(builder: (_) => details);
-            Navigator.of(context).push(route);
-          },
-        ),
-      );
     }
 
     if (item.status == 'publish_manual') {
@@ -293,21 +275,6 @@ class _MyAccountScreenState extends State<MyAccountScreen>
         },
       ),
     );
-    // if (item.status == 'publish_manual') {
-    //   actions.add(BottomSheetAction(
-    //     title: Text(
-    //       'Publish',
-    //       style: TextStyle(
-    //           color: Colors.green, fontSize: 30, fontWeight: FontWeight.bold),
-    //     ),
-    //     onPressed: (context) {
-    //       Navigator.of(context).pop();
-    //       var screen = VideoPrimaryInfo(item: item, justForEditing: false);
-    //       var route = MaterialPageRoute(builder: (c) => screen);
-    //       Navigator.of(context).push(route);
-    //     },
-    //   ));
-    // }
     showAdaptiveActionSheet(
       context: context,
       title: const Text('Options'),
@@ -406,7 +373,10 @@ class _MyAccountScreenState extends State<MyAccountScreen>
 
   Widget _videosList(List<VideoDetails> items, HiveUserData user) {
     var published = items.where((item) => item.status == 'published').toList();
-    var ready = items.where((item) => item.status == 'publish_manual').toList();
+    var ready = items
+        .where((item) =>
+            item.status == 'publish_manual' || item.status == 'publish_later')
+        .toList();
     // items.forEach((element) {
     //   log(element.status);
     // });
@@ -420,6 +390,7 @@ class _MyAccountScreenState extends State<MyAccountScreen>
             item.status != 'published' &&
             item.status != 'publish_manual' &&
             item.status != 'encoding_failed' &&
+            item.status != 'publish_later' &&
             item.status.toLowerCase() != 'deleted')
         .toList();
     var delted =

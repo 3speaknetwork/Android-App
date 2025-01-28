@@ -28,7 +28,7 @@ mixin Upload {
   ValueNotifier<UploadResponse?> thumbnailUploadResponse = ValueNotifier(null);
 
   int page = 0;
-  late VideoInfo videoInfo;
+   VideoInfo? videoInfo;
   late VideoUploadInfo uploadedVideoItem;
   File? pickedThumbnail;
 
@@ -60,7 +60,7 @@ mixin Upload {
       _initiateNextUpload();
       var zipPath = FolderPath().readZipFile().path;
       var response = await _uploadToServer(zipPath, finalUploadProgress);
-      videoInfo = videoInfo.copyWith(tusId: response.url);
+      videoInfo = videoInfo!.copyWith(tusId: response.url);
       uploadStatus.value = UploadStatus.ended;
       _initiateNextUpload();
     }, onError);
@@ -238,7 +238,7 @@ mixin Upload {
     VideoEncoder encoder = VideoEncoder();
     VideoResolution? originalResolution =
         await encoder.getVideoResolution(filePath);
-    videoInfo = videoInfo.copyWith(
+    videoInfo = videoInfo!.copyWith(
         isLandscape: originalResolution!.isLandscape,
         height: originalResolution.originalHeight,
         width: originalResolution.originalWidth);
@@ -250,7 +250,7 @@ mixin Upload {
         videoUploadProgress,
         onComplete,
         (duration) =>
-            videoInfo = videoInfo.copyWith(duration: duration.toInt()),
+            videoInfo = videoInfo!.copyWith(duration: duration.toInt()),
         onError);
   }
 }

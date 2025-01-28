@@ -18,6 +18,7 @@ class VideoDeviceEncodeUploadModel {
   final List<BeneficiariesJson> beneficiaries;
   final bool rewardPowerup; 
   final String tusId; 
+  final bool publishLater;
 
   VideoDeviceEncodeUploadModel({
     required this.originalFilename,
@@ -35,6 +36,7 @@ class VideoDeviceEncodeUploadModel {
     required this.beneficiaries,
     required this.rewardPowerup,
     required this.tusId,
+    required this.publishLater
   });
 
    VideoDeviceEncodeUploadModel copyWith({
@@ -53,6 +55,7 @@ class VideoDeviceEncodeUploadModel {
     List<BeneficiariesJson>? beneficiaries,
     bool? rewardPowerup,
     String? tusId,
+    bool? publishLater
   }) {
     return VideoDeviceEncodeUploadModel(
       originalFilename: originalFilename ?? this.originalFilename,
@@ -70,6 +73,7 @@ class VideoDeviceEncodeUploadModel {
       beneficiaries: beneficiaries ?? this.beneficiaries,
       rewardPowerup: rewardPowerup ?? this.rewardPowerup,
       tusId: tusId ?? this.tusId,
+      publishLater: publishLater ?? this.publishLater
     );
   }
 
@@ -95,6 +99,7 @@ class VideoDeviceEncodeUploadModel {
       'beneficiaries': json.encode(bene.map((e) => e.toJson()).toList()),
       'rewardPowerup': rewardPowerup,
       'tusId': tusId,
+      'publishLater': publishLater
     };
   }
 

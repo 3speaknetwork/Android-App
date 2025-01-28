@@ -17,7 +17,6 @@ import 'package:acela/src/utils/enum.dart';
 import 'package:acela/src/widgets/loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:images_picker/images_picker.dart';
 import 'package:provider/provider.dart';
 
 class VideoUploadScreen extends StatefulWidget {
@@ -26,7 +25,7 @@ class VideoUploadScreen extends StatefulWidget {
       required this.appData,
       required this.isCamera,
       required this.isDeviceEncode,
-      this.thumbnailFile})
+      this.thumbnailFile, this.videoFile})
       : super(key: key);
 
   final HiveUserData appData;
@@ -34,6 +33,7 @@ class VideoUploadScreen extends StatefulWidget {
   final bool isCamera;
   final bool isDeviceEncode;
   final File? thumbnailFile;
+  final XFile? videoFile;
   @override
   State<VideoUploadScreen> createState() => _VideoUploadScreenState();
 }
@@ -230,27 +230,11 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
     controller.jumpToPage();
     if (controller.uploadStatus.value == UploadStatus.idle) {
       try {
-        final XFile? file;
-        // file = null;
-        file = await ImagePicker().pickVideo(
-          source: widget.isCamera ? ImageSource.camera : ImageSource.gallery,
-          preferredCameraDevice: CameraDevice.front,
-        );
-
-        if (file != null) {
-          var fileToSave = File(file.path);
-          if (widget.isCamera) {
-            ImagesPicker.saveVideoToAlbum(fileToSave);
-          }
-          await controller.onUpload(
-              isDeviceEncoding: controller.isDeviceEncoding,
-              hiveUserData: widget.appData,
-              pickedVideoFile: file,
-              onError: (e) => _onError(e, context, controller));
-        } else {
-          showMessage('Video Picker Cancelled');
-          Navigator.pop(context);
-        }
+        await controller.onUpload(
+            isDeviceEncoding: controller.isDeviceEncoding,
+            hiveUserData: widget.appData,
+            pickedVideoFile: widget.videoFile!,
+            onError: (e) => _onError(e, context, controller));
       } catch (e) {
         _onError(e, context, controller);
       }
@@ -276,23 +260,27 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  void showSuccessDialog(bool hasPostingAuthority,
-      {required VoidCallback resetControllerCallback}) {
+  void showSuccessDialog(
+    bool hasPostingAuthority, {
+    required VoidCallback resetControllerCallback,
+    required bool publishLater,
+  }) {
     showDialog(
         barrierDismissible: false,
         context: context,
         builder: (c) => VideoUploadSucessDialog(
+              publishLater: publishLater,
               hasPostingAuthority: hasPostingAuthority,
             )).whenComplete(() {
       resetControllerCallback();
       Navigator.pop(context);
-      if (!hasPostingAuthority) {
+      if (!hasPostingAuthority || publishLater) {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => MyAccountScreen(
               data: widget.appData,
-              initialTabIndex: 2,
+              initialTabIndex: publishLater ? 0 : 2,
             ),
           ),
         );
@@ -306,18 +294,44 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
       builder: (context, isPulishing, child) {
         return Visibility(visible: !isPulishing, child: child!);
       },
-      child: FloatingActionButton.extended(
-          onPressed: () {
-            controller.validateAndSaveVideo(widget.appData,
-                successDialog: (hasPostingAuthority) => showSuccessDialog(
-                    hasPostingAuthority,
-                    resetControllerCallback: controller.resetController),
-                successSnackbar: (message) => showMessage(
-                      message,
-                    ),
-                errorSnackbar: (message) => showError(message));
-          },
-          label: Text("Save")),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          if (widget.isDeviceEncode)
+            Padding(
+              padding: const EdgeInsets.only(right: 10.0),
+              child: FloatingActionButton.extended(
+                heroTag: "publish later",
+                onPressed: () {
+                  _save(controller, true);
+                },
+                label: Text("Publish Later"),
+              ),
+            ),
+          FloatingActionButton.extended(
+            heroTag: "publish now",
+            onPressed: () {
+              _save(controller, false);
+            },
+            label: Text(widget.isDeviceEncode ? "Publish now" : "Save"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _save(VideoUploadController controller, bool publishLater) {
+    return controller.validateAndSaveVideo(
+      widget.appData,
+      successDialog: (hasPostingAuthority) => showSuccessDialog(
+          hasPostingAuthority,
+          publishLater: publishLater,
+          resetControllerCallback: controller.resetController),
+      successSnackbar: (message) => showMessage(
+        message,
+      ),
+      errorSnackbar: (message) => showError(message),
+      publishLater: publishLater,
     );
   }
 }
