@@ -200,7 +200,10 @@ class _NewVideoDetailsScreenState extends State<NewVideoDetailsScreen> {
           ? BetterPlayerVideoFormat.hls
           : BetterPlayerVideoFormat.other,
     );
-    _betterPlayerController = BetterPlayerController(betterPlayerConfiguration);
+    setState(() {
+      _betterPlayerController =
+          BetterPlayerController(betterPlayerConfiguration);
+    });
     _betterPlayerController.setupDataSource(dataSource);
   }
 
