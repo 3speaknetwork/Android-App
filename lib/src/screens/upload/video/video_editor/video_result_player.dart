@@ -89,20 +89,20 @@ class _VideoResultPlayerState extends State<VideoResultPlayer> {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              widget(
-                child: AspectRatio(
-                  aspectRatio: _controller?.value.aspectRatio ?? 1,
-                  child: _controller?.value.isInitialized == true
-                      ? VideoPlayer(_controller!)
-                      : const Center(child: CircularProgressIndicator()),
-                ),
+              AspectRatio(
+                aspectRatio: _controller?.value.aspectRatio ?? 1,
+                child: _controller?.value.isInitialized == true
+                    ? VideoPlayer(_controller!)
+                    : const Center(child: CircularProgressIndicator()),
               ),
               if (_showControls)
                 AnimatedOpacity(
                   opacity: _showControls ? 1 : 0,
                   duration: const Duration(milliseconds: 300),
                   child: Icon(
-                    _controller!.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                    _controller!.value.isPlaying
+                        ? Icons.pause
+                        : Icons.play_arrow,
                     size: 50,
                     color: Colors.white.withOpacity(0.8),
                   ),
