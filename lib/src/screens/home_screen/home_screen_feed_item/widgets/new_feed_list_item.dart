@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -177,7 +178,10 @@ class _NewFeedListItemState extends State<NewFeedListItem>
           ? BetterPlayerVideoFormat.hls
           : BetterPlayerVideoFormat.other,
     );
-    _betterPlayerController = BetterPlayerController(betterPlayerConfiguration);
+    setState(() {
+      _betterPlayerController =
+          BetterPlayerController(betterPlayerConfiguration);
+    });
     _betterPlayerController!.setupDataSource(dataSource);
     homeFeedVideoController.changeControlsVisibility(
         _betterPlayerController!, false);
@@ -185,7 +189,20 @@ class _NewFeedListItemState extends State<NewFeedListItem>
 
   void _initVideo() async {
     if (widget.item!.isVideo) {
-      setupVideo(widget.item!.videoV2M3U8(widget.appData));
+      var url = widget.item!.videoV2M3U8(widget.appData);
+      try {
+        var data = await http.get(Uri.parse(url));
+        if (data.body.contains('failed to resolve /ipfs')) {
+          debugPrint('Invalid url. let\'s update it ${url}');
+          url = widget.item!.mobileEncodedVideoUrl();
+        } else {
+          debugPrint('Valid URL. lets not update it. - ${data.body}');
+        }
+      } catch (e) {
+        debugPrint('Invalid url. let\'s update it ${url}');
+        url = widget.item!.mobileEncodedVideoUrl();
+      }
+      setupVideo(url);
     } else {
       setupVideo(widget.item!.playUrl!);
     }
