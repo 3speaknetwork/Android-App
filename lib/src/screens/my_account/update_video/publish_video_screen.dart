@@ -143,7 +143,7 @@ class _PublishVideoScreenState extends State<PublishVideoScreen> {
                     isCompleting = false;
                     processText = '';
                     qrCode = null;
-                    showMessage('Congratulations. Your video is published.');
+                    // showMessage('Congratulations. Your video is published.');
                     showMyDialog();
                   });
                 } catch (e) {
@@ -151,8 +151,8 @@ class _PublishVideoScreenState extends State<PublishVideoScreen> {
                     qrCode = null;
                     isCompleting = false;
                     processText = '';
-                    showMessage(
-                        'Video is posted on Hive but needs to be marked as published. Please try again.');
+                    // showMessage(
+                    //     'Video is posted on Hive but needs to be marked as published. Please try again.');
                   });
                   Navigator.pop(context);
                 }
@@ -297,8 +297,8 @@ class _PublishVideoScreenState extends State<PublishVideoScreen> {
         if ((bridgeResponse.error == "success" ||
                 bridgeResponse.error.isEmpty) &&
             user.keychainData?.hasAuthKey == null) {
-          showMessage(
-              'Please wait. Video is posted on Hive but needs to be marked as published.');
+          // showMessage(
+          //     'Please wait. Video is posted on Hive but needs to be marked as published.');
           Future.delayed(const Duration(seconds: 6), () async {
             if (mounted) {
               try {
@@ -306,15 +306,15 @@ class _PublishVideoScreenState extends State<PublishVideoScreen> {
                 setState(() {
                   isCompleting = false;
                   processText = '';
-                  showMessage('Congratulations. Your video is published.');
+                  // showMessage('Congratulations. Your video is published.');
                   showMyDialog();
                 });
               } catch (e) {
                 setState(() {
                   isCompleting = false;
                   processText = '';
-                  showMessage(
-                      'Video is posted on Hive but needs to be marked as published. Please try again.');
+                  // showMessage(
+                  //     'Video is posted on Hive but needs to be marked as published. Please try again.');
                 });
                 Navigator.pop(context);
               }
@@ -336,8 +336,8 @@ class _PublishVideoScreenState extends State<PublishVideoScreen> {
         }
       }
     } catch (e) {
-      showError(e.toString());
       setState(() {
+        showError(e.toString());
         isCompleting = false;
         processText = '';
       });
