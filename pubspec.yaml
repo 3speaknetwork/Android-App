@@ -97,6 +97,7 @@ dependencies:
   wakelock_web: ^0.4.0
   video_editor: ^3.0.0
   fraction: ^5.0.4
+  flutter_expandable_fab: ^2.3.0
 
 dev_dependencies:
   flutter_test:

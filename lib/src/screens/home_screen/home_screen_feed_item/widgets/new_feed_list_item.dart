@@ -11,6 +11,7 @@ import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/home
 import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/home_feed_video_timer.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/mute_unmute_button.dart';
 import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/play_pause_button.dart';
+import 'package:acela/src/screens/home_screen/home_screen_feed_item/widgets/thumbnail_widget.dart';
 import 'package:acela/src/screens/report/widgets/report_pop_up_menu.dart';
 import 'package:acela/src/screens/video_details_screen/new_video_details/video_detail_favourite_provider.dart';
 import 'package:acela/src/screens/video_details_screen/video_details_screen.dart';
@@ -227,11 +228,10 @@ class _NewFeedListItemState extends State<NewFeedListItem>
     return Selector<SettingsProvider, String>(
         selector: (context, myType) => myType.resolution,
         builder: (context, value, child) {
-          return CachedImage(
-            imageUrl: Utilities.getProxyImage(value, widget.thumbUrl),
-            fit: widget.isGridView ? BoxFit.cover : null,
-            imageHeight: !widget.isGridView ? 230 : null,
-            imageWidth: double.infinity,
+          return ThumbnailWidget(
+            image: Utilities.getProxyImage(value, widget.thumbUrl),
+            height: !widget.isGridView ? 230 : null,
+            width: double.infinity,
           );
         });
   }

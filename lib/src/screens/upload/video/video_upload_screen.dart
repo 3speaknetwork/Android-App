@@ -6,6 +6,7 @@ import 'package:acela/src/screens/upload/video/controller/video_upload_controlle
 import 'package:acela/src/screens/upload/video/widgets/beneficaries_tile.dart';
 import 'package:acela/src/screens/upload/video/widgets/community_picker.dart';
 import 'package:acela/src/screens/upload/video/widgets/language_tile.dart';
+import 'package:acela/src/screens/upload/video/widgets/publish_fab.dart';
 import 'package:acela/src/screens/upload/video/widgets/reward_type_widget.dart';
 import 'package:acela/src/screens/upload/video/widgets/thumbnail_picker.dart';
 import 'package:acela/src/screens/upload/video/widgets/uploadProgressExpansionTile.dart';
@@ -16,6 +17,7 @@ import 'package:acela/src/screens/upload/video/widgets/work_type_widget.dart';
 import 'package:acela/src/utils/enum.dart';
 import 'package:acela/src/widgets/loading_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -25,7 +27,8 @@ class VideoUploadScreen extends StatefulWidget {
       required this.appData,
       required this.isCamera,
       required this.isDeviceEncode,
-      this.thumbnailFile, this.videoFile})
+      this.thumbnailFile,
+      this.videoFile})
       : super(key: key);
 
   final HiveUserData appData;
@@ -69,6 +72,8 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
     final controller = context.read<VideoUploadController>();
     return Scaffold(
       appBar: AppBar(title: Text("Upload your video")),
+      floatingActionButtonLocation: ExpandableFab.location,
+      resizeToAvoidBottomInset: false,
       floatingActionButton: saveButton(controller),
       body: SafeArea(
         child: Padding(
@@ -290,34 +295,15 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
 
   Widget saveButton(VideoUploadController controller) {
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.isSaving,
-      builder: (context, isPulishing, child) {
-        return Visibility(visible: !isPulishing, child: child!);
-      },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          if (widget.isDeviceEncode)
-            Padding(
-              padding: const EdgeInsets.only(right: 10.0),
-              child: FloatingActionButton.extended(
-                heroTag: "publish later",
-                onPressed: () {
-                  _save(controller, true);
-                },
-                label: Text("Publish Later"),
-              ),
-            ),
-          FloatingActionButton.extended(
-            heroTag: "publish now",
-            onPressed: () {
-              _save(controller, false);
-            },
-            label: Text(widget.isDeviceEncode ? "Publish now" : "Save"),
-          ),
-        ],
-      ),
-    );
+        valueListenable: controller.isSaving,
+        builder: (context, isPulishing, child) {
+          return Visibility(visible: !isPulishing, child: child!);
+        },
+        child: PublishFab(
+          isDeviceEncode: widget.isDeviceEncode,
+          onPublishNow: () => _save(controller, false),
+          onPublishLater: () => _save(controller, true),
+        ));
   }
 
   Future<void> _save(VideoUploadController controller, bool publishLater) {
