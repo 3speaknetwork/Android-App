@@ -81,16 +81,8 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
       {required Function(bool) successDialog,
       required Function(String) successSnackbar,
       required Function(String) errorSnackbar,
-      required bool publishLater}) async {
-    if (uploadStatus.value != UploadStatus.ended) {
-      errorSnackbar('Only after the video is upload, you can pulish the video');
-    } else if (title.isEmpty) {
-      errorSnackbar('Title is Required');
-    } else if (description.isEmpty) {
-      errorSnackbar('Description is Required');
-    } else if (thumbnailUploadResponse.value == null && !isDeviceEncoding) {
-      errorSnackbar('Thumbnail is Required');
-    } else {
+      required bool publishLater,
+      DateTime? scheduledData}) async {
       isSaving.value = true;
       bool? hasPostingAuthoriy = await _hasPostingAuthority();
       if (hasPostingAuthoriy == null) {
@@ -111,6 +103,12 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
               successDialog: () => successDialog(hasPostingAuthoriy),
               errorSnackbar: errorSnackbar);
         } else {
+          if ((!publishLater || scheduledData != null) && !hasPostingAuthoriy) {
+            isSaving.value = false;
+            errorSnackbar(
+                "Need posting authority for 3speak to use this feature");
+            return;
+          }
           await saveDeviceEncodedVideo(
               userData,
               VideoDeviceEncodeUploadModel(
@@ -130,13 +128,15 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
                   beneficiaries: beneficaries,
                   rewardPowerup: isPower100,
                   publishLater: publishLater,
+                  scheduled: scheduledData != null,
+                  publishData: scheduledData,
                   tusId: videoInfo!.tusId!),
               hasPostingAuthoriy,
               errorSnackbar: errorSnackbar,
-              successDialog: () => successDialog(hasPostingAuthoriy && !publishLater));
+              successDialog: () =>
+                  successDialog(hasPostingAuthoriy && !publishLater));
         }
       }
-    }
   }
 
   Future<bool?> _hasPostingAuthority() async {

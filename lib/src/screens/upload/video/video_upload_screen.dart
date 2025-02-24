@@ -5,6 +5,7 @@ import 'package:acela/src/screens/my_account/my_account_screen.dart';
 import 'package:acela/src/screens/upload/video/controller/video_upload_controller.dart';
 import 'package:acela/src/screens/upload/video/widgets/beneficaries_tile.dart';
 import 'package:acela/src/screens/upload/video/widgets/community_picker.dart';
+import 'package:acela/src/screens/upload/video/widgets/confirm_schedule_time_dialog.dart';
 import 'package:acela/src/screens/upload/video/widgets/language_tile.dart';
 import 'package:acela/src/screens/upload/video/widgets/publish_fab.dart';
 import 'package:acela/src/screens/upload/video/widgets/reward_type_widget.dart';
@@ -19,6 +20,7 @@ import 'package:acela/src/widgets/loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:provider/provider.dart';
 
 class VideoUploadScreen extends StatefulWidget {
@@ -45,6 +47,8 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
   late final TextEditingController titleController;
   late final TextEditingController descriptionController;
   late final TextEditingController tagsController;
+
+  DateTime? scheduledTime;
 
   @override
   void initState() {
@@ -269,6 +273,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
     bool hasPostingAuthority, {
     required VoidCallback resetControllerCallback,
     required bool publishLater,
+    required bool scheduleLater,
   }) {
     showDialog(
         barrierDismissible: false,
@@ -276,6 +281,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
         builder: (c) => VideoUploadSucessDialog(
               publishLater: publishLater,
               hasPostingAuthority: hasPostingAuthority,
+              scheduleLater: scheduleLater,
             )).whenComplete(() {
       resetControllerCallback();
       Navigator.pop(context);
@@ -293,6 +299,55 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
     });
   }
 
+  Future<void> _pickDateTime(VideoUploadController controller) async {
+    final DateTime now = DateTime.now();
+    final DateTime minAllowedTime = now.add(Duration(minutes: 59));
+    DateTime? picked = await showOmniDateTimePicker(
+      context: context,
+      initialDate: scheduledTime ?? minAllowedTime,
+      firstDate: minAllowedTime,
+      lastDate: now.add(Duration(days: 31)),
+      is24HourMode: false,
+      isShowSeconds: false,
+    );
+
+    if (picked != null) {
+      if (picked.isBefore(now.add(Duration(minutes: 59)))) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Please pick a time at least 1 hour from now."),
+          ),
+        );
+        return;
+      }
+      scheduledTime = picked;
+      _showConfirmationDialog(picked, controller);
+    }
+  }
+
+  void _showConfirmationDialog(
+      DateTime picked, VideoUploadController controller) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ConfirmSceduleTimeDialog(
+          dateTime: picked,
+          onConfirm: () {
+            Navigator.of(context).pop();
+            _save(controller, false, picked);
+          },
+          onCancel: () {
+            Navigator.of(context).pop();
+          },
+          onPickAgain: () {
+            Navigator.of(context).pop();
+            _pickDateTime(controller);
+          },
+        );
+      },
+    );
+  }
+
   Widget saveButton(VideoUploadController controller) {
     return ValueListenableBuilder<bool>(
         valueListenable: controller.isSaving,
@@ -303,21 +358,45 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
           isDeviceEncode: widget.isDeviceEncode,
           onPublishNow: () => _save(controller, false),
           onPublishLater: () => _save(controller, true),
+          onSchedulePublish: () => validate(controller, () {
+            _pickDateTime(controller);
+          }),
         ));
   }
 
-  Future<void> _save(VideoUploadController controller, bool publishLater) {
-    return controller.validateAndSaveVideo(
-      widget.appData,
-      successDialog: (hasPostingAuthority) => showSuccessDialog(
-          hasPostingAuthority,
+  Future<void> _save(VideoUploadController controller, bool publishLater,
+      [DateTime? scheduledDate]) async {
+    validate(controller, () async {
+      return await controller.validateAndSaveVideo(widget.appData,
+          successDialog: (hasPostingAuthority) => showSuccessDialog(
+              scheduleLater: scheduledDate != null,
+              hasPostingAuthority,
+              publishLater: publishLater,
+              resetControllerCallback: controller.resetController),
+          successSnackbar: (message) => showMessage(
+                message,
+              ),
+          errorSnackbar: (message) => showError(message),
           publishLater: publishLater,
-          resetControllerCallback: controller.resetController),
-      successSnackbar: (message) => showMessage(
-        message,
-      ),
-      errorSnackbar: (message) => showError(message),
-      publishLater: publishLater,
-    );
+          scheduledData: scheduledDate);
+    });
+  }
+
+  void validate(
+    VideoUploadController controller,
+    VoidCallback onValidate,
+  ) {
+    if (controller.uploadStatus.value != UploadStatus.ended) {
+      showMessage('Only after the video is upload, you can pulish the video');
+    } else if (controller.title.isEmpty) {
+      showMessage('Title is Required');
+    } else if (controller.description.isEmpty) {
+      showMessage('Description is Required');
+    } else if (controller.thumbnailUploadResponse.value == null &&
+        !controller.isDeviceEncoding) {
+      showMessage('Thumbnail is Required');
+    } else {
+      onValidate();
+    }
   }
 }

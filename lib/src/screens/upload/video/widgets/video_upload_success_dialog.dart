@@ -5,11 +5,15 @@ import 'package:flutter/material.dart';
 
 class VideoUploadSucessDialog extends StatefulWidget {
   const VideoUploadSucessDialog(
-      {Key? key, required this.hasPostingAuthority,required this.publishLater})
+      {Key? key,
+      required this.hasPostingAuthority,
+      required this.publishLater,
+      required this.scheduleLater})
       : super(key: key);
 
   final bool hasPostingAuthority;
   final bool publishLater;
+  final bool scheduleLater;
 
   @override
   State<VideoUploadSucessDialog> createState() =>
@@ -25,7 +29,7 @@ class _VideoUploadSucessDialogState extends State<VideoUploadSucessDialog> {
   Random random = Random();
   bool enableButton = false;
 
-  List<Color> colors = [
+  static const List<Color> colors = [
     Colors.red,
     Colors.tealAccent,
     Colors.blue,
@@ -43,11 +47,10 @@ class _VideoUploadSucessDialogState extends State<VideoUploadSucessDialog> {
   @override
   void initState() {
     super.initState();
-
     _init();
   }
 
-  void _init() async {
+  void _init() {
     colorChangeTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
       if (mounted) {
         setState(() {
@@ -83,34 +86,41 @@ class _VideoUploadSucessDialogState extends State<VideoUploadSucessDialog> {
     super.dispose();
   }
 
+  String getContentText() {
+    return widget.scheduleLater
+        ? "Your video will be automatically published on schedule time"
+        : "As soon as your video is uploaded on decentralised IPFS infrastructure, it'll be published";
+  }
+
+  String getPublishText() {
+    if (widget.publishLater) {
+      return "🚨 You can publish the video later from my account.🚨";
+    } else if (widget.hasPostingAuthority) {
+      return "🚨 Your Video will be automatically published 🚨";
+    } else {
+      return "🚨 You will have to publish from my account after it is processed. It will NOT be published automatically. 🚨";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async {
-        if (enableButton) return true;
-        return false;
-      },
+      onWillPop: () async => enableButton,
       child: AlertDialog(
         title: Text("🎉 Upload Complete 🎉"),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Text(getContentText()),
+            SizedBox(height: 10),
             Text(
-                "As soon as your video is uploaded on decentralised IPFS infrastructure, it'll be published"),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              widget.publishLater == true
-                  ? "🚨 You can publish the video later from my account.🚨"
-                  : widget.hasPostingAuthority
-                      ? "🚨 Your Video will be automatically published 🚨"
-                      : "🚨 You will have to publish from my account after it is processed. It will NOT be published automatically. 🚨 ",
+              getPublishText(),
               style: TextStyle(
-                  color: colors[colorIndex],
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700),
-            )
+                color: colors[colorIndex],
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ],
         ),
         actions: [
@@ -118,9 +128,11 @@ class _VideoUploadSucessDialogState extends State<VideoUploadSucessDialog> {
             children: [
               TextButton(
                 style: TextButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor),
+                  backgroundColor: Theme.of(context).primaryColor,
+                ),
                 child: Text(
-                    "${widget.hasPostingAuthority ? "AutoPublish" : "Okay. I will"} ${timerCount != 0 ? timerCount : ""}"),
+                  "${widget.scheduleLater ? "Done" : widget.hasPostingAuthority ? "AutoPublish" : "Okay. I will"} ${timerCount != 0 ? timerCount : ""}",
+                ),
                 onPressed: () {
                   Navigator.pop(context);
                 },
@@ -132,8 +144,9 @@ class _VideoUploadSucessDialogState extends State<VideoUploadSucessDialog> {
                   visible: !enableButton,
                   child: Container(
                     decoration: BoxDecoration(
-                        color: Colors.black12.withOpacity(0.5),
-                        borderRadius: BorderRadius.all(Radius.circular(40))),
+                      color: Colors.black12.withOpacity(0.5),
+                      borderRadius: BorderRadius.all(Radius.circular(40)),
+                    ),
                   ),
                 ),
               ),

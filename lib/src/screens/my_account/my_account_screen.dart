@@ -138,7 +138,8 @@ class _MyAccountScreenState extends State<MyAccountScreen>
         item.status.toLowerCase() == "deleted") {
       return const Icon(Icons.cancel_outlined, color: Colors.red);
     } else if (item.status == 'publish_manual' ||
-        item.status == 'publish_later') {
+        item.status == 'publish_later' ||
+        item.status == 'scheduled') {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -375,7 +376,9 @@ class _MyAccountScreenState extends State<MyAccountScreen>
     var published = items.where((item) => item.status == 'published').toList();
     var ready = items
         .where((item) =>
-            item.status == 'publish_manual' || item.status == 'publish_later')
+            item.status == 'publish_manual' ||
+            item.status == 'publish_later' ||
+            item.status == 'scheduled')
         .toList();
     // items.forEach((element) {
     //   log(element.status);
@@ -391,6 +394,7 @@ class _MyAccountScreenState extends State<MyAccountScreen>
             item.status != 'publish_manual' &&
             item.status != 'encoding_failed' &&
             item.status != 'publish_later' &&
+            item.status != 'scheduled' &&
             item.status.toLowerCase() != 'deleted')
         .toList();
     var delted =
