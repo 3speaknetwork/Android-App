@@ -387,22 +387,22 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
 
 SPEC CHECKSUMS:
-  assets_audio_player: edee322b9cb625571b830b35872ead1a295fd917
-  audio_service: f509d65da41b9521a61f1c404dd58651f265a567
-  audio_session: 088d2483ebd1dc43f51d253d4a1c517d9a2e7207
-  better_player: 2406bfe8175203c7a46fa15f9d778d73b12e1646
+  assets_audio_player: ae418728ee1b31f11556504fda8034639e20ce44
+  audio_service: 2023a4a1bdb2fd1443e7b00bdbdb1baa321525db
+  audio_session: f08db0697111ac84ba46191b55488c0563bb29c6
+  better_player: 472a1f3471b8991bde82327c91498b0f7934245d
   Cache: 4ca7e00363fca5455f26534e5607634c820ffc2d
-  croppy: b6199bc8d56bd2e03cc11609d1c47ad9875c1321
-  device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
+  croppy: 979e8ddc254f4642bffe7d52dc7193354b27ba30
+  device_info_plus: 71ffc6ab7634ade6267c7a93088ed7e4f74e5896
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   ffmpeg-kit-ios-https-gpl: 0caef23dca1bdb18fe6f2e1cd43d02d5978c4c2e
-  ffmpeg_kit_flutter_https_gpl: 066ec3b6a89759f1ffb84860e75534c3d3a1b172
-  file_picker: ce3938a0df3cc1ef404671531facef740d03f920
+  ffmpeg_kit_flutter_https_gpl: 9ac316d69f8c5e30aa1ff6b9f76c4eb284b385f9
+  file_picker: 5f42b9d5580e30b57b4863f9d94b448016b702e5
   Firebase: 374a441a91ead896215703a674d58cdb3e9d772b
-  firebase_analytics: 07bd7cfbac54bfcdccf2bb2530f9a65486f7ef3f
-  firebase_core: feb37e79f775c2bd08dd35e02d83678291317e10
-  firebase_crashlytics: 609a5f6f4a2f5af9e40a68182e0c1be3ca2a02f6
+  firebase_analytics: a5c6ef5a435d22870fe3cfdcb424f390f56ff752
+  firebase_core: 2337982fb78ee4d8d91e608b0a3d4f44346a93c8
+  firebase_crashlytics: 3b6a9a9cbdc5ab92afaf9b206e52c79c2321a0d4
   FirebaseAnalytics: 7114c698cac995602e3b1b96663473e50d54d6e7
   FirebaseCore: 48b0dd707581cf9c1a1220da68223fb0a562afaa
   FirebaseCoreExtension: 2d77d6430c16cf43ca2b04608302ed02b3598361
@@ -412,37 +412,37 @@ SPEC CHECKSUMS:
   FirebaseRemoteConfigInterop: e75e348953352a000331eb77caf01e424248e176
   FirebaseSessions: 9529d14180868e29a8da164b3a729c036204918b
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_downloader: b7301ae057deadd4b1650dc7c05375f10ff12c39
-  flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
+  flutter_downloader: 78da0da1084e709cbfd3b723c7ea349c71681f09
+  flutter_secure_storage: 2c2ff13db9e0a5647389bff88b0ecac56e3f3418
   FYVideoCompressor: 80e2a90bbc118044038b37b8442f23084c5698bf
   GCDWebServer: 2c156a56c8226e2d5c0c3f208a3621ccffbe3ce4
   GoogleAppMeasurement: 6a9e6317b6a6d810ad03d4a66564ca6c4c5818a3
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
   HLSCachingReverseProxyServer: 59935e1e0244ad7f3375d75b5ef46e8eb26ab181
-  image_picker_ios: c560581cceedb403a6ff17f2f816d7fea1421fc1
-  images_picker: fa9364e3a7d3083c49f865fcfb2b9e7cdc574d3a
-  just_audio: baa7252489dbcf47a4c7cc9ca663e9661c99aafa
+  image_picker_ios: 7fe1ff8e34c1790d6fff70a32484959f563a928a
+  images_picker: f01be5684149ad15ee37b5f270a3d50fdb33afa5
+  just_audio: 6c031bb61297cf218b4462be616638e81c058e97
   libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
-  package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
-  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
-  permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   PINCache: d9a87a0ff397acffe9e2f0db972ac14680441158
   PINOperation: fb563bcc9c32c26d6c78aaff967d405aa2ee74a7
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
-  share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f
-  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
-  sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d
+  share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
+  shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
+  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
-  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
-  video_compress: fce97e4fb1dfd88175aa07d2ffc8a2f297f87fbe
-  video_player_avfoundation: 7c6c11d8470e1675df7397027218274b6d2360b3
-  video_thumbnail: c4e2a3c539e247d4de13cd545344fd2d26ffafd1
-  wakelock_plus: 373cfe59b235a6dd5837d0fb88791d2f13a90d56
-  webview_flutter_wkwebview: 0982481e3d9c78fd5c6f62a002fcd24fc791f1e4
+  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
+  video_compress: f2133a07762889d67f0711ac831faa26f956980e
+  video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
+  video_thumbnail: b637e0ad5f588ca9945f6e2c927f73a69a661140
+  wakelock_plus: 04623e3f525556020ebd4034310f20fe7fda8b49
+  webview_flutter_wkwebview: 44d4dee7d7056d5ad185d25b38404436d56c547c
   ZLPhotoBrowser: 4bfab86b851042e18d7f413284472aa68759626a
 
 PODFILE CHECKSUM: c47b194cb97680e602c9d704f278cff245139eb7
