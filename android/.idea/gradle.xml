@@ -4,11 +4,23 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="/Applications/flutter/flutter/packages/flutter_tools/gradle" name="gradle">
+                <projects>
+                  <project path="/Applications/flutter/flutter/packages/flutter_tools/gradle" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
         <option name="testRunner" value="CHOOSE_PER_TEST" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleJvm" value="jbr-17" />
         <option name="modules">
           <set>
+            <option value="/Applications/flutter/flutter/packages/flutter_tools/gradle" />
             <option value="$USER_HOME$/.pub-cache/git/Flutter-AssetsAudioPlayer-28a7f52db65fd8b8ac0bdc39013d3de978c8a375/android" />
             <option value="$USER_HOME$/.pub-cache/git/betterplayer-fae11a11ebd752289c8126f51ca802453f57f9bd/android" />
             <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/audio_service-0.18.16/android" />

@@ -1,0 +1,2 @@
+/Users/sagar/Projects/3speak/Android-App/android/app/.cxx/Debug/74c58341/x86/CMakeFiles/rebuild_cache.dir
+/Users/sagar/Projects/3speak/Android-App/android/app/.cxx/Debug/74c58341/x86/CMakeFiles/edit_cache.dir
