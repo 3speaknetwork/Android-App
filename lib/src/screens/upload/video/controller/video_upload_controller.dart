@@ -19,13 +19,16 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
   bool isNsfwContent = false;
   bool isPower100 = false;
   List<BeneficiariesJson> beneficaries = [];
-  String userName = '';
   late VideoLanguage language;
   bool isDeviceEncoding = false;
+  ValueNotifier<bool?> hasPostingAuthority = ValueNotifier(null);
 
-  VideoUploadController() {
+  final String? userName;
+
+  VideoUploadController(this.userName) {
     setCommunity();
     setLanguage();
+    getStatusForPostingAuthority();
   }
 
   void setCommunity({
@@ -48,8 +51,7 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
     }
   }
 
-  void setBeneficiares({String? userName, bool resetBeneficiares = false}) {
-    this.userName = userName ?? this.userName;
+  void setBeneficiares({bool resetBeneficiares = false}) {
     if (beneficaries.isEmpty || resetBeneficiares) {
       if (resetBeneficiares) {
         beneficaries.clear();
@@ -83,70 +85,78 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
       required Function(String) errorSnackbar,
       required bool publishLater,
       DateTime? scheduledData}) async {
-      isSaving.value = true;
-      bool? hasPostingAuthoriy = await _hasPostingAuthority();
-      if (hasPostingAuthoriy == null) {
-        isSaving.value = false;
-        errorSnackbar("Something went wrong, try again");
+    isSaving.value = true;
+
+    if (hasPostingAuthority.value != true) {
+      hasPostingAuthority.value = await _hasPostingAuthority();
+    }
+    if (hasPostingAuthority.value == null) {
+      isSaving.value = false;
+      errorSnackbar("Failed to check posting authority");
+    } else {
+      if (!isDeviceEncoding) {
+        await saveVideo(userData, uploadedVideoItem, hasPostingAuthority.value!,
+            title: title,
+            description: description,
+            tags: tags,
+            beneficiaries: beneficaries,
+            communityId: communityId,
+            isNsfwContent: isNsfwContent,
+            language: language,
+            isPowerUp100: isPower100,
+            thumbIpfs: thumbnailUploadResponse.value!.name,
+            successDialog: () => successDialog(hasPostingAuthority.value!),
+            errorSnackbar: errorSnackbar);
       } else {
-        if (!isDeviceEncoding) {
-          await saveVideo(userData, uploadedVideoItem, hasPostingAuthoriy,
-              title: title,
-              description: description,
-              tags: tags,
-              beneficiaries: beneficaries,
-              communityId: communityId,
-              isNsfwContent: isNsfwContent,
-              language: language,
-              isPowerUp100: isPower100,
-              thumbIpfs: thumbnailUploadResponse.value!.name,
-              successDialog: () => successDialog(hasPostingAuthoriy),
-              errorSnackbar: errorSnackbar);
-        } else {
-          if ((!publishLater || scheduledData != null) && !hasPostingAuthoriy) {
-            isSaving.value = false;
-            errorSnackbar(
-                "Need posting authority for 3speak to use this feature");
-            return;
-          }
-          await saveDeviceEncodedVideo(
-              userData,
-              VideoDeviceEncodeUploadModel(
-                  originalFilename: videoInfo!.originalFilename!,
-                  duration: videoInfo!.duration!,
-                  size: videoInfo!.duration!,
-                  width: videoInfo!.width!,
-                  height: videoInfo!.height!,
-                  owner: userData.username!,
-                  title: title,
-                  description: description,
-                  isReel:
-                      !videoInfo!.isLandscape! && videoInfo!.duration! <= 90,
-                  isNsfwContent: isNsfwContent,
-                  tags: tags,
-                  communityID: communityId,
-                  beneficiaries: beneficaries,
-                  rewardPowerup: isPower100,
-                  publishLater: publishLater,
-                  scheduled: scheduledData != null,
-                  publishData: scheduledData,
-                  tusId: videoInfo!.tusId!),
-              hasPostingAuthoriy,
-              errorSnackbar: errorSnackbar,
-              successDialog: () =>
-                  successDialog(hasPostingAuthoriy && !publishLater));
+        if ((!publishLater || scheduledData != null) &&
+            !hasPostingAuthority.value!) {
+          isSaving.value = false;
+          errorSnackbar(
+              "Need posting authority for 3speak to use this feature");
+          return;
         }
+        await saveDeviceEncodedVideo(
+            userData,
+            VideoDeviceEncodeUploadModel(
+                originalFilename: videoInfo!.originalFilename!,
+                duration: videoInfo!.duration!,
+                size: videoInfo!.duration!,
+                width: videoInfo!.width!,
+                height: videoInfo!.height!,
+                owner: userData.username!,
+                title: title,
+                description: description,
+                isReel: !videoInfo!.isLandscape! && videoInfo!.duration! <= 90,
+                isNsfwContent: isNsfwContent,
+                tags: tags,
+                communityID: communityId,
+                beneficiaries: beneficaries,
+                rewardPowerup: isPower100,
+                publishLater: publishLater,
+                scheduled: scheduledData != null,
+                publishData: scheduledData,
+                tusId: videoInfo!.tusId!),
+            hasPostingAuthority.value!,
+            errorSnackbar: errorSnackbar,
+            successDialog: () =>
+                successDialog(hasPostingAuthority.value! && !publishLater));
       }
+    }
+  }
+
+  void getStatusForPostingAuthority() async {
+    hasPostingAuthority.value = await _hasPostingAuthority();
   }
 
   Future<bool?> _hasPostingAuthority() async {
-    ActionSingleDataResponse<UserModel> response =
-        await Communicator().getAccountInfo(this.userName);
-    if (response.isSuccess) {
-      return response.data!.hasThreeSpeakPostingAuthority();
-    } else {
-      return null;
+    if (this.userName != null) {
+      ActionSingleDataResponse<UserModel> response =
+          await Communicator().getAccountInfo(this.userName!);
+      if (response.isSuccess) {
+        return response.data!.hasThreeSpeakPostingAuthority();
+      }
     }
+    return null;
   }
 
   void resetController() {
@@ -170,6 +180,7 @@ class VideoUploadController extends ChangeNotifier with Upload, VideoSaveMixin {
     isSaving.value = false;
     pickedThumbnail = null;
     isDeviceEncoding = false;
+    getStatusForPostingAuthority();
   }
 
   @override

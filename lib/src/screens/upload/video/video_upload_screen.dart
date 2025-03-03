@@ -7,6 +7,7 @@ import 'package:acela/src/screens/upload/video/widgets/beneficaries_tile.dart';
 import 'package:acela/src/screens/upload/video/widgets/community_picker.dart';
 import 'package:acela/src/screens/upload/video/widgets/confirm_schedule_time_dialog.dart';
 import 'package:acela/src/screens/upload/video/widgets/language_tile.dart';
+import 'package:acela/src/screens/upload/video/widgets/posting_authority_warning_widget.dart';
 import 'package:acela/src/screens/upload/video/widgets/publish_fab.dart';
 import 'package:acela/src/screens/upload/video/widgets/reward_type_widget.dart';
 import 'package:acela/src/screens/upload/video/widgets/thumbnail_picker.dart';
@@ -15,8 +16,11 @@ import 'package:acela/src/screens/upload/video/widgets/upload_textfield.dart';
 import 'package:acela/src/screens/upload/video/widgets/video_upload_divider.dart';
 import 'package:acela/src/screens/upload/video/widgets/video_upload_success_dialog.dart';
 import 'package:acela/src/screens/upload/video/widgets/work_type_widget.dart';
+import 'package:acela/src/utils/constants.dart';
 import 'package:acela/src/utils/enum.dart';
+import 'package:acela/src/utils/storages/video_storage.dart';
 import 'package:acela/src/widgets/loading_screen.dart';
+import 'package:acela/src/widgets/user_profile_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:image_picker/image_picker.dart';
@@ -57,8 +61,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
     titleController = TextEditingController(text: controller.title);
     descriptionController = TextEditingController(text: controller.description);
     tagsController = TextEditingController(text: controller.tags);
-    controller.setBeneficiares(
-        userName: context.read<HiveUserData>().username!);
+    controller.setBeneficiares();
     controller.isDeviceEncoding = widget.isDeviceEncode;
     super.initState();
   }
@@ -75,10 +78,16 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
   Widget build(BuildContext context) {
     final controller = context.read<VideoUploadController>();
     return Scaffold(
-      appBar: AppBar(title: Text("Upload your video")),
+      appBar: AppBar(
+          title: ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: UserProfileImage(
+                  radius: 35, userName: context.read<HiveUserData>().username!),
+              title: Text("Upload your video"))),
       floatingActionButtonLocation: ExpandableFab.location,
       resizeToAvoidBottomInset: false,
       floatingActionButton: saveButton(controller),
+      bottomNavigationBar: PostingAuthorityWarningWidget(),
       body: SafeArea(
         child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 15),
@@ -104,7 +113,13 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (widget.isDeviceEncode)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15.0),
+                        child: videoQualities(context),
+                      ),
                     UploadProgressExpandableTile(
                         currentPage: controller.page,
                         pageController: controller.pageController,
@@ -398,5 +413,28 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
     } else {
       onValidate();
     }
+  }
+
+  Widget videoQualities(BuildContext context) {
+    final theme = Theme.of(context);
+    List<String> qualities = VideoStorage().readEncodingQualities();
+    ;
+    List<String> updatedList = qualities.map((e) => e + 'p').toList();
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(horizontal: kScreenHorizontalPaddingDigit),
+      child: RichText(
+        text: TextSpan(
+          text: 'Your video will be processed to ',
+          style: theme.textTheme.bodyMedium,
+          children: [
+            TextSpan(
+                text: updatedList.join(', '),
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.bold))
+          ],
+        ),
+      ),
+    );
   }
 }

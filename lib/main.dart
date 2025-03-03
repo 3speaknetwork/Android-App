@@ -1,4 +1,3 @@
-// import 'package:acela/firebase_options.dart';
 import 'package:acela/src/bloc/server.dart';
 import 'package:acela/src/global_provider/image_resolution_provider.dart';
 import 'package:acela/src/global_provider/video_setting_provider.dart';
@@ -9,11 +8,6 @@ import 'package:acela/src/screens/report/controller/report_controller.dart';
 import 'package:acela/src/screens/upload/video/controller/video_upload_controller.dart';
 import 'package:acela/src/utils/graphql/gql_communicator.dart';
 import 'package:acela/src/utils/routes/app_router.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/foundation.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -29,9 +23,6 @@ import 'src/screens/podcast/widgets/audio_player/audio_player_core_controls.dart
 Future<void> main() async {
   await dotenv.load(fileName: "dotenv");
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    // options: DefaultFirebaseOptions.currentPlatform,
-  );
   await GetStorage.init();
   await FlutterDownloader.initialize(
     debug: true,
@@ -48,16 +39,8 @@ Future<void> main() async {
   );
   // await Upgrader.clearSavedSettings(); // for debugging
   await Upgrader.sharedInstance.initialize();
-  if (kDebugMode) {
-    runApp(const MyApp());
-  } else {
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
-    runApp(MyApp());
-  }
+  runApp(const MyApp());
+
 }
 
 class MyApp extends StatefulWidget {
@@ -69,9 +52,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late final Future<void> _futureToLoadData;
-
-  // late final FirebaseMessaging _messaging;
-  // Create storage
 
   Widget futureBuilder(Widget withWidget) {
     return FutureBuilder(
@@ -93,12 +73,6 @@ class _MyAppState extends State<MyApp> {
           );
         }
       },
-    );
-  }
-
-  void logEvent() async {
-    await FirebaseAnalytics.instance.logEvent(
-      name: 'app_entry',
     );
   }
 
@@ -144,7 +118,10 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(
           create: (context) => PodcastPlayerController(),
         ),
-        ChangeNotifierProvider(create: (context) => VideoUploadController())
+        ChangeNotifierProxyProvider<HiveUserData, VideoUploadController>(
+      create: (_) => VideoUploadController(null),
+      update: (_, hiveUserData, videoUploadController)=> VideoUploadController(hiveUserData.username),
+    ),
       ],
       child: OverlaySupport.global(
         child: futureBuilder(
@@ -162,7 +139,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    logEvent();
     _futureToLoadData = loadData();
   }
 
